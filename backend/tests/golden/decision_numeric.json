@@ -1,0 +1,2645 @@
+{
+  "age_boundary_max": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "conditional"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 47.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 5400000,
+          "opportunityCost": 8965000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 33,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1252000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 68103127,
+        "schwabeIndexPct": 41.7,
+        "tco5yKRW": 75150000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 20375000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 23,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2271000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 123497521,
+        "schwabeIndexPct": 75.7,
+        "tco5yKRW": 136276250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 73350000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 17,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1910000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 103860666,
+        "schwabeIndexPct": 63.7,
+        "tco5yKRW": 114607500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "age_boundary_min": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 47.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 5400000,
+          "opportunityCost": 8965000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 33,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1252000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 68103127,
+        "schwabeIndexPct": 41.7,
+        "tco5yKRW": 75150000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 20375000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 23,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2271000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 123497521,
+        "schwabeIndexPct": 75.7,
+        "tco5yKRW": 136276250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 73350000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 17,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1910000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 103860666,
+        "schwabeIndexPct": 63.7,
+        "tco5yKRW": 114607500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "age_over_max": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 47.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 53430000,
+          "maintenance": 5400000,
+          "opportunityCost": 10595000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 30,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 260000000,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 2515000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 136773779,
+        "schwabeIndexPct": 83.8,
+        "tco5yKRW": 150926250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 16300000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 25,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금",
+        "loanAmountKRW": 0,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 1326000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 72099598,
+        "schwabeIndexPct": 44.2,
+        "tco5yKRW": 79560000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 106860000,
+          "maintenance": 5400000,
+          "opportunityCost": 21190000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 23,
+        "id": "jeonse_loan",
+        "label": "전세 + 일반 전세자금대출(예시 금리)",
+        "loanAmountKRW": 520000000,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 2338000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 127150758,
+        "schwabeIndexPct": 77.9,
+        "tco5yKRW": 140307500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "baseline": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 47.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 5400000,
+          "opportunityCost": 8965000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 33,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1252000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 68103127,
+        "schwabeIndexPct": 41.7,
+        "tco5yKRW": 75150000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 20375000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 23,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2271000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 123497521,
+        "schwabeIndexPct": 75.7,
+        "tco5yKRW": 136276250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 73350000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 17,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1910000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 103860666,
+        "schwabeIndexPct": 63.7,
+        "tco5yKRW": 114607500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "household_four": {
+    "affordability": {
+      "band": "risk",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 4578150,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 0,
+      "recommendedMonthlyHousingCostKRW": 0
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 47.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 5400000,
+          "opportunityCost": 8965000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 33,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1252000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 68103127,
+        "schwabeIndexPct": 41.7,
+        "tco5yKRW": 75150000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 20375000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 23,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2271000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 123497521,
+        "schwabeIndexPct": 75.7,
+        "tco5yKRW": 136276250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 73350000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 17,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1910000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 103860666,
+        "schwabeIndexPct": 63.7,
+        "tco5yKRW": 114607500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "max_jeonse_region": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11200",
+        "name": "서울 성동구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 39.7
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 0.7
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 1
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 6000000,
+          "opportunityCost": 815000,
+          "rent": 88500000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 40,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1589000,
+        "monthlyRentKRW": 1475000,
+        "npv5yKRW": 86416207,
+        "schwabeIndexPct": 53.0,
+        "tco5yKRW": 95358000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 6000000,
+          "opportunityCost": 8965000,
+          "rent": 66000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 33,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1412000,
+        "monthlyRentKRW": 1100000,
+        "npv5yKRW": 76802927,
+        "schwabeIndexPct": 47.1,
+        "tco5yKRW": 84750000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3585400,
+          "interest": 29000000,
+          "maintenance": 6000000,
+          "opportunityCost": 26732000,
+          "rent": 86460000
+        },
+        "depositKRW": 364000000,
+        "fitScore": 21,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2529000,
+        "monthlyRentKRW": 1441000,
+        "npv5yKRW": 137545116,
+        "schwabeIndexPct": 84.3,
+        "tco5yKRW": 151777400,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 0,
+          "interest": 29000000,
+          "maintenance": 6000000,
+          "opportunityCost": 86227000,
+          "rent": 0
+        },
+        "depositKRW": 729000000,
+        "fitScore": 17,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2020000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 109859451,
+        "schwabeIndexPct": 67.3,
+        "tco5yKRW": 121227000,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "metro_gyeonggi": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "41117",
+        "name": "경기 수원시 영통구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 61.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "medium",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 20.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 7.1
+        },
+        {
+          "impact": "medium",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 60.0
+        }
+      ],
+      "score": 22
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 430000,
+          "interest": 650000,
+          "maintenance": 4800000,
+          "opportunityCost": 6520000,
+          "rent": 48000000
+        },
+        "depositKRW": 50000000,
+        "fitScore": 55,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 10000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1006000,
+        "monthlyRentKRW": 800000,
+        "npv5yKRW": 54736245,
+        "schwabeIndexPct": 33.5,
+        "tco5yKRW": 60400000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3250500,
+          "interest": 29000000,
+          "maintenance": 4800000,
+          "opportunityCost": 21190000,
+          "rent": 0
+        },
+        "depositKRW": 330000000,
+        "fitScore": 43,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 970000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 52779243,
+        "schwabeIndexPct": 32.3,
+        "tco5yKRW": 58240500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 4800000,
+          "opportunityCost": 815000,
+          "rent": 59220000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 42,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1081000,
+        "monthlyRentKRW": 987000,
+        "npv5yKRW": 58794340,
+        "schwabeIndexPct": 36.0,
+        "tco5yKRW": 64878000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 1518000,
+          "interest": 18125000,
+          "maintenance": 4800000,
+          "opportunityCost": 6520000,
+          "rent": 41220000
+        },
+        "depositKRW": 165000000,
+        "fitScore": 40,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 125000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1203000,
+        "monthlyRentKRW": 687000,
+        "npv5yKRW": 65414345,
+        "schwabeIndexPct": 40.1,
+        "tco5yKRW": 72183000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "non_metro": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "26350",
+        "name": "부산 해운대구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 60.0
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "high",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 78.5
+        },
+        {
+          "impact": "medium",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 51.0
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 30
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 2509534,
+          "interest": 29000000,
+          "maintenance": 4200000,
+          "opportunityCost": 8928325,
+          "rent": 0
+        },
+        "depositKRW": 254775000,
+        "fitScore": 91,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 743000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 40452133,
+        "schwabeIndexPct": 24.8,
+        "tco5yKRW": 44637859,
+        "type": "jeonse",
+        "verdict": "stretch"
+      },
+      {
+        "components": {
+          "insurance": 1168400,
+          "interest": 12615000,
+          "maintenance": 4200000,
+          "opportunityCost": 6520000,
+          "rent": 32400000
+        },
+        "depositKRW": 127000000,
+        "fitScore": 64,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 87000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 948000,
+        "monthlyRentKRW": 540000,
+        "npv5yKRW": 51567524,
+        "schwabeIndexPct": 31.6,
+        "tco5yKRW": 56903400,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 258000,
+          "interest": 0,
+          "maintenance": 4200000,
+          "opportunityCost": 4890000,
+          "rent": 48000000
+        },
+        "depositKRW": 30000000,
+        "fitScore": 63,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 0,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 955000,
+        "monthlyRentKRW": 800000,
+        "npv5yKRW": 51970434,
+        "schwabeIndexPct": 31.8,
+        "tco5yKRW": 57348000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 4200000,
+          "opportunityCost": 815000,
+          "rent": 54300000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 57,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 989000,
+        "monthlyRentKRW": 905000,
+        "npv5yKRW": 53791955,
+        "schwabeIndexPct": 33.0,
+        "tco5yKRW": 59358000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      }
+    ]
+  },
+  "non_metro_no_guarantee": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 300000,
+        "existingDebt": 300000,
+        "livingCost": 1530773,
+        "netIncome": 3000000
+      },
+      "maxMonthlyHousingCostKRW": 860000,
+      "recommendedMonthlyHousingCostKRW": 730000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "12330",
+        "name": "광주 광산구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "high",
+      "factors": [
+        {
+          "impact": "medium",
+          "name": "전세가율",
+          "valuePct": 78.2
+        },
+        {
+          "impact": "high",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "high",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 75.2
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 32.7
+        },
+        {
+          "impact": "high",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 85.0
+        }
+      ],
+      "score": 74
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 0,
+          "interest": 17835000,
+          "maintenance": 3300000,
+          "opportunityCost": 6625950,
+          "rent": 0
+        },
+        "depositKRW": 163650000,
+        "fitScore": 100,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 123000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 462000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 25157784,
+        "schwabeIndexPct": 15.4,
+        "tco5yKRW": 27760950,
+        "type": "jeonse",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 0,
+          "interest": 0,
+          "maintenance": 3300000,
+          "opportunityCost": 3260000,
+          "rent": 27000000
+        },
+        "depositKRW": 20000000,
+        "fitScore": 100,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 0,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 559000,
+        "monthlyRentKRW": 450000,
+        "npv5yKRW": 30413053,
+        "schwabeIndexPct": 18.6,
+        "tco5yKRW": 33560000,
+        "type": "monthly",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 0,
+          "interest": 0,
+          "maintenance": 3300000,
+          "opportunityCost": 815000,
+          "rent": 31260000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 100,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 589000,
+        "monthlyRentKRW": 521000,
+        "npv5yKRW": 32057859,
+        "schwabeIndexPct": 19.6,
+        "tco5yKRW": 35375000,
+        "type": "monthly",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 0,
+          "interest": 5945000,
+          "maintenance": 3300000,
+          "opportunityCost": 6520000,
+          "rent": 23580000
+        },
+        "depositKRW": 81000000,
+        "fitScore": 100,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 41000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 655000,
+        "monthlyRentKRW": 393000,
+        "npv5yKRW": 35655589,
+        "schwabeIndexPct": 21.8,
+        "tco5yKRW": 39345000,
+        "type": "monthly",
+        "verdict": "affordable"
+      }
+    ]
+  },
+  "unknown_region": {
+    "raised": "ValueError"
+  },
+  "very_high_income": {
+    "affordability": {
+      "band": "safe",
+      "breakdown": {
+        "buffer": 3000000,
+        "existingDebt": 0,
+        "livingCost": 1530773,
+        "netIncome": 30000000
+      },
+      "maxMonthlyHousingCostKRW": 9000000,
+      "recommendedMonthlyHousingCostKRW": 7650000
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "ineligible"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 0.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 14.3
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 4
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 16300000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 100,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금",
+        "loanAmountKRW": 0,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 1326000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 72099598,
+        "schwabeIndexPct": 4.4,
+        "tco5yKRW": 79560000,
+        "type": "monthly",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 100,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": 4.8,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 105950000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 100,
+        "id": "jeonse_loan",
+        "label": "전세 + 일반 전세자금대출(예시 금리)",
+        "loanAmountKRW": 0,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 1970000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 107123092,
+        "schwabeIndexPct": 6.6,
+        "tco5yKRW": 118207500,
+        "type": "jeonse",
+        "verdict": "affordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 52975000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 100,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 0,
+        "loanRatePct": 4.11,
+        "monthlyEquivalentCostKRW": 2331000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 126759946,
+        "schwabeIndexPct": 7.8,
+        "tco5yKRW": 139876250,
+        "type": "monthly",
+        "verdict": "affordable"
+      }
+    ]
+  },
+  "zero_income": {
+    "affordability": {
+      "band": "risk",
+      "breakdown": {
+        "buffer": 0,
+        "existingDebt": 0,
+        "livingCost": 1530773,
+        "netIncome": 0
+      },
+      "maxMonthlyHousingCostKRW": 0,
+      "recommendedMonthlyHousingCostKRW": 0
+    },
+    "meta": {
+      "engineVersion": "3.0.0",
+      "generatedAt": "2026-01-01T00:00:00Z",
+      "region": {
+        "code": "11440",
+        "name": "서울 마포구"
+      }
+    },
+    "policies": [
+      {
+        "category": "대출",
+        "id": "buttress_youth",
+        "maxAmountKRW": 200000000,
+        "name": "청년전용 버팀목전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.9
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "이자지원",
+        "id": "seoul_deposit_interest",
+        "maxAmountKRW": 200000000,
+        "name": "서울시 청년 임차보증금 이자지원",
+        "rateRangePct": [
+          0.0,
+          2.0
+        ],
+        "source": "서울특별시",
+        "status": "eligible"
+      },
+      {
+        "category": "저축",
+        "id": "housing_dream_savings",
+        "maxAmountKRW": 50000000,
+        "name": "청년 주택드림 청약통장",
+        "rateRangePct": [
+          2.0,
+          4.5
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "대출",
+        "id": "youth_monthly_loan",
+        "maxAmountKRW": 45000000,
+        "name": "청년전용 보증부월세대출",
+        "rateRangePct": [
+          1.0,
+          1.3
+        ],
+        "source": "주택도시기금",
+        "status": "eligible"
+      },
+      {
+        "category": "보증",
+        "id": "hug_deposit_guarantee",
+        "maxAmountKRW": 700000000,
+        "name": "전세보증금반환보증",
+        "rateRangePct": [
+          0.1,
+          0.2
+        ],
+        "source": "주택도시보증공사(HUG)",
+        "status": "conditional"
+      },
+      {
+        "category": "지원금",
+        "id": "youth_rent_support",
+        "maxAmountKRW": 4800000,
+        "name": "청년월세 한시 특별지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "국토교통부",
+        "status": "conditional"
+      },
+      {
+        "category": "지원금",
+        "id": "seoul_youth_rent",
+        "maxAmountKRW": 2400000,
+        "name": "서울시 청년월세지원",
+        "rateRangePct": [
+          0.0,
+          0.0
+        ],
+        "source": "서울특별시",
+        "status": "conditional"
+      },
+      {
+        "category": "대출",
+        "id": "newlywed_jeonse",
+        "maxAmountKRW": 300000000,
+        "name": "신혼부부 전용 전세자금대출",
+        "rateRangePct": [
+          1.5,
+          2.7
+        ],
+        "source": "주택도시기금",
+        "status": "ineligible"
+      }
+    ],
+    "risk": {
+      "band": "low",
+      "factors": [
+        {
+          "impact": "low",
+          "name": "전세가율",
+          "valuePct": 43.3
+        },
+        {
+          "impact": "low",
+          "name": "보증보험 가입 가능성",
+          "valuePct": 100.0
+        },
+        {
+          "impact": "medium",
+          "name": "보증금 내 대출 비중",
+          "valuePct": 45.0
+        },
+        {
+          "impact": "low",
+          "name": "보증금 규모 (가입 가능 상한 대비)",
+          "valuePct": 14.3
+        },
+        {
+          "impact": "low",
+          "name": "지역 임대차 시장 여건",
+          "valuePct": 30.0
+        }
+      ],
+      "score": 10
+    },
+    "scenarios": [
+      {
+        "components": {
+          "insurance": 860000,
+          "interest": 2925000,
+          "maintenance": 5400000,
+          "opportunityCost": 8965000,
+          "rent": 57000000
+        },
+        "depositKRW": 100000000,
+        "fitScore": 15,
+        "id": "monthly_standard",
+        "label": "월세 — 지역 표준 보증금 + 청년전용 보증부월세대출",
+        "loanAmountKRW": 45000000,
+        "loanRatePct": 1.3,
+        "monthlyEquivalentCostKRW": 1252000,
+        "monthlyRentKRW": 950000,
+        "npv5yKRW": 68103127,
+        "schwabeIndexPct": null,
+        "tco5yKRW": 75150000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 43000,
+          "interest": 0,
+          "maintenance": 5400000,
+          "opportunityCost": 815000,
+          "rent": 79860000
+        },
+        "depositKRW": 5000000,
+        "fitScore": 15,
+        "id": "monthly_low_deposit",
+        "label": "월세 — 저보증금·고월세형",
+        "loanAmountKRW": 0,
+        "loanRatePct": 0.0,
+        "monthlyEquivalentCostKRW": 1435000,
+        "monthlyRentKRW": 1331000,
+        "npv5yKRW": 78042649,
+        "schwabeIndexPct": null,
+        "tco5yKRW": 86118000,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 6857500,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 73350000,
+          "rent": 0
+        },
+        "depositKRW": 650000000,
+        "fitScore": 15,
+        "id": "jeonse_loan",
+        "label": "전세 + 청년전용 버팀목전세자금대출",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 1910000,
+        "monthlyRentKRW": 0,
+        "npv5yKRW": 103860666,
+        "schwabeIndexPct": null,
+        "tco5yKRW": 114607500,
+        "type": "jeonse",
+        "verdict": "unaffordable"
+      },
+      {
+        "components": {
+          "insurance": 3201250,
+          "interest": 29000000,
+          "maintenance": 5400000,
+          "opportunityCost": 20375000,
+          "rent": 78300000
+        },
+        "depositKRW": 325000000,
+        "fitScore": 15,
+        "id": "semi_jeonse",
+        "label": "반전세(보증부월세) — 보증금 절반 + 월세",
+        "loanAmountKRW": 200000000,
+        "loanRatePct": 2.9,
+        "monthlyEquivalentCostKRW": 2271000,
+        "monthlyRentKRW": 1305000,
+        "npv5yKRW": 123497521,
+        "schwabeIndexPct": null,
+        "tco5yKRW": 136276250,
+        "type": "monthly",
+        "verdict": "unaffordable"
+      }
+    ]
+  }
+}

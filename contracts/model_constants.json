@@ -1,0 +1,1674 @@
+{
+  "$schema": "./model_constants.registry.schema.json",
+  "registryVersion": "4.1.0",
+  "frozenAtCommit": "3bce651",
+  "description": [
+    "SPEC 5.1 상수 외부화의 계약면. 손으로 쓴 코디네이터 소유 파일이며 생성물이 아니다 (SPEC 9.4).",
+    "이 파일은 값의 정본이 아니다. 값의 정본은 store 의 ModelConstant 다.",
+    "이 파일이 고정하는 것은 세 가지뿐이다 — (1) 키, (2) 단위·타입, (3) 분류.",
+    "frozen_current_value 는 1-① 의 구조 변경이 '판정 숫자를 바꾸지 않았음'을 증명하기 위한",
+    "기준값이었고, 1-② 부터는 저장소가 시드하는 현재 값이다. 이름은 1-① 국면의 잔재다.",
+    "개수는 이 산문에 적지 않는다 — entries 를 세어라. registryVersion 1.0.0 은 26키였고",
+    "1.1.0 에서 인라인 가중치·구간 경계 41키가 더해졌다. 산문에 개수를 박아 두면 반드시 어긋난다",
+    "(실제로 어긋났고 W-store 가 잡았다). SPEC Part 0-C 의 '19개'는 산문 오기이며 표는 20행이다."
+  ],
+  "injectionContract": {
+    "$comment": "SPEC 5.1.1 '네 엔진이 각자 다른 방식을 발명하지 않도록 하나의 방식만 쓴다' 의 구체형.",
+    "form": "def <entry_point>(*, constants: Mapping[str, ConstantValue], ...) -> dict",
+    "constantValueTypes": "float | int | str | Mapping[int, int] | Sequence[str] | Sequence[Mapping[str, Any]]",
+    "keyedBy": "이 파일의 entries[].key 문자열",
+    "lookupRule": [
+      "반드시 constants[key] 로 조회한다. constants.get(key, <default>) 를 금지한다.",
+      "SPEC 5.1.1 fail-closed — 조회 실패 시 기본값을 쓰지 않는다. 누락은 KeyError 로 터져야 한다.",
+      "전수 존재 검증은 기동 시 별도로 수행한다 (Wave 2, api 소유)."
+    ],
+    "enginesMayNotImport": "engines 는 store 를 import 하지 않는다 (SPEC 1.2). 매핑은 호출자가 주입한다.",
+    "numericType": {
+      "decision": "float 유지",
+      "$comment": "Decimal 전환은 반올림 경로를 바꿔 판정 숫자를 움직일 수 있고, 1-① 완료 기준('판정 숫자·상태 필드가 1-① 이전과 동일')과 정면 충돌한다. 1-① 은 구조 변경이므로 float 을 유지한다. 통화 반올림 규율은 common.floor_to / money 와 SPEC 9.1.1 골든 픽스처가 담당한다."
+    }
+  },
+  "valueTypeVocabulary": {
+    "ratio": "0..1 배수. 코드에서 곱셈에 직접 쓰인다 (예: 0.30).",
+    "krw": "원 단위 정수.",
+    "krw_by_household": "가구원수(int) -> 원(int) 매핑.",
+    "years": "연 단위 정수.",
+    "score_points": "점수 척도의 값 — 구간 경계와 가중치 모두. 리스크 0~100, fitScore 0~100.",
+    "policy_id_order": "정책 ID 문자열의 우선순위 순서열. 숫자는 아니지만 어느 상품이 매칭되는지를 바꾸므로 SPEC 5.1.2 의 금지 대상('판정 결과의 숫자를 바꾸는 값')에 해당한다.",
+    "percent_rate": "퍼센트 포인트이며 사용 시 /100 을 거친다 (3.0 -> 0.03). percent_level 과 섞으면 예선의 80만/81만 부류 단위 사고가 난다.",
+    "percent_level": "퍼센트 포인트이며 그대로 비교되거나 응답에 그대로 실린다 (60 은 60% 그 자체). /100 을 거치지 않는다.",
+    "guarantee_rate_table": "보증금액 구간 x 주택유형 x 부채비율 -> 연 보증료율(percent_rate). 24행 배열이며 각 행은 {depositMaxKRW, housingType, debtRatioMaxPct, ratePct} 다. depositMaxKRW 와 debtRatioMaxPct 의 null 은 개방 상한(「초과」)을 뜻한다.",
+    "lookup_rule": "조회 규칙의 이름. 숫자는 아니지만 표의 어느 칸이 선택되는지를 바꾸므로 SPEC 5.1.2 의 금지 대상('판정 결과의 숫자를 바꾸는 값')에 해당한다.",
+    "sido_code_prefixes": "행정표준코드 시도 접두 2자리 문자열의 목록. 지역 코드가 이 중 하나로 시작하면 그 분류에 속한다.",
+    "attempts": "시도 횟수의 상한(1 이상 정수). 최초 호출을 포함한다 — 2 는 '최초 1회 + 재시도 1회'다.",
+    "multiple": "배수(1.0 = 같음). ratio 와 다르다 — ratio 는 0..1 이고 이쪽은 상한이 없다. 중앙값의 몇 배인지 같은 비교에 쓴다.",
+    "count": "건수(0 이상 정수). 표본 수처럼 세는 값이다.",
+    "months": "개월 수(1 이상 정수). years 와 섞으면 12배 어긋난다.",
+    "sqm": "제곱미터. 전용면적처럼 넓이를 재는 값이다.",
+    "seconds": "초(1 이상 정수). 밀리초와 섞지 않는다 — 계약 파일의 타임아웃은 ms 이고 이쪽은 배치 쪽 초 단위다."
+  },
+  "engineConsumers": {
+    "$comment": "★ 이 레지스트리의 항목이 전부 판정 엔진에 조회되는 것은 아니다. SPEC Part 0-E #4 가 (d) 성격의 **운영 임계**(신선도 임계 · 7.3 SLA N일 · 4.5 강등 임계 등)를 '별도 설정 개념을 새로 만들지 않고 ModelConstant + our_choice 로 등재'하라고 명시했고, 그 셋은 전부 엔진이 조회하지 않는다. 그러므로 [엔진이 조회하는 키]와 [등재된 전체 키]는 같지 않으며, 같기를 요구하면 SPEC 보다 좁은 계약이 된다.",
+    "engines": ["affordability", "tco", "risk", "eligibility", "engines"],
+    "$enginesComment": "SPEC 1.1 의 4대 판정 엔진 + 엔진 공용(engines). 이 목록에 속한 key 의 집합은 engines.required_constant_keys() 와 **정확히 일치해야 한다** — 그 등호가 계약 드리프트 탐지의 본체이며 test_constant_key_sources.py 가 집행한다.",
+    "nonEngineConsumers": {
+      "extraction": "SPEC 4단계 정책 추출 파이프라인(ingest). 판정 경로가 아니다 — SPEC 원칙 1 에 따라 /api/analyze 는 LLM 을 호출하지 않으므로, 이 소비자의 상수는 판정 숫자를 바꾸지 못한다.",
+      "auth": "SPEC 4단계 인증·권한(api). 판정 경로가 아니다 — 세션 수명은 누가 화면을 얼마나 오래 열어 둘 수 있는가를 정할 뿐 판정 숫자에 작용하지 않는다.",
+      "ingest": "SPEC 3단계 시세 수집 배치(ingest). 판정 경로가 아니다 — 배치가 저장소에 넣은 **값**은 판정을 바꾸지만, 이 상수들은 [무엇을 어떻게 모을 것인가]를 정할 뿐 이미 저장된 값에는 작용하지 않는다."
+    },
+    "$sensitivityComment": "비엔진 상수도 spec_class == d 이면 감도분석 전수 대상에 그대로 들어간다 (Part 0-E #4 가 그렇게 요구한다). ★ 다만 표에 무엇이 찍히는지는 실제로 돌려서 확인해야 한다 — extraction.max_attempts 는 현재 값 2 에 교란폭 ±5%·±20% 를 곱해도 정수 한 칸을 못 넘으므로 표에 [교란 불가]로 나온다. [판정 변화 0]이 아니다. 둘은 다른 사실이며(전자는 교란 자체가 성립하지 않았다는 뜻, 후자는 교란했는데 안 바뀌었다는 뜻) sensitivity.py 가 0% 로 뭉개는 것을 거부하는 이유가 그것이다. 이 상수가 판정 경로 밖이라는 사실은 표가 아니라 engineConsumers 가 말한다. 표를 손보거나 억지로 영향을 만들지 않는다."
+  },
+  "classificationLegend": {
+    "a": "법정 계산 — 정답 존재. 추정 금지, 계산으로 대체 (SPEC Part 0-C)",
+    "b": "관측 통계 — 인용 + 기준시점 명시",
+    "c": "시장 가격 — 관측값 + 기준일 명시, 만기 대응",
+    "d": "규범적 선택 — 정답 없음. 우리 선택임을 명시 + 감도분석"
+  },
+  "seedRule": [
+    "W-store 는 이 파일의 entries 를 그대로 ModelConstant 로 시드한다.",
+    "(d) 항목은 seed_provenance.verification = our_choice 로 등재된다 — 규범적 선택에는 신선도가 없다 (SPEC 2.4).",
+    "(a)(b)(c) 항목은 seed_provenance.verification = unverified 로 등재된다 (SPEC D-14).",
+    "따라서 1-① 완료 시 dataGrade 는 정직하게 C 가 된다. 이것이 의도된 상태다.",
+    "pending_diligence 에 적힌 준거 후보는 실사 승인 전까지 seed_provenance 에 기재하지 않는다.",
+    "  — SPEC Part 0-C 경고: 모집단·기준시점을 밝히지 않은 인용은 심사에서 즉시 반박당한다."
+  ],
+  "entries": [
+    {
+      "key": "affordability.housing_cost_ratio_cap",
+      "engine": "affordability",
+      "legacy_symbol": "HOUSING_COST_RATIO_CAP",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.3,
+      "spec_action": "RIR 수도권 임차가구 중위수를 준거로 인용하되, 상한값 0.30 은 우리 선택임을 명시 + 감도분석",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "국토교통부 2024년도 주거실태조사 — 수도권 임차가구 RIR 중위수 18.4%",
+        "source_ref": "https://www.molit.go.kr/USR/NEWS/m_71/dtl.jsp?lcmspage=1&id=95091415",
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "관측된 수도권 임차가구 RIR 중위수는 18.4%다 (국토부 주거실태조사 2024년도). 우리는 주거비 상한을 30%로 둔다 — 이것은 관측 중위수가 아니라 허용 최대치이며, 관측값보다 높게 잡은 것은 우리 선택이다. 30%라는 수치 자체에 공표 준거는 없다.",
+      "$comment": "USER DECISION 2026-08-13. 실사(FINDINGS.md A5)가 모집단 5종을 원문확인했다 — 전국 임차 15.8 / 수도권 임차 18.4 / 광역시 15.2 / 도지역 12.7 / 청년가구 16.0 / 신혼 17.7 / 고령 25.4. SPEC D-4(서울 중심)에 가장 가까운 수도권을 준거로 채택했다. SPEC Part 0-C 가 적은 'RIR 30% 초과 부담 / 50% 초과 과부담' 기준은 2024년도 보도자료에서 출처를 확인하지 못했으므로(FINDINGS.md A5-7) 그 문구를 준거로 인용하지 않는다. pending_diligence 가 아니라 open_questions 를 쓴다 — 전자는 '이 상수의 출처가 아직 승인되지 않았다'는 뜻이고, store 의 test_no_pending_diligence_candidate_leaks_into_provenance 가 그 경우 계보에 source_name 을 적지 못하게 막는다. 여기는 준거가 승인된 경우이므로 그 가드에 걸리면 안 되고, 걸리게 두면 가드의 의미가 흐려진다.",
+      "open_questions": "저소득층 RIR (FINDINGS.md A5-6) 미확인 — 2024년도 보도자료에 소득계층별 항목이 없다. 확인되면 준거 모집단을 재검토한다. 채택된 준거(수도권 임차 18.4%) 자체는 원문확인 완료다."
+    },
+    {
+      "key": "affordability.recommended_haircut",
+      "engine": "affordability",
+      "legacy_symbol": "RECOMMENDED_HAIRCUT",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.85,
+      "spec_action": "F-2 통합 완료 (1-③). 권장액 상한의 단일 규칙이다 — recommended = max_cost x 0.85. 폐기: affordability.recommended_ratio_cap (0.25).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "권장액은 감당 가능 상한의 85%다. 15%p 라는 안전마진에 공표 준거는 없다 — 우리 선택이다. 소득 대비 비중 상한은 housing_cost_ratio_cap(0.30, RIR 수도권 임차 18.4% 준거)이 단독으로 지며, 이 상수는 그 축을 다시 제한하지 않고 실제로 구속한 상한(비율상한이든 잔여여력이든) 아래로 여유를 둘 뿐이다. 결과적으로 비율상한이 구속하는 구간에서 권장액의 실효 소득비중은 0.30 x 0.85 = 25.5%가 되며, 이 25.5%에도 공표 준거는 없다.",
+      "$comment": "F-2 통합 (1-③, W-engines-3 제안 -> 코디네이터 승인 2026-08-14). SPEC Part 0-C F-2 가 지적한 것은 0.30 x 0.85 = 0.255 와 0.25 가 2% 차이로 겹쳐 구간에 따라 각각 유효해진다는 것이었다. 통합 근거는 두 상수가 **같은 축이 아니라는** 것이다 — 소득비중 축은 준거가 있는 housing_cost_ratio_cap 이 이미 단독으로 지고 있었고 recommended_ratio_cap 은 그 위에 얹힌 준거 없는 중복이었다. 이 상수는 다른 축(상한 대비 안전마진)이며 실제로 구속한 상한에 붙으므로 전 구간에서 같은 규칙이 된다. 회귀: 계약 프로필 세트 6건 중 판정 뒤집힘 0건, 숫자 이동 1건 (very_high_income 권장액 7,500,000 -> 7,650,000, +2.0%). 변화 구간은 cap_ratio(=max/net) 0.294~0.30 뿐이고 권장액 이동폭 상한은 소득의 0.5%p 다. || ★ 기각한 안 B — recommended_haircut 을 버리고 recommended_ratio_cap(0.25) 을 남기는 안. 다시 제안하지 말 것. (1) tco.py 의 verdict 는 monthly<=aff_rec 이면 affordable, monthly<=aff_max 면 stretch 인데, 잔여여력이 세게 구속하는 구간에서 안 B 는 권장액을 상한과 같게 만든다 (net 2,000,000 -> max 260,000 / 권장 260,000). 그 순간 **stretch 분기가 도달 불가능**해지고 3분류가 조용히 2분류가 된다. (2) 그 구간은 1-② 이후 **다수 구간**이다 — 생활비가 공표값으로 오르면서 구속 제약이 비율상한에서 잔여여력으로 옮겨갔다 (감도분석: housing_cost_ratio_cap +20% 판정뒤집힘 67% -> 0%, buffer_ratio 0% -> 67%). (3) 저소득 가구에서 권장액이 느슨해지는 방향이라 계약 결정 #11 의 「첫 집 지불능력 도구에서 틀릴 방향으로는 관대한 쪽」에 정면으로 걸린다. || 감도분석에서의 위치 (SPEC 5.1.3): 통합 전 -20% 큰 폭에서 이 상수는 67% 를 뒤집었고 recommended_ratio_cap 은 17% 만 뒤집었다 — 권장액을 실제로 지고 있는 것이 이쪽이라는 관측이며 축 논증과 같은 방향이다. 통합 후 이 상수의 감도는 **올라간다**. 두 상수의 +20% 가 모두 0% 였던 것은 서로가 서로를 가려 주었기 때문이고, 가림이 사라진 것이지 회귀가 아니다."
+    },
+    {
+      "key": "affordability.buffer_ratio",
+      "engine": "affordability",
+      "legacy_symbol": "BUFFER_RATIO",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.1,
+      "spec_action": "준거 없음. 우리 선택 명시.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "affordability.net_income_from_annual",
+      "engine": "affordability",
+      "legacy_symbol": "NET_INCOME_FROM_ANNUAL",
+      "spec_class": "a",
+      "value_type": "ratio",
+      "frozen_current_value": 0.85,
+      "spec_action": "상수 삭제. 법정 산식 함수로 대체 (1-②).",
+      "slated_for_removal": "1-②. 4대보험 요율 + 근로소득 간이세액표 기반 함수로 교체된다.",
+      "pending_diligence": "근로소득 간이세액표의 개정일·적용 지급분 시점 (4대보험 요율 4종은 원문확인 완료)",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "unverified"
+      },
+      "open_questions": "**4대보험 요율 4종은 원문확인됐고 간이세액표만 막혔다** (FINDINGS.md A1). 확인된 것 — 국민연금 9.5%(근로자 4.75) · 건강보험 7.19%(근로자 3.595) · 장기요양 0.9448%(★ 모수가 보수월액이 아니라 **건강보험료**다. 곱셈 순서를 틀리면 100배 어긋난다) · 고용보험 실업급여 근로자 0.9%(고용안정·직업능력개발분은 사업주 전액이라 실수령액 계산에서 뺀다). 막힌 것 — 근로소득 간이세액표. 국세청 페이지가 「소득세법시행규칙으로 규정(매년 변경되는 것은 아님)」만 적고 개정일·적용시점을 밝히지 않는다 (FINDINGS.md A1-5, 2차출처뿐).\n\n**그래서 부분 산식을 만들지 않고 0.85 를 unverified 로 남긴다.** 4대보험만 공제하고 소득세를 빼먹으면 실수령액이 과대계산되고 그대로 지불능력 과대로 이어진다 — 첫 집 지불능력 도구에서 틀릴 방향으로는 관대한 쪽이며, 계약 결정 #11 이 생활비 정의에서 기각한 함정과 같은 종류다. 4대보험 요율을 레지스트리에 새 키로 넣지도 않는다: 쓰이지 않는 키는 test_every_registry_key_is_live_somewhere 가 죽은 키로 잡는다.\n\n위 `slated_for_removal` 의 「1-②」 표기는 **이번 웨이브에 실현되지 않았다.** 간이세액표가 확인되기 전에는 산식 교체를 시작할 수 없다."
+    },
+    {
+      "key": "affordability.living_cost_by_household",
+      "engine": "affordability",
+      "legacy_symbol": "LIVING_COST_BY_HOUSEHOLD",
+      "spec_class": "b",
+      "value_type": "krw_by_household",
+      "frozen_current_value": {
+        "1": 1530773,
+        "2": 2553845,
+        "3": 3690871,
+        "4": 4578150
+      },
+      "spec_action": "가계동향조사 소비지출 − (실제주거비 + 공동주택관리비). 계약 README 결정 #11",
+      "$comment": "1-② 승격. 원문확인은 FINDINGS-3.md 7.3 (KOSIS 101/DT_1L9U105, 2025년 연간·전국 1인이상·전체가구). **값 자체는 공표값의 뺄셈이지만 「무엇을 뺄지」의 정의는 우리 판단이다** — 모델이 주거비로 세는 것은 tco.py:95-103 의 5개(interest·rent·maintenance·opportunityCost·insurance)뿐이고 연료비·상하수도·주택유지수선은 거기 없다. 그래서 소비지출에서 빼는 것은 실제주거비 + 기타주거관련서비스(=공동주택관리비) 둘뿐이다 (계약 결정 #11). 원 단위 공표값끼리의 뺄셈이므로 **반올림하지 않는다.** — **전가는 폐기됐다.** 1.2.0 까지 쓰던 「전체평균 구성비 47.9% 를 가구원수별에 전가」는 오차 부호가 가구원수에 따라 뒤집혀(1인 과소·4인이상 과대) 단일 계수로 고칠 수 없는 것이었고, KOSIS 레벨2 에 가구원수별 세부 분해가 실제로 공표되어 있어 전가가 불필요해졌다 (FINDINGS-3.md). 그래서 normative_statement 를 제거했다 — 값은 더 이상 우리 선택이 아니다. — **시점 = 2025년 연간** (분기 아님): 연료비는 우리가 생활비에 **남기는** 항목인데 1분기에 1.50배로 부푼다. 분기를 쓰면 계절 편향이 상수에 박히고 갱신 때마다 판정이 계절을 탄다. **상수가 계절을 타는 것은 결함이다.** 연간값은 KOSIS 가 [년] 주기로 공표한 값이지 우리가 4개 분기를 평균 낸 것이 아니다. — **키 4 = 「4인」 독립 행** (「4인이상」 아님): 「4인이상」은 5인+ 를 품고 있어 그 위에 living_cost_extra_per_person 을 또 더하면 이중계상된다. 가구분포 검산 4인 13.35% + 5인이상 2.88% = 4인이상 16.23% 로 두 시점 모두 맞는다. — **observed_at 유도 (계약 결정 #12):** 연간 집계 통계이므로 관측 기간(2025년)의 종료일 2025-12-31.",
+      "seed_provenance": {
+        "source_kind": "statistic",
+        "source_name": "국가데이터처 가계동향조사 — 가구원수별 가구당 월평균 가계수지 (2025년 연간, 전국 1인이상 전체가구). 소비지출에서 실제주거비 + 기타주거관련서비스를 뺀 값",
+        "source_ref": "KOSIS 101 / DT_1L9U105",
+        "observed_at": "2025-12-31T00:00:00+09:00",
+        "fetched_at": "2026-08-14T00:00:00+09:00",
+        "verification": "verified"
+      }
+    },
+    {
+      "key": "affordability.living_cost_extra_per_person",
+      "engine": "affordability",
+      "legacy_symbol": "LIVING_COST_EXTRA_PER_PERSON",
+      "spec_class": "b",
+      "value_type": "krw",
+      "frozen_current_value": 500000,
+      "spec_action": "통계 직접 사용, 불가 시 외삽임을 명시",
+      "seed_provenance": {
+        "source_kind": "statistic",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "unverified"
+      },
+      "open_questions": "**1-② 에서 승격하지 않는다. unverified 를 유지한다.** 3차 실사로 가구원수별 세부 분해는 열렸으나(FINDINGS-3.md) 5인·6인 구간은 여전히 없고 「5인이상」 개방구간(평균 5.12명) 하나뿐이라, 인접 구간을 빼서 증분을 만들면 그것은 인용이 아니라 외삽이다. W-research-3 이 역산을 거부한 판단이 맞다.\n\n**구조 변경 후보 (1-③).** 「5인이상」의 주거비 제외 생활비 공표값 4,995,411원이 존재하므로, 외삽 대신 그 값을 n>=5 에 직접 쓰는 구조 변경이 가능하다. 로직 변경이므로 이번 범위가 아니다.\n\n참고로 현행 조합은 4인 4,578,150 + 500,000 = 5,078,150 이고 공표 5인이상은 4,995,411 이라 **1.7% 과대**다 — 생활비 과대는 잔여여력을 줄이는 보수적 방향이라 지금 당장 위험하지는 않다."
+    },
+    {
+      "key": "affordability.safe_cap_ratio",
+      "engine": "affordability",
+      "legacy_symbol": "SAFE_CAP_RATIO",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.25,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "affordability.caution_cap_ratio",
+      "engine": "affordability",
+      "legacy_symbol": "CAUTION_CAP_RATIO",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.12,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "affordability.safe_debt_ratio",
+      "engine": "affordability",
+      "legacy_symbol": "SAFE_DEBT_RATIO",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.2,
+      "spec_action": "준거 없음. 우리 선택 명시 + 감도분석. DSR 은 준거로 쓸 수 없다 (아래)",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "$comment": "실사 결론 채택 (FINDINGS.md 5절). DSR 규제 비율(은행권 40% / 2금융권 50%)을 준거로 쓸 수 없다 — 정의가 다르다. DSR 의 분모는 세전 연소득이고 우리 지표의 분모는 월 실수령액(세후)이다. 실수령액이 총급여보다 작으므로 같은 상환액이라도 우리 비율이 항상 크게 나오고, 40%를 그대로 옮기면 우리 지표에서는 오히려 40%보다 느슨한 기준이 된다. 분자도 다르다 — DSR 은 전 금융권 합산 원리금이고 우리는 프로필이 신고한 월 부채상환액이다. 인용하려면 분모를 세전 연소득으로 바꾸는 모델 변경이 선행되어야 하며 그건 실사가 아니라 설계 결정이다. ★ 2026-08-16 (결정 #45) — 7차 실사가 이 [준거 없음] 이 **참임을 법령 원문으로 확인했다**(은행업감독규정 별표 6 · 시행세칙 별표 18 제9호 · 가계금융복지조사 보도자료 90면). 진술은 그대로 두고 **인용의 부정확 하나만 고쳤다** — 40% 는 [총대출액 1억원 초과 차주] 로 범위가 한정되는데 우리 칸이 조건 없이 인용하고 있었다. 결론은 바뀌지 않는다.",
+      "normative_statement": "준거 없음 — **7차 실사가 법령 원문까지 내려가 확인했다** (FINDINGS-7.md D7-1·D7-2). DSR 규제 비율(은행권 40% / 2금융권 50%)은 분모가 세전 연소득이고 우리 지표는 월 실수령액(세후)이라 정의가 다르다 — 40%를 그대로 옮기면 우리 지표에서는 오히려 더 느슨한 기준이 된다. 은행업감독규정 별표 6 이 DTI·DSR 을 [연간 소득 대비 연간 원리금 상환액 비율] 로 정의하고 시행세칙 별표 18 제9호가 연소득을 원천징수영수증·소득금액증명원 등으로 산정하며, 규정·세칙 전문에 [세후]·[실수령] 이 **0건**이다. 세후 분모의 상환액 **비율** 자체가 어디에도 공표되지 않는다(가계금융복지조사 보도자료에 [상환비율] 0건). ★ 그리고 그 40% 는 **모든 차주에게 걸리는 값이 아니다** — 별표 6 제4장 제4호 가목이 [총대출액이 1억원을 초과하는 차주] 로 범위를 한정한다. 이 값은 우리 선택이다."
+    },
+    {
+      "key": "affordability.caution_debt_ratio",
+      "engine": "affordability",
+      "legacy_symbol": "CAUTION_DEBT_RATIO",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.35,
+      "spec_action": "준거 없음. 우리 선택 명시 + 감도분석. DSR 은 준거로 쓸 수 없다 (아래)",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "$comment": "실사 결론 채택 (FINDINGS.md 5절). DSR 규제 비율(은행권 40% / 2금융권 50%)을 준거로 쓸 수 없다 — 정의가 다르다. DSR 의 분모는 세전 연소득이고 우리 지표의 분모는 월 실수령액(세후)이다. 실수령액이 총급여보다 작으므로 같은 상환액이라도 우리 비율이 항상 크게 나오고, 40%를 그대로 옮기면 우리 지표에서는 오히려 40%보다 느슨한 기준이 된다. 분자도 다르다 — DSR 은 전 금융권 합산 원리금이고 우리는 프로필이 신고한 월 부채상환액이다. 인용하려면 분모를 세전 연소득으로 바꾸는 모델 변경이 선행되어야 하며 그건 실사가 아니라 설계 결정이다. ★ 2026-08-16 (결정 #45) — 7차 실사가 이 [준거 없음] 이 **참임을 법령 원문으로 확인했다**(은행업감독규정 별표 6 · 시행세칙 별표 18 제9호 · 가계금융복지조사 보도자료 90면). 진술은 그대로 두고 **인용의 부정확 하나만 고쳤다** — 40% 는 [총대출액 1억원 초과 차주] 로 범위가 한정되는데 우리 칸이 조건 없이 인용하고 있었다. 결론은 바뀌지 않는다.",
+      "normative_statement": "준거 없음 — **7차 실사가 법령 원문까지 내려가 확인했다** (FINDINGS-7.md D7-1·D7-2). DSR 규제 비율(은행권 40% / 2금융권 50%)은 분모가 세전 연소득이고 우리 지표는 월 실수령액(세후)이라 정의가 다르다 — 40%를 그대로 옮기면 우리 지표에서는 오히려 더 느슨한 기준이 된다. 은행업감독규정 별표 6 이 DTI·DSR 을 [연간 소득 대비 연간 원리금 상환액 비율] 로 정의하고 시행세칙 별표 18 제9호가 연소득을 원천징수영수증·소득금액증명원 등으로 산정하며, 규정·세칙 전문에 [세후]·[실수령] 이 **0건**이다. 세후 분모의 상환액 **비율** 자체가 어디에도 공표되지 않는다(가계금융복지조사 보도자료에 [상환비율] 0건). ★ 그리고 그 40% 는 **모든 차주에게 걸리는 값이 아니다** — 별표 6 제4장 제4호 가목이 [총대출액이 1억원을 초과하는 차주] 로 범위를 한정한다. 이 값은 우리 선택이다."
+    },
+    {
+      "key": "tco.horizon_years",
+      "engine": "tco",
+      "legacy_symbol": "HORIZON_YEARS",
+      "spec_class": "d",
+      "value_type": "years",
+      "frozen_current_value": 5,
+      "spec_action": "임대차 2+2년 갱신구조를 준거로 검토",
+      "$comment": "HORIZON_MONTHS 는 HORIZON_YEARS * 12 의 파생값이므로 등재하지 않는다. 12 는 SPEC 5.1.2 의 허용 대상(연→월 환산)이다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.opportunity_rate_pct",
+      "engine": "tco",
+      "legacy_symbol": "OPPORTUNITY_RATE_PCT",
+      "spec_class": "c",
+      "value_type": "percent_rate",
+      "frozen_current_value": 3.26,
+      "spec_action": "예금금리 관측값. 기준일 명시. 할인율과 분리한다 — 같은 값일 근거가 없다.",
+      "$comment": "1-② 승격. 3.0 -> 3.26. 원문확인은 FINDINGS.md C3 이며 값을 그 문서에서 옮겼다. **observed_at 유도 (계약 결정 #12):** 원문이 「2026년 6월중 … 신규취급액 기준」이라고 적은 집계 통계이므로 관측 기간의 종료일 2026-06-30 을 쓴다. FINDINGS.md 가 적은 2026-06-01 은 기간의 시작일이며, 6월 한 달 거래가 모두 집계에 들어 있으므로 신선도(SPEC 2.4)가 묻는 시점이 아니다. 공표일 2026-07-28 도 쓰지 않는다 — 공표일을 쓰면 집계와 공표 사이의 시차만큼 신선해 보인다.",
+      "seed_provenance": {
+        "source_kind": "market",
+        "source_name": "한국은행 「2026년 6월 금융기관 가중평균금리」 — 예금은행 수신금리(신규취급액 기준) 정기예금(1년) 연 3.26%, 잠정치(p)",
+        "source_ref": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?nttId=11063198&menuNo=201264",
+        "observed_at": "2026-06-30T00:00:00+09:00",
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "만기 대응으로 정기예금 1년물(3.26)을 골랐다 — 같은 표의 정기예금 전체는 3.02 이고, 둘 중 무엇을 쓸지는 우리 선택이다 (FINDINGS.md C3). 잠정치(p)이므로 확정치가 공표되면 갱신 대상이다."
+    },
+    {
+      "key": "tco.discount_rate_pct",
+      "engine": "tco",
+      "legacy_symbol": "DISCOUNT_RATE_PCT",
+      "spec_class": "c",
+      "value_type": "percent_rate",
+      "frozen_current_value": 4.016,
+      "spec_action": "국고채 5년. 기회비용률과 같은 값일 근거 없음 — 분리.",
+      "$comment": "1-② 승격. 3.0 -> 4.016. 원문확인은 FINDINGS-2.md R2-1. **observed_at 유도 (계약 결정 #12):** 집계가 아니라 **단일 시점 관측**이므로 그 시점을 그대로 쓴다 — 표 주석이 「오전 : 11시30분, 오후 : 16시」로 고시 시각을 명시하므로 오후 고시는 2026-08-13T16:00:00+09:00 이다. 화면에 찍힌 「2026.08.13 22:04 기준」은 화면 갱신 시각이지 수익률의 기준시각이 아니다 (FINDINGS-2.md 3.2).",
+      "seed_provenance": {
+        "source_kind": "market",
+        "source_name": "금융투자협회 채권정보센터 최종호가수익률 — 국고채권(5년) 오후(16시) 고시 연 4.016%",
+        "source_ref": "https://www.kofiabond.or.kr/ → /html/MAIN.html → 「최종호가수익률」 탭",
+        "observed_at": "2026-08-13T16:00:00+09:00",
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "셋이 우리 선택이다 — (1) 오후(16:00) 4.016 대 오전(11:30) 4.001, (2) 일별 고시값을 그대로 상수로 고정할지 월·분기 평균을 쓸지, (3) 최종호가수익률 대 장외거래대표수익률(실거래 기반, 아직 열지 않았다). FINDINGS-2.md 4.6 · 4.7."
+    },
+    {
+      "key": "tco.guarantee_rate_table",
+      "engine": "tco",
+      "legacy_symbol": "GUARANTEE_RATE_PCT",
+      "spec_class": "a",
+      "value_type": "guarantee_rate_table",
+      "frozen_current_value": [
+        {"depositMaxKRW": 100000000, "housingType": "apartment", "debtRatioMaxPct": 70, "ratePct": 0.097},
+        {"depositMaxKRW": 100000000, "housingType": "apartment", "debtRatioMaxPct": 80, "ratePct": 0.117},
+        {"depositMaxKRW": 100000000, "housingType": "apartment", "debtRatioMaxPct": null, "ratePct": 0.137},
+        {"depositMaxKRW": 100000000, "housingType": "other", "debtRatioMaxPct": 70, "ratePct": 0.111},
+        {"depositMaxKRW": 100000000, "housingType": "other", "debtRatioMaxPct": 80, "ratePct": 0.142},
+        {"depositMaxKRW": 100000000, "housingType": "other", "debtRatioMaxPct": null, "ratePct": 0.172},
+        {"depositMaxKRW": 200000000, "housingType": "apartment", "debtRatioMaxPct": 70, "ratePct": 0.102},
+        {"depositMaxKRW": 200000000, "housingType": "apartment", "debtRatioMaxPct": 80, "ratePct": 0.124},
+        {"depositMaxKRW": 200000000, "housingType": "apartment", "debtRatioMaxPct": null, "ratePct": 0.146},
+        {"depositMaxKRW": 200000000, "housingType": "other", "debtRatioMaxPct": 70, "ratePct": 0.117},
+        {"depositMaxKRW": 200000000, "housingType": "other", "debtRatioMaxPct": 80, "ratePct": 0.151},
+        {"depositMaxKRW": 200000000, "housingType": "other", "debtRatioMaxPct": null, "ratePct": 0.184},
+        {"depositMaxKRW": 500000000, "housingType": "apartment", "debtRatioMaxPct": 70, "ratePct": 0.107},
+        {"depositMaxKRW": 500000000, "housingType": "apartment", "debtRatioMaxPct": 80, "ratePct": 0.131},
+        {"depositMaxKRW": 500000000, "housingType": "apartment", "debtRatioMaxPct": null, "ratePct": 0.154},
+        {"depositMaxKRW": 500000000, "housingType": "other", "debtRatioMaxPct": 70, "ratePct": 0.124},
+        {"depositMaxKRW": 500000000, "housingType": "other", "debtRatioMaxPct": 80, "ratePct": 0.161},
+        {"depositMaxKRW": 500000000, "housingType": "other", "debtRatioMaxPct": null, "ratePct": 0.197},
+        {"depositMaxKRW": null, "housingType": "apartment", "debtRatioMaxPct": 70, "ratePct": 0.113},
+        {"depositMaxKRW": null, "housingType": "apartment", "debtRatioMaxPct": 80, "ratePct": 0.138},
+        {"depositMaxKRW": null, "housingType": "apartment", "debtRatioMaxPct": null, "ratePct": 0.164},
+        {"depositMaxKRW": null, "housingType": "other", "debtRatioMaxPct": 70, "ratePct": 0.132},
+        {"depositMaxKRW": null, "housingType": "other", "debtRatioMaxPct": 80, "ratePct": 0.172},
+        {"depositMaxKRW": null, "housingType": "other", "debtRatioMaxPct": null, "ratePct": 0.211}
+      ],
+      "spec_action": "HUG 보증료율 공시값",
+      "$comment": "1-③ F-3. 폐기된 tco.guarantee_rate_pct(0.15)를 대체한다. **0.15 는 이 표의 어느 칸과도 일치하지 않았다** (FINDINGS.md A3-1). 24행 전부 원문 그대로이며 발췌는 excerpts/A3-hug-보증료율표.md 다. 원문 그대로인지는 주장이 아니라 검사가 붙든다 — test_hug_guarantee.py 가 그 발췌 문서의 마크다운 표를 파싱해 이 배열과 대조한다. **observed_at 유도 (계약 결정 #10·#12):** HUG 상품개요 페이지의 요율표에 개정일·적용시점 표기가 전혀 없다(발췌 문서 「이 발췌로 확인되지 않은 것」 1항). 조회일을 observed_at 으로 대용하지 않고 observed_at_unstated 로 표시한다.",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": "주택도시보증공사(HUG) 「전세보증금반환보증 > 상품개요」 보증료율표 — 보증금액 4구간 x 주택유형 2종(아파트/기타) x 부채비율 3구간(70%/80%/초과) 24칸, 연 0.097~0.211%",
+        "source_ref": "https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp",
+        "observed_at": null,
+        "observed_at_unstated": true,
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "보증료 산식은 「보증금액 x 보증료율 x 전세계약기간/365」이고 보증금액은 「보증한도내에서 보증신청인이 신청한 금액」이다. 우리는 전액보증(보증금 전부를 보증금액으로 신청)을 가정해 deposit 을 그대로 쓴다 — 보증료를 크게 잡는 쪽이다. 사회배려계층 보증료 할인은 이 페이지에서 확인하지 않았다."
+    },
+    {
+      "key": "tco.guarantee_rate_unknown_axis_rule",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "lookup_rule",
+      "frozen_current_value": "bracket_max",
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py guarantee_rate_pct_for — 요율표에서 칸을 고르는 규칙",
+      "normative_statement": "요율표의 축은 셋인데 **우리 입력에는 보증금액 하나뿐이다.** 주택유형 필드가 프로필·지역 데이터 어디에도 없고, 부채비율의 분자인 선순위채권도 없다. 더 근본적으로 build_scenarios 는 특정 물건이 아니라 지역 중위값에서 시나리오를 만들기 때문에 「이 물건의 주택유형」은 값이 비어 있는 것이 아니라 붙일 대상이 없다 — 요청 스키마를 넓혀도 성립하지 않는다. 그래서 보증금액 구간만으로 칸을 고르고 **그 구간의 최고요율**을 쓴다. HUG 원문 주석이 「단독,다중,다가구주택의 경우로서 타전세계약확인서 미제출시 보증금액 구간에 따른 최고요율」이라고 적어 정보 부재 시 발행기관 스스로 최고요율을 적용하고 있고 그와 같은 방향이다. 다만 원문 조항은 특정 주택유형 + 특정 서류 미제출로 한정되므로 이를 일반 폴백으로 확장하는 것은 **우리 선택이다.** 기각한 대안 — 「아파트·부채비율 70% 이하를 전형으로 가정」(0.097~0.113). 폐기된 0.15 보다도 낮아져 보증료가 더 과소계상되고, 첫 집 지불능력 도구에서 그것이 관대한 방향이다 (계약 결정 #11).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "요율표 조회 축 2종(주택유형·부채비율)이 입력에 없을 때의 처리 — 우리 선택",
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.jeonse_ltv",
+      "engine": "tco",
+      "legacy_symbol": "JEONSE_LTV",
+      "spec_class": "a",
+      "value_type": "ratio",
+      "frozen_current_value": 0.8,
+      "spec_action": "전역 상수 부적절. 상품마다 다름 → 정책 데이터 필드로 이동.",
+      "slated_for_removal": "1-②. 정책 데이터 필드로 이동하고, 필드가 없는 정책은 판정에서 해당 상품을 제외한다 (SPEC 5.1). 전역 기본값으로 메우지 않는다.",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "unverified"
+      }
+    },
+    {
+      "key": "tco.fallback_jeonse_rate_pct",
+      "engine": "tco",
+      "legacy_symbol": "FALLBACK_JEONSE_RATE_PCT",
+      "spec_class": "c",
+      "value_type": "percent_rate",
+      "frozen_current_value": 4.11,
+      "spec_action": "은행 전세자금대출 금리 공시값",
+      "$comment": "1-② 승격. 4.2 -> 4.11. 원문확인은 FINDINGS.md C4 — tco.opportunity_rate_pct 와 **같은 보도자료의 다른 표**(수신금리가 아니라 담보별 가계대출 금리)에서 읽었다. **observed_at 유도 (계약 결정 #12):** 같은 「2026년 6월중」 집계이므로 관측 기간의 종료일 2026-06-30. 유도 근거는 tco.opportunity_rate_pct 와 같다.",
+      "seed_provenance": {
+        "source_kind": "market",
+        "source_name": "한국은행 「2026년 6월 금융기관 가중평균금리」 — 예금은행 담보별 가계대출 금리(신규취급액 기준) 전세자금대출 연 4.11%, 잠정치(p)",
+        "source_ref": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?nttId=11063198&menuNo=201264",
+        "observed_at": "2026-06-30T00:00:00+09:00",
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "잠정치(p)이므로 확정치가 공표되면 갱신 대상이다. 이 값은 예금은행 평균이며 특정 정책상품 금리가 아니다 — 정책 대출이 매칭되면 그쪽 ratePct 가 우선하고 이 상수는 폴백으로만 쓰인다 (engines/tco.py build_scenarios)."
+    },
+    {
+      "key": "risk.band_low_max",
+      "engine": "risk",
+      "legacy_symbol": "BAND_LOW_MAX",
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 34,
+      "spec_action": "근거 없음. 제도적 임계값 정박 검토 + 감도분석",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.band_medium_max",
+      "engine": "risk",
+      "legacy_symbol": "BAND_MEDIUM_MAX",
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 64,
+      "spec_action": "근거 없음. 제도적 임계값 정박 검토 + 감도분석",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.guarantee_deposit_cap_metro_krw",
+      "engine": "risk",
+      "legacy_symbol": "GUARANTEE_LIMIT_KRW",
+      "spec_class": "a",
+      "value_type": "krw",
+      "frozen_current_value": 700000000,
+      "spec_action": "HUG 가입요건 상한 공시값",
+      "$comment": "1-③ F-4. 폐기된 risk.guarantee_limit_krw 와 **수치는 같지만 의미가 다르다** — 7억은 「보증한도」가 아니라 가입요건 ②의 「가입 가능한 전세보증금 상한」이다 (FINDINGS.md A3-3). 진짜 보증한도는 「주택가격 x 90% - 선순위채권」이라는 물건별 산식이라 상수가 될 수 없고, 주택가격도 선순위채권도 입력에 없으므로 이 도구는 그 산식을 계산하지 않는다 (A3-2). 상수 하나가 서로 다른 둘을 겸하고 있던 것을 이름과 함께 갈랐다. observed_at 은 위 요율표와 같은 페이지·같은 사유로 observed_at_unstated 다 (계약 결정 #10).",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": "주택도시보증공사(HUG) 「전세보증금반환보증 > 상품개요」 가입요건 ② — 전세보증금(월세가 있는 경우 전월세전환율 적용)이 수도권 7억 이하일 것",
+        "source_ref": "https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp",
+        "observed_at": null,
+        "observed_at_unstated": true,
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "원문은 「월세가 있는 경우 전월세전환율 적용 전세보증금」으로 환산해 비교하라고 적는다. 우리는 월세 시나리오의 보증금을 환산 없이 그대로 비교한다 — 환산하면 상한에 더 쉽게 걸리므로 현재 처리가 관대한 쪽이다. 현재 지역 데이터로는 어느 시나리오도 상한 근처에 가지 않아 판정이 달라지지 않는다."
+    },
+    {
+      "key": "risk.guarantee_deposit_cap_other_krw",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "a",
+      "value_type": "krw",
+      "frozen_current_value": 500000000,
+      "spec_action": "HUG 가입요건 상한 공시값",
+      "$comment": "1-③ F-4. 위 키의 비수도권 짝. 이전 구현은 전 지역에 7억을 썼는데 지역 10건 중 4건(부산·대구·광주·대전)이 비수도권이다. 비수도권에 7억을 쓰면 상한을 과대하게 잡아 「보증금/상한」 비율이 낮게 나오고 위험 가중치가 덜 붙는다 — 관대한 방향이다 (계약 결정 #11).",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": "주택도시보증공사(HUG) 「전세보증금반환보증 > 상품개요」 가입요건 ② — 그 외 지역 5억원 이하일 것",
+        "source_ref": "https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp",
+        "observed_at": null,
+        "observed_at_unstated": true,
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      }
+    },
+    {
+      "key": "risk.metro_sido_code_prefixes",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "a",
+      "value_type": "sido_code_prefixes",
+      "frozen_current_value": ["11", "28", "41"],
+      "spec_action": "「수도권」의 정의 — 실사 필요",
+      "pending_diligence": "수도권정비계획법 제2조 및 같은 법 시행령이 수도권의 범위를 정한다. 조문을 원문으로 확인하지 않았다. 확인되면 (a) verified 로 승격한다.",
+      "$comment": "1-③ F-4. **HUG 상한 2개(원문확인)와 「수도권」의 정의(미확인)를 다른 키로 분리한 것이다.** 한 상수에 섞으면 원문확인분에 미확인분이 묻어 verified 로 승격되고, 그 순간 확인하지 않은 분류가 공시값인 척하게 된다 (SPEC Part 0-C · 계약 결정 #8). our_choice 로 두지 않는 이유는 결정 #2 와 같다 — (d) 로 두면 SPEC 2.4 의 dataGrade 산정에서 빠져 「수도권 정의를 확인하지 않았다」는 사실이 등급에서 사라진다. 지역 데이터(regions.json)에 수도권 플래그를 넣는 안은 store 소유 경로라 택하지 않았다.",
+      "seed_provenance": {
+        "source_kind": "statute",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "unverified"
+      }
+    },
+    {
+      "key": "risk.low_exposure_krw",
+      "engine": "risk",
+      "legacy_symbol": "LOW_EXPOSURE_KRW",
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 50000000,
+      "spec_action": "우리 선택 명시",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.minimal_exposure_krw",
+      "engine": "risk",
+      "legacy_symbol": "MINIMAL_EXPOSURE_KRW",
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 10000000,
+      "spec_action": "우리 선택 명시",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "engines.jeonse_loan_priority",
+      "engine": "engines",
+      "legacy_symbol": "JEONSE_LOAN_PRIORITY",
+      "spec_class": "d",
+      "value_type": "policy_id_order",
+      "frozen_current_value": [
+        "buttress_youth",
+        "newlywed_jeonse"
+      ],
+      "spec_action": "정책 데이터로 이동 검토. 준거 없음 — 우리 선택 명시.",
+      "$comment": "COORDINATOR FINDING (8.2). SPEC Part 0-C 의 상수 전수 분류는 engines/__init__.py 를 훑지 않아 이 둘을 놓쳤다. 숫자 리터럴이 아니어서 '19개' 조사에 잡히지 않았으나, 어느 대출상품이 매칭되는지를 결정하므로 판정 결과를 바꾼다. SPEC 5.1.2 의 금지 대상 정의는 '판정 결과의 숫자를 바꾸는 값'이며 상품 선택은 그 상류에 있다. JEONSE_LTV 에 대한 SPEC 의 논리('상품마다 다름 → 전역 상수 부적절')가 그대로 적용된다.",
+      "pending_diligence": "이 우선순위를 정책 데이터 필드로 옮길지, ModelConstant 로 남길지 — 2단계 정책 스키마 확정 시 재검토.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "engines.monthly_loan_priority",
+      "engine": "engines",
+      "legacy_symbol": "MONTHLY_LOAN_PRIORITY",
+      "spec_class": "d",
+      "value_type": "policy_id_order",
+      "frozen_current_value": [
+        "youth_monthly_loan"
+      ],
+      "spec_action": "정책 데이터로 이동 검토. 준거 없음 — 우리 선택 명시.",
+      "pending_diligence": "engines.jeonse_loan_priority 와 함께 2단계에서 재검토.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "eligibility.boundary_margin",
+      "engine": "eligibility",
+      "legacy_symbol": "BOUNDARY_MARGIN",
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.05,
+      "spec_action": "경계 근처 conditional 처리 여유폭. 우리 선택 명시.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_threshold_1",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 60,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_threshold_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 70,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_threshold_3",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 80,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_threshold_4",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 90,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_weight_1",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 4,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_weight_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 10,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_weight_3",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 18,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_weight_4",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 30,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.jeonse_ratio_weight_5",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 42,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _jeonse_ratio_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_threshold_1",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 20,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_threshold_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 50,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_threshold_3",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 70,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_weight_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 6,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_weight_3",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 10,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.loan_share_weight_4",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 14,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _loan_share_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.deposit_size_threshold_1",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 50,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _deposit_size_factor (보증한도 대비 비중)",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.deposit_size_threshold_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 90,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _deposit_size_factor (보증한도 대비 비중)",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.deposit_size_weight_2",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 6,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _deposit_size_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.deposit_size_weight_3",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 12,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py _deposit_size_factor",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.market_weight_medium",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 6,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py MARKET_FACTORS",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.market_weight_high",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 14,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py MARKET_FACTORS",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.market_value_pct_low",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 30.0,
+      "spec_action": "응답에 실리는 값이므로 계약의 일부다. 우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py:65-67 — 응답 factors[].valuePct 로 그대로 실린다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.market_value_pct_medium",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 60.0,
+      "spec_action": "응답에 실리는 값이므로 계약의 일부다. 우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py:65-67 — 응답 factors[].valuePct 로 그대로 실린다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.market_value_pct_high",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "percent_level",
+      "frozen_current_value": 85.0,
+      "spec_action": "응답에 실리는 값이므로 계약의 일부다. 우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py:65-67 — 응답 factors[].valuePct 로 그대로 실린다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.guarantee_unavailable_weight",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 28,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py 보증 미가입 가중치",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.guarantee_small_deposit_multiplier",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.3,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py 소액 보증금 완화 계수",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.exposure_multiplier_low",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.5,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py 노출 규모 완화 계수",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "risk.exposure_multiplier_minimal",
+      "engine": "risk",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.2,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/risk.py 노출 규모 완화 계수",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fit_afford_weight",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 60.0,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:112-121 — fitScore 가중치. 시나리오 정렬 순서를 바꾼다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fit_afford_overrun_slope",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 120.0,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:112-121 — fitScore 가중치. 시나리오 정렬 순서를 바꾼다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fit_capital_weight",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 25.0,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:112-121 — fitScore 가중치. 시나리오 정렬 순서를 바꾼다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fit_preference_match_score",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 15.0,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:112-121 — fitScore 가중치. 시나리오 정렬 순서를 바꾼다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fit_preference_mismatch_score",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "score_points",
+      "frozen_current_value": 7.0,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:112-121 — fitScore 가중치. 시나리오 정렬 순서를 바꾼다",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.semi_jeonse_deposit_share",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.5,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:252 — 반전세 시나리오의 보증금 비율",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.low_deposit_scenario_deposit_krw",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 5000000,
+      "spec_action": "우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py 저보증금 시나리오 정의값",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.deposit_rounding_unit_krw",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 1000000,
+      "spec_action": "판정 숫자를 최대 100만원 움직이고 이자·TCO·NPV 로 전파된다. 우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:51 대출액 · :252 반전세 보증금",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.monthly_rounding_unit_krw",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 1000,
+      "spec_action": "월 환산액 반올림 단위. 우리 선택 명시 + 감도분석",
+      "code_ref": "engines/tco.py:96 월 환산액 · :253 · :294",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "tco.fallback_conversion_rate_pct",
+      "engine": "tco",
+      "legacy_symbol": null,
+      "spec_class": "c",
+      "value_type": "percent_rate",
+      "frozen_current_value": 5.6,
+      "spec_action": "전월세전환율 공표값. 기준일 명시.",
+      "code_ref": "engines/tco.py:209 — region.conversionRatePct 결측 시 폴백. :253 에서 /100/12 를 거친다",
+      "$comment": "COORDINATOR DECISION (8.2). W-engines 는 (c) 로 제안했고 채택한다. (d) our_choice 로 두면 SPEC 2.4 에 따라 dataGrade 산정에서 빠져 '출처 없는 폴백이 판정에 쓰였다'는 사실이 등급에서 사라진다. — 1-② 승격. 6.0 -> 5.6. 원문확인은 FINDINGS-2.md R3-1. **observed_at 유도 (계약 결정 #12):** 월 단위 집계 통계이므로 관측 기간의 종료일 2026-05-31. FINDINGS-2.md 가 적은 2026-05-01 은 기간의 시작일이다. 자료갱신일 2026-07-30 은 공표 쪽 시각이라 쓰지 않는다. **모조사명 주의** — 「월세가격동향조사」는 2015 년 중지통계이며 현행 공표는 「전국주택가격동향조사」다 (FINDINGS.md C5). 중지된 조사명으로 인용하면 심사에서 반박당한다.",
+      "seed_provenance": {
+        "source_kind": "market",
+        "source_name": "한국부동산원 「전국주택가격동향조사」 지역별 전월세전환율 — 서울 · 주택유형 종합, 2026년 5월 연 5.6%",
+        "source_ref": "KOSIS orgId=408 · tblId=DT_30404_N0010 (https://kosis.kr/statHtml/statHtml.do?orgId=408&tblId=DT_30404_N0010)",
+        "observed_at": "2026-05-31T00:00:00+09:00",
+        "fetched_at": "2026-08-13T00:00:00+09:00",
+        "verification": "verified"
+      },
+      "open_questions": "지역·주택유형 두 축이 우리 선택이다 — 지역은 SPEC D-4(서울 중심)에 따라 서울(5.6)을 골랐고(수도권 6.3 / 전국 6.7), 주택유형은 이 폴백이 region.conversionRatePct 결측 시 주택유형을 가리지 않고 쓰이므로 종합(5.6)을 골랐다(아파트는 4.7). **종합과 아파트를 섞으면 안 된다** (FINDINGS-2.md R3-4). HUG 보증심사 적용률 6.5% 는 시장 관측통계가 아니라 개념이 다르므로 준거로 쓰지 않는다 (FINDINGS.md C5-2)."
+    },
+    {
+      "key": "eligibility.age_cap_imminent_years",
+      "engine": "eligibility",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "years",
+      "frozen_current_value": 1,
+      "spec_action": "연령 상한 임박 caveat. caveat 이 붙으면 status 가 eligible -> conditional 로 바뀌므로 판정 변경값이다.",
+      "code_ref": "engines/eligibility.py:52 — age_max - age <= 1",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      }
+    },
+    {
+      "key": "eligibility.age_max_unlimited_sentinel",
+      "engine": "eligibility",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "years",
+      "frozen_current_value": 200,
+      "spec_action": "'상한 없음'을 뜻하는 파수병 값. 정책 데이터 스키마 산물이다.",
+      "code_ref": "engines/eligibility.py:48 — age_max < 200",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "slated_for_removal": "2단계 — RuleDraft 스키마(SPEC 4.2.3)에서 nullable 로 표현한다. 허용목록이 아니라 등재로 처리하는 이유는, 허용목록에 두면 '2단계에 없앤다'는 사실이 계약에서 사라지기 때문이다."
+    },
+    {
+      "key": "eligibility.amount_unlimited_sentinel_krw",
+      "engine": "eligibility",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "krw",
+      "frozen_current_value": 1000000000,
+      "spec_action": "'상한 없음'을 뜻하는 파수병 값. 정책 데이터 스키마 산물이다.",
+      "code_ref": "engines/eligibility.py:63 income_cap · :78 asset_cap (같은 값을 두 곳이 공유)",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "slated_for_removal": "2단계 — RuleDraft 스키마(SPEC 4.2.3)에서 nullable 로 표현한다. 허용목록이 아니라 등재로 처리하는 이유는, 허용목록에 두면 '2단계에 없앤다'는 사실이 계약에서 사라지기 때문이다."
+    },
+    {
+      "key": "extraction.max_attempts",
+      "engine": "extraction",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "attempts",
+      "frozen_current_value": 2,
+      "spec_action": "SPEC 4.2.2 는 '재시도는 정해진 횟수까지'라고만 정하고 그 횟수를 미정으로 남겼다. (d) 규범적 선택이므로 Part 0-E #4 에 따라 ModelConstant + our_choice 로 등재한다.",
+      "code_ref": "ingest 추출 파이프라인. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "재시도 횟수에 공표 준거는 없다. 실패 분포를 관측하기 전의 우리 선택이다. 2 로 둔 근거는 제품 내 일관성뿐이다 — llm/agent.py 의 LLM_MAX_ATTEMPTS 가 이미 2 이고, 한 제품 안에서 재시도 개념이 두 값으로 갈라질 이유가 없다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-extract 의 ask 에 대한 답. 값 선정은 사용자가 코디네이터에게 위임한 범위다(신규 (d) our_choice 상수의 초기값). ★ 재시도가 span 검증 실패에 걸리면 같은 입력에 주사위를 다시 굴리는 것이 된다. 검증 자체는 여전히 진짜지만, 1차 성공과 재시도 후 성공을 합쳐 세면 '모델이 검증을 얼마나 자주 통과 못 하는가'가 숨는다 — 그게 SPEC 4.2.2 의 추출 스키마 실패율이 재려는 값이다. 그래서 추출 보고는 둘을 나눠 적는다.",
+      "open_questions": "적정값 미정. 실측 실패 분포(2단계)를 본 뒤 재검토한다. 추출 성공률 합격선 자체가 SPEC 의 미정 항목이므로 이 값도 그때 함께 정한다."
+    },
+    {
+      "key": "ingest.market_outlier_ratio_jeonse",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "multiple",
+      "frozen_current_value": 3.0,
+      "spec_action": "SPEC 3.1 이 [중앙값 대비 편차 임계]를 (d) 규범적 선택으로 등재하라고 명시했다. 통계마다 산포가 달라 하나로 둘 수 없다 — 사용자 결정 2026-08-14.",
+      "code_ref": "ingest 시세 수집 배치 (전세 보증금). 판정 엔진은 이 키를 조회하지 않는다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "실측 최악 지역 4.5%. 전세 보증금은 산포가 좁아 3배로 충분하다. 공표 준거는 없다. 실측이 준 것은 [배수 -> 이상치 비율] 대응이지 옳은 값이 아니다. 값을 고른 기준(최악 지역 비율 5% 이하)도 우리 선택이며, 그 기준의 근거는 [늘 켜져 있는 표시는 검토 신호가 못 된다]는 것뿐이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14. 단일 키 ingest.market_outlier_deviation_ratio(3.0)를 대체한다. 그 값으로 실데이터를 돌렸더니 10개 지역 중 9개가 걸렸고 원인이 데이터가 아니라 모델이었다 — 통계 4종의 산포가 구조적으로 다르다. 사용자가 [편차 배수를 통계별로 나눈다]로 결정했다.",
+      "open_questions": "실측 3개월·9개 지역 기준이다. 계절·시장 국면이 바뀌면 다시 봐야 한다."
+    },
+    {
+      "key": "ingest.market_outlier_ratio_monthly_deposit",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "multiple",
+      "frozen_current_value": 10.0,
+      "spec_action": "SPEC 3.1 이 [중앙값 대비 편차 임계]를 (d) 규범적 선택으로 등재하라고 명시했다. 통계마다 산포가 달라 하나로 둘 수 없다 — 사용자 결정 2026-08-14.",
+      "code_ref": "ingest 시세 수집 배치 (월세 보증금). 판정 엔진은 이 키를 조회하지 않는다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "실측 최악 지역 5.5%. 8배(13.9%)에서 10배(5.5%)로 떨어지는 무릎이 여기다. 월세 보증금은 보증금 500만/월세 50만과 보증금 2억/월세 30만이 둘 다 정상이라 원래 100배 넘게 퍼진다 — 3배 띠는 이 변수에 맞지 않는 모델이었다. 공표 준거는 없다. 실측이 준 것은 [배수 -> 이상치 비율] 대응이지 옳은 값이 아니다. 값을 고른 기준(최악 지역 비율 5% 이하)도 우리 선택이며, 그 기준의 근거는 [늘 켜져 있는 표시는 검토 신호가 못 된다]는 것뿐이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14. 단일 키 ingest.market_outlier_deviation_ratio(3.0)를 대체한다. 그 값으로 실데이터를 돌렸더니 10개 지역 중 9개가 걸렸고 원인이 데이터가 아니라 모델이었다 — 통계 4종의 산포가 구조적으로 다르다. 사용자가 [편차 배수를 통계별로 나눈다]로 결정했다.",
+      "open_questions": "실측 3개월·9개 지역 기준이다. 계절·시장 국면이 바뀌면 다시 봐야 한다."
+    },
+    {
+      "key": "ingest.market_outlier_ratio_monthly_rent",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "multiple",
+      "frozen_current_value": 10.0,
+      "spec_action": "SPEC 3.1 이 [중앙값 대비 편차 임계]를 (d) 규범적 선택으로 등재하라고 명시했다. 통계마다 산포가 달라 하나로 둘 수 없다 — 사용자 결정 2026-08-14.",
+      "code_ref": "ingest 시세 수집 배치 (월세(월 임대료)). 판정 엔진은 이 키를 조회하지 않는다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "실측 최악 지역 4.3%. 보증금과 월세가 서로를 대체하는 구조라 월세도 넓게 퍼진다. 공표 준거는 없다. 실측이 준 것은 [배수 -> 이상치 비율] 대응이지 옳은 값이 아니다. 값을 고른 기준(최악 지역 비율 5% 이하)도 우리 선택이며, 그 기준의 근거는 [늘 켜져 있는 표시는 검토 신호가 못 된다]는 것뿐이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14. 단일 키 ingest.market_outlier_deviation_ratio(3.0)를 대체한다. 그 값으로 실데이터를 돌렸더니 10개 지역 중 9개가 걸렸고 원인이 데이터가 아니라 모델이었다 — 통계 4종의 산포가 구조적으로 다르다. 사용자가 [편차 배수를 통계별로 나눈다]로 결정했다.",
+      "open_questions": "실측 3개월·9개 지역 기준이다. 계절·시장 국면이 바뀌면 다시 봐야 한다."
+    },
+    {
+      "key": "ingest.market_outlier_ratio_trade",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "multiple",
+      "frozen_current_value": 5.0,
+      "spec_action": "SPEC 3.1 이 [중앙값 대비 편차 임계]를 (d) 규범적 선택으로 등재하라고 명시했다. 통계마다 산포가 달라 하나로 둘 수 없다 — 사용자 결정 2026-08-14.",
+      "code_ref": "ingest 시세 수집 배치 (매매 거래금액). 판정 엔진은 이 키를 조회하지 않는다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "실측 최악 지역 3.9%. 3배는 12.4%로 너무 자주 걸렸다. 공표 준거는 없다. 실측이 준 것은 [배수 -> 이상치 비율] 대응이지 옳은 값이 아니다. 값을 고른 기준(최악 지역 비율 5% 이하)도 우리 선택이며, 그 기준의 근거는 [늘 켜져 있는 표시는 검토 신호가 못 된다]는 것뿐이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14. 단일 키 ingest.market_outlier_deviation_ratio(3.0)를 대체한다. 그 값으로 실데이터를 돌렸더니 10개 지역 중 9개가 걸렸고 원인이 데이터가 아니라 모델이었다 — 통계 4종의 산포가 구조적으로 다르다. 사용자가 [편차 배수를 통계별로 나눈다]로 결정했다.",
+      "open_questions": "실측 3개월·9개 지역 기준이다. 계절·시장 국면이 바뀌면 다시 봐야 한다."
+    },
+    {
+      "key": "ingest.market_outlier_share_threshold",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "ratio",
+      "frozen_current_value": 0.1,
+      "spec_action": "지역을 unverified 로 표시할지 정하는 비율 문턱. 사용자 결정 2026-08-14 [건수가 아니라 비율로].",
+      "code_ref": "ingest 시세 수집 배치. 이상치 **기록**에는 걸리지 않는다 — 판정에만 걸린다.",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "10%. 공표 준거는 없다. 배수를 통계별로 나눈 뒤 지역별 최대 이상치 비율은 0.6~5.5% 였다(9개 지역·3개월 실측) — 그 대역이 정상이므로 문턱을 그 위(관측 최대의 약 2배)에 둔다. 아래에서 걸리는 것은 이상이 아니라 산포다. 실측이 준 것은 [정상 대역]이지 옳은 문턱이 아니다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14. 배수를 통계별로 나눠 이상치가 4420->473 건으로 줄어든 뒤에도 9/10 지역이 여전히 걸렸다 — 큰 표본에서 극단값 한둘은 늘 있기 때문이다. 건수 기준으로는 [늘 켜져 있는 표시]를 피할 수 없다.",
+      "open_questions": "실측 3개월·9개 지역 기준이다. 이 문턱에서 현재 걸리는 지역은 0개이며, 그것이 [정상]인지 [문턱이 느슨한지]는 더 긴 관측이 필요하다."
+    },
+    {
+      "key": "ingest.market_min_sample_count",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "count",
+      "frozen_current_value": 10,
+      "spec_action": "표본이 너무 적은 집계를 통계라고 부르지 않기 위한 하한. SPEC 3.1 의 [표본 최소 건수] 미정 항목.",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "통계(전세 중앙값 / 월세 보증금 중앙값 / 월세 중앙값) 각각에 대해 거래 10건 미만이면 표본부족으로 취급한다. 10 에 공표 준거는 없다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다."
+    },
+    {
+      "key": "ingest.market_pair_area_band_sqm",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "sqm",
+      "frozen_current_value": 1.0,
+      "spec_action": "SPEC 3.1 3차 정정 — 파생 비율을 [비의 중앙값] 으로 내기 위한 셀 정의의 면적 구간 폭. 셀 = 법정동 + 단지명 + 전용면적 구간.",
+      "code_ref": "ingest 시세 수집 배치의 짝짓기. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "한국부동산원 공동주택 실거래가격지수 — 동일 주택 가정 (국가통계 승인 제116072호)",
+        "source_ref": "https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?mi=10337&cntntsId=1193&statId=S231520283",
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "전용면적을 이 폭으로 반올림해 구간을 만든다. **면적 짝짓기에는 공표 규약이 있다** — 한국부동산원 공동주택 실거래가격지수는 동일 주택을 [단지·면적·동·층그룹이 **같은**] 으로 정의해 **면적에 구간 폭을 두지 않는다**(폭 0). 우리 1제곱미터 반올림은 그 규약이 아니다. **그래도 값을 바꾸지 않는다 — 목적이 다르기 때문이다.** 부동산원은 같은 호가 두 번 팔린 것을 찾는 반복매매지수라 동일성이 어긋나면 지수가 오염되고, 우리는 전세와 매매를 비교 가능한 집합 안에서 짝지어 비를 내므로 폭을 두는 것이 오히려 표본을 만든다. 우리 셀은 동·층을 아예 보지 않아 이미 여러 축에서 더 느슨하며, 부동산원 규약이 우리 산출을 규율하지도 않는다. 6차 실사가 1제곱미터와 5제곱미터를 비교해 값의 최대 이동이 0.12%p(전환율) · 0.46%p(전세가율) 로 결과를 만들지 않음을 실측했다 (FINDINGS-6.md).",
+      "$comment": "COORDINATOR DECISION 2026-08-15. 사용자가 6차 실사 표를 보고 [짝지은 산식으로 바꾼다] 를 결정했고, 신규 (d) our_choice 상수의 초기값 선정은 코디네이터 위임 범위다. 값의 근거는 준거가 아니라 민감도 실측이다 — 어느 값을 골라도 결과가 같으므로 재현 가능한 쪽(실사 스크립트 기본값)을 골랐다. value_type 은 지시서가 ratio 였으나 어휘가 ratio 를 [0..1 배수, 곱셈에 직접 쓰임] 으로 정의하고 이 값은 제곱미터 폭이므로, W-market-2 의 ask 에 답해 sqm 으로 정정했다 (이웃 ingest.market_max_exclusive_area_sqm 와 같은 축). ★ 2026-08-16 정정 (결정 #45) — 이 칸은 [공표 준거가 없다] 고 적고 있었고 **그것이 거짓이었다.** 7차 실사(FINDINGS-7.md D7-3)가 부동산원 원문을 확인했다. 값도 클래스도 바꾸지 않았다.",
+      "open_questions": "짝짓기 성립률의 최소 문턱은 새 상수를 만들지 않고 기존 ingest.market_min_sample_count 를 짝 성립 셀 수에 건다. 그 문턱으로 충분한지는 실수집 후 재검토한다."
+    },
+    {
+      "key": "ingest.market_lookback_months",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "months",
+      "frozen_current_value": 3,
+      "spec_action": "집계 대상 기간. SPEC 3.1 의 [집계 단위] 미정 항목의 시간 축.",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "감정평가에 관한 규칙 (국토교통부령 제1253호) 제2조제12호의2 — [적정한 실거래가] 의 거래시점 상한",
+        "source_ref": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=law&MST=254883&type=XML",
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "계약년월 기준 최근 3개월을 합산한다. 짧으면 표본이 모자라고 길면 최근 시세를 못 따라간다 — 그 절충이 우리 선택이다. **다만 [준거가 없다] 는 것은 거짓이었다.** 인접한 준거가 둘 있고 우리 값은 그 어느 것과도 같지 않다 — ① 감정평가에 관한 규칙 제2조제12호의2 는 [적정한 실거래가] 의 거래시점을 **도시지역 3년 · 그 밖 5년 이내**로 정한다. 이것은 **상한**이고 우리 3개월은 그 안쪽이므로 **어기지 않는다.** ② 한국부동산원 공동주택 실거래가격지수는 **계약월기준**으로 집계한다 — 축이 다르다(집계 주기이지 조회 창이 아니다). 어느 쪽도 [최근 3개월] 을 주지 않으므로 값은 여전히 우리 선택이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다. ★ 2026-08-16 정정 (결정 #45) — 이 칸은 [준거가 없다] 고 적고 있었고 **그것이 거짓이었다.** 7차 실사(FINDINGS-7.md D7-4)가 국토교통부령 원문과 부동산원 통계정보를 확인했다. 값도 클래스도 바꾸지 않았다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다. 7차 실사가 인접 준거 둘을 드러냈으나 **둘 다 우리 조회 창을 정해 주지 않는다** — 재검토는 준거가 아니라 실수집 표본으로 한다."
+    },
+    {
+      "key": "ingest.market_max_exclusive_area_sqm",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "sqm",
+      "frozen_current_value": 85,
+      "spec_action": "집계 대상 전용면적 상한. SPEC 3.1 의 [집계 단위] 미정 항목의 면적 축.",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "전용 85제곱미터 이하만 집계한다. 85 자체는 국민주택규모라는 준거가 있으나 **상한을 두기로 한 것은 우리 선택**이다. 첫 집 수요에 맞춘 좁힘이며, 그 결과 지역 시세는 [아파트 · 85제곱미터 이하 중앙값]이지 [지역 전체 시세]가 아니다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다."
+    },
+    {
+      "key": "ingest.market_max_attempts",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "attempts",
+      "frozen_current_value": 2,
+      "spec_action": "수집 1회의 시도 횟수 상한. SPEC 3절 [재시도 후 실패 시 이전 값 유지].",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "공표 준거 없음. 제품 내 일관성이 유일한 근거다 — extraction.max_attempts 와 llm/agent.py 의 LLM_MAX_ATTEMPTS 가 이미 2 다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다."
+    },
+    {
+      "key": "ingest.market_request_timeout_seconds",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "seconds",
+      "frozen_current_value": 20,
+      "spec_action": "외부 API 호출 1건의 대기 상한.",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "공표 준거 없음. 측정 전의 우리 선택이며 실측 후 재검토한다. SPEC 8.3 의 경로별 타임아웃은 **HTTP 요청 경로**에 걸리는 규칙이고 이쪽은 배치라 계약 파일의 x- 확장 대상이 아니다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다."
+    },
+    {
+      "key": "ingest.market_batch_deadline_seconds",
+      "engine": "ingest",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "seconds",
+      "frozen_current_value": 600,
+      "spec_action": "배치 전체의 실행 시간 상한. SPEC 8.3 이 [배치 실행 시간 상한]을 3단계에서 실측하라고 남긴 항목.",
+      "code_ref": "ingest 시세 수집 배치. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": null,
+        "source_ref": null,
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "공표 준거 없음. 실측 전의 우리 선택이다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-market 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다.",
+      "open_questions": "실측 전의 값이다. 3단계 실수집 결과를 보고 재검토한다."
+    },
+    {
+      "key": "auth.session_idle_timeout_seconds",
+      "engine": "auth",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "seconds",
+      "frozen_current_value": 1800,
+      "spec_action": "SPEC 6.3 이 [유휴 만료 + 절대 만료 둘 다 둔다]고 정하고 값은 [8단계 리허설 뒤에 정한다]로 남겼다. (d) 규범적 선택이므로 Part 0-E #4 에 따라 등재한다.",
+      "code_ref": "api 의 세션 계층. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "OWASP ASVS 4.0, V3.3.2 (세션 관리 — 주기적 재인증)",
+        "source_ref": "https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md",
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "유휴 30분. **ASVS 4.0 V3.3.2 가 레벨별 숫자를 준다** — L1 30일 / **L2 12시간 또는 무활동 30분** / L3 12시간 또는 무활동 15분. 이 30분은 그 L2 의 숫자다. 다만 **어느 레벨을 목표로 하는지는 우리 선택**이므로 (d) 로 남는다 — SPEC Part 0-C 의 (d) 행이 [준거가 있으면 인용]이라고 적은 그대로다.",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-auth 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다. ★ 2026-08-16 정정 — 이 칸은 [공표 준거가 없다. OWASP ASVS 는 두 종류를 두라고만 하고 숫자를 주지 않는다]고 적고 있었고 **그것이 거짓이었다.** 8단계 리허설 워커가 ASVS 의 30분을 근거로 들면서 어긋남이 드러났고, 원문을 조회해(2026-08-16) 정정했다. 값은 바꾸지 않았다.",
+      "open_questions": "SPEC 6.3 의 [8단계 리허설 뒤에 정한다]는 2026-08-16 에 닫혔다. 리허설 실측(상담원 로그인부터 마지막 인증 동작까지 10~11초, 3회 모두)은 기계 조작이라 시연 세션 수명의 하한이며 이 값에 제약을 걸지 않는다. 남은 물음은 하나 — 목표 레벨을 L2 로 잡은 것이 우리 업무의 위험에 맞는가. ASVS 는 레벨 선택을 조직에 맡긴다."
+    },
+    {
+      "key": "auth.session_absolute_timeout_seconds",
+      "engine": "auth",
+      "legacy_symbol": null,
+      "spec_class": "d",
+      "value_type": "seconds",
+      "frozen_current_value": 28800,
+      "spec_action": "위와 같다. 절대 만료가 없으면 활동만 계속되면 세션이 무한히 산다.",
+      "code_ref": "api 의 세션 계층. 판정 엔진은 이 키를 조회하지 않는다 (engineConsumers 참조).",
+      "seed_provenance": {
+        "source_kind": "normative",
+        "source_name": "OWASP ASVS 4.0, V3.3.2 (세션 관리 — 주기적 재인증)",
+        "source_ref": "https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md",
+        "observed_at": null,
+        "fetched_at": null,
+        "verification": "our_choice"
+      },
+      "normative_statement": "절대 8시간. **ASVS 4.0 V3.3.2 의 L2 는 12시간**이고 우리는 그보다 **짧게** 잡았다 — 상담원의 영업점 근무가 하루 단위이므로 1근무일을 넘기지 않는다는 우리 선택이다. 준거보다 엄한 쪽이므로 ASVS 를 어기지 않으나, **8시간이라는 숫자 자체는 어느 준거에도 없다.**",
+      "$comment": "COORDINATOR DECISION 2026-08-14, W-auth 의 ask 에 대한 답. 신규 (d) our_choice 상수의 초기값 선정은 사용자가 코디네이터에게 위임한 범위다. ★ 2026-08-16 정정 — 이 칸은 [공표 준거가 없다]고만 적고 있었으나 ASVS L2 가 12시간이라는 상한을 준다. 우리 값이 그 안쪽이라는 사실이 빠져 있었다. 원문 조회 2026-08-16. 값은 바꾸지 않았다.",
+      "open_questions": "SPEC 6.3 의 [8단계 리허설 뒤에 정한다]는 2026-08-16 에 닫혔다. 리허설은 회차 전체가 25~27초여서 절대 만료에 아무 제약을 걸지 않았다. 남은 물음은 하나 — 상담원의 실제 근무 리듬이 1근무일보다 길거나 짧은가. 재지 않았다."
+    }
+  ],
+  "knownIncomplete": {
+    "$comment": "해소됨 (registryVersion 1.1.0). W-engines 가 engines/ 전수 AST 스윕(리터럴 237개)을 돌려 판정 결과를 바꾸면서 미등재인 39개를 열거했고, 코디네이터가 코드로 검증한 뒤 floor_to 단위 2개를 더해 41개를 등재했다.",
+    "resolvedAt": "W-engines ask (task_0fe60380273c) -> 코디네이터 검증 -> 등재",
+    "coordinatorAdditions": [
+      "tco.deposit_rounding_unit_krw · tco.monthly_rounding_unit_krw — W-engines 는 이 둘을 '단위·구조 상수' 비대상으로 제안했으나 기각했다. SPEC 5.1.2 가 비대상으로 명시한 것은 common.floor_to 의 기본값 10_000 하나이고, tco.py:51 의 1_000_000 은 대출액을 최대 100만원 움직여 이자·TCO·NPV 로 전파되므로 '판정 결과의 숫자를 바꾸는 값'에 해당한다."
+    ],
+    "allowlistBoundary": "허용목록에 남는 것은 항등·백분율 환산(0·1·100), 연->월 환산 12, common.floor_to 기본값 10_000, round() 자릿수, 리스트 인덱스·슬라이스, max(1,...) 하한이다. 각 항목에 근거를 적는다 (SPEC 5.1.2).",
+    "keyGrammar": "<engine>.<snake_case_symbol>. 인라인 가중치는 <engine>.<factor>_weight_<n|band> / 구간 경계는 <engine>.<factor>_threshold_<n>."
+  }
+}

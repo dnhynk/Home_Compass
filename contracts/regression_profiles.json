@@ -1,0 +1,239 @@
+{
+  "$note": [
+    "회귀·감도분석용 합성 프로필 세트 (SPEC 9.2.2).",
+    "SPEC 7.1 이 시민 프로필 저장을 금지하므로 실사용 데이터를 쓸 수 없다. 4.1 #5 · 4.4 #2 ·",
+    "4.5 #4 · 5.1.3 이 모두 요구하는 「결과가 달라지는 사례」의 모집단이 이 파일이다.",
+    "",
+    "★ 이 파일은 계약이다. 세트가 바뀌면 골든 스냅샷이 바뀌므로 SPEC 8.2 절차를 따른다 —",
+    "  코디네이터만 바꾸고, 바꾸면 골든과 감도분석 산출물을 함께 재생성한다.",
+    "  이전 위치는 backend/tests/golden/profiles.provisional.json 이었다. 거기 있는 동안은",
+    "  워커 경로 안이라 「계약 변경」 게이트가 걸리지 않았다.",
+    "",
+    "★ 축은 임의로 늘리지 않는다. 각 항목은 자기가 여는 분기를 axes 에 적고, 그 분기가",
+    "  실제로 열리는 것을 실측으로 확인한 뒤에만 들어온다. 개수를 늘려 놓고 「커버리지 확보」라고",
+    "  말하지 않는다."
+  ],
+  "setVersion": "1.0.0",
+  "supersedes": "0.1.0-provisional",
+  "axes": {
+    "baseline": "축이 아니라 대조군. 나머지 항목은 이 값에서 한 축만 움직인다.",
+    "zero_income": "SPEC 9.2.2 축 — 0소득",
+    "very_high_income": "SPEC 9.2.2 축 — 초고소득",
+    "age_boundary_min": "SPEC 9.2.2 축 — 연령 경계 (하한, 씨드 정책의 ageMin=19)",
+    "age_boundary_max": "SPEC 9.2.2 축 — 연령 경계 (상한, 씨드 정책의 ageMax=34)",
+    "age_over_max": "SPEC 9.2.2 축 — 연령 경계 (상한 초과)",
+    "unknown_region": "SPEC 9.2.2 축 — 없는 지역 (analyze 가 ValueError 를 던지는 경로)",
+    "non_metro": "F-4 수도권/비수도권 분기 — 가입요건 상한이 7억에서 **5억**으로 갈린다. 실측: 부산 해운대구(26350)에서 cap 5억 · riskScore 32->24.",
+    "non_metro_no_guarantee": "guaranteeAvailable=False 경로 + marketRisk=high 가중. 실측: 광주 광산구(12330)에서 riskScore 32->82 로 가장 크게 움직인다. ★ 두 축이 붙어 있다 — 시드 지역에 [고위험이면서 보증 가능] 조합이 없어 분리할 수 없다.",
+    "metro_gyeonggi": "수도권 접두가 '11' 만이 아님을 고정한다. risk.metro_sido_code_prefixes 는 ['11','28','41'] 인데 시드 지역이 서울뿐이면 '41'·'28' 이 죽은 값인지 아무도 모른다. 실측: 경기 수원 영통(41117)에서 cap 7억 유지 · marketRisk=medium.",
+    "max_jeonse_region": "규모 경계 — 시드 지역 중 전세 중위값 최대(서울 성동구 11200, 3.2억). 새 분기를 여는 것이 아니라 보증금 규모의 상단이다. 실측: riskScore 20 으로 전 프로필 최저.",
+    "household_four": "가구원수별 생활비의 최대 구간. affordability.living_cost_by_household 는 1~4 인분이 등재돼 있는데 나머지 프로필이 전부 1인이라 **4인 값이 한 번도 쓰이지 않았다** — 계약 결정 #14 가 「4인」을 독립 행으로 확정하며 실사를 들인 값이다. 실측: 생활비 1,530,773 -> 4,578,150 이며 **band 가 safe -> risk 로 뒤집히는 유일한 프로필**이다."
+  },
+  "$uncovered": [
+    "★ tco.fallback_conversion_rate_pct 는 이 세트로 덮을 수 없다.",
+    "그 폴백은 region.get('conversionRatePct') 이 비었을 때만 걸리는데, 시드 지역 10건이",
+    "전부 그 값을 갖고 있다(5.4~6.4). 프로필은 지역을 **고르는** 것이지 지역의 필드를",
+    "지우지 못하므로, 프로필을 몇 개 더 만들어도 이 경로는 열리지 않는다.",
+    "덮으려면 그 필드가 없는 **지역 픽스처**가 필요하며 그것은 이 파일의 소관이 아니다.",
+    "값을 지어내 덮은 척하지 않는다 — 안 덮인다는 사실을 여기 적는다.",
+    "",
+    "★ F-4 상한을 **초과**하는 경우도 덮이지 않는다.",
+    "보증금은 지역의 전세 중위값에서 나오는데 최대가 3.2억(서울 성동)이고 비수도권 최대는",
+    "1.5억(부산)이라, 5억·7억 어느 상한에도 닿지 않는다. 덮이는 것은 [어느 상한이",
+    "선택되는가]까지이며 [상한을 넘었을 때]가 아니다."
+  ],
+  "profiles": [
+    {
+      "id": "baseline",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "zero_income",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 0,
+        "monthlyNetIncomeKRW": 0,
+        "liquidAssetsKRW": 0,
+        "existingDebtMonthlyKRW": 0,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": false,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "very_high_income",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 500000000,
+        "monthlyNetIncomeKRW": 30000000,
+        "liquidAssetsKRW": 1000000000,
+        "existingDebtMonthlyKRW": 0,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": false,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "age_boundary_min",
+      "profile": {
+        "age": 19,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "age_boundary_max",
+      "profile": {
+        "age": 34,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "age_over_max",
+      "profile": {
+        "age": 35,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "unknown_region",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "99999",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "non_metro",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "26350",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "non_metro_no_guarantee",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "12330",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "metro_gyeonggi",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "41117",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "max_jeonse_region",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 1,
+        "regionCode": "11200",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    },
+    {
+      "id": "household_four",
+      "profile": {
+        "age": 28,
+        "annualIncomeKRW": 42000000,
+        "monthlyNetIncomeKRW": 3000000,
+        "liquidAssetsKRW": 40000000,
+        "existingDebtMonthlyKRW": 300000,
+        "householdSize": 4,
+        "regionCode": "11440",
+        "isHomeless": true,
+        "isNewlywed": false,
+        "isSMEEmployee": true,
+        "preferredType": "any"
+      }
+    }
+  ]
+}

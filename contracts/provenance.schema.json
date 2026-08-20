@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dnhynk/KB_AI/contracts/provenance.schema.json",
+  "title": "Provenance",
+  "description": "SPEC 2.1. Attached to every fact — both collected data (D-5) and model constants (Part 0-C). Hand-written coordinator source, NOT a generated artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_kind",
+    "source_name",
+    "source_ref",
+    "observed_at",
+    "fetched_at",
+    "verification"
+  ],
+  "properties": {
+    "source_kind": {
+      "description": "SPEC Part 0-C (a)(b)(c)(d). statute=(a) 법정 계산, statistic=(b) 관측 통계, market=(c) 시장 가격, normative=(d) 규범적 선택.",
+      "enum": ["statute", "statistic", "market", "normative"]
+    },
+    "source_name": {
+      "description": "기관·통계명. 예: '국민연금법 시행령', '통계청 가계동향조사'.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "source_ref": {
+      "description": "URL · 고시번호 · 통계표 ID.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "observed_at": {
+      "description": "공표·관측 기준시점. RFC 3339, 숫자 오프셋 필수. 'Z' 금지 — SPEC 2.1 'UTC로 뭉개지 않는다'의 기계적 강제. 날짜 단위 사실은 T00:00:00+09:00 으로 적는다.",
+      "$ref": "#/$defs/rfc3339Offset"
+    },
+    "fetched_at": {
+      "description": "우리가 취득한 시각. 수집 데이터는 필수, 상수는 null 허용 (SPEC 2.1 표).",
+      "$ref": "#/$defs/rfc3339Offset"
+    },
+    "verification": {
+      "description": "our_choice 는 normative 전용. SPEC 2.1 '규범적 선택을 다른 값으로 표시하는 것을 금지한다'.",
+      "enum": ["verified", "unverified", "stale", "our_choice"]
+    },
+    "observed_at_unstated": {
+      "description": "원문을 확인했으나 그 원문이 기준시점을 밝히지 않은 경우에만 true. observed_at 이 null 인 채로 verified 를 허용하는 유일한 통로다. 기본값은 없음(=false)이며, 값을 못 찾은 경우에 쓰는 필드가 아니다 — 그건 unverified 다.",
+      "const": true
+    }
+  },
+  "$defs": {
+    "rfc3339Offset": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?[+-][0-9]{2}:[0-9]{2}$"
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "SPEC 2.1 표 — normative 는 observed_at/fetched_at 이 null 이고 verification 은 항상 our_choice.",
+      "if": {
+        "properties": { "source_kind": { "const": "normative" } },
+        "required": ["source_kind"]
+      },
+      "then": {
+        "properties": {
+          "observed_at": { "type": "null" },
+          "fetched_at": { "type": "null" },
+          "verification": { "const": "our_choice" }
+        }
+      }
+    },
+    {
+      "$comment": "역방향 강제 — our_choice 는 normative 전용.",
+      "if": {
+        "properties": { "verification": { "const": "our_choice" } },
+        "required": ["verification"]
+      },
+      "then": {
+        "properties": { "source_kind": { "const": "normative" } }
+      }
+    },
+    {
+      "$comment": "COORDINATOR DECISION (8.2). SPEC 2.1 표는 statute/statistic/market 에 source_name·source_ref·observed_at 을 '필수'로 적지만, D-14 는 1-① 에서 현행 값을 verification=unverified 로 등재하도록 요구한다. 출처를 모르는 것이 곧 unverified 의 의미이므로, 두 요구를 동시에 만족시키려면 필수 여부가 verification 에 걸려야 한다. 대안이었던 '자리표시자 날짜 기입'은 Part 0-C 의 값 날조 금지에, '(d)로 분류'는 '(d)를 (a)(b)(c)인 척하지 않는다'의 역방향 위반에 해당하여 둘 다 기각했다. 따라서 필수 조건은 verified/stale 에만 건다.",
+      "if": {
+        "properties": { "verification": { "enum": ["verified", "stale"] } },
+        "required": ["verification"]
+      },
+      "then": {
+        "properties": {
+          "source_name": { "type": "string" },
+          "source_ref": { "type": "string" }
+        },
+        "anyOf": [
+          {
+            "$comment": "정상 경로 — 원문이 기준시점을 밝힌다.",
+            "properties": { "observed_at": { "type": "string" } },
+            "required": ["observed_at"]
+          },
+          {
+            "$comment": "COORDINATOR DECISION (8.2). 실사에서 '원문을 확인했는데 그 원문에 기준시점 표기가 없는' 행이 7건 나왔다 (고용보험 요율표 · HUG 보증료율/보증한도 · 저작권정책 등). 이 행들을 처리하는 세 방법 중 둘은 기각했다 — 조회일을 observed_at 으로 대용하면 관측 기준시점과 취득 시각의 구분(SPEC 2.1 의 observed_at vs fetched_at)이 무너지고, unverified 로 두면 원문에서 값을 읽었다는 사실이 사라진다. 그래서 '원문 미표기'를 명시적으로 표현한다.",
+            "properties": {
+              "observed_at": { "type": "null" },
+              "observed_at_unstated": { "const": true }
+            },
+            "required": ["observed_at_unstated"]
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "observed_at_unstated 는 normative 에 쓸 수 없다. 규범적 선택에는 관측 기준시점이라는 개념 자체가 없으므로 '원문이 밝히지 않았다'가 성립하지 않는다.",
+      "if": {
+        "properties": { "observed_at_unstated": { "const": true } },
+        "required": ["observed_at_unstated"]
+      },
+      "then": {
+        "properties": {
+          "source_kind": { "enum": ["statute", "statistic", "market"] },
+          "observed_at": { "type": "null" },
+          "verification": { "enum": ["verified", "stale"] }
+        },
+        "required": ["source_name", "source_ref"]
+      }
+    }
+  ],
+  "examples": [
+    {
+      "source_kind": "normative",
+      "source_name": "국토교통부 주거실태조사 RIR 30% 준거",
+      "source_ref": null,
+      "observed_at": null,
+      "fetched_at": null,
+      "verification": "our_choice"
+    },
+    {
+      "source_kind": "statistic",
+      "source_name": null,
+      "source_ref": null,
+      "observed_at": null,
+      "fetched_at": null,
+      "verification": "unverified"
+    }
+  ]
+}

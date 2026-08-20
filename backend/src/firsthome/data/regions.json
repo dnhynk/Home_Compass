@@ -1,0 +1,897 @@
+{
+  "_disclaimer": "국토교통부 실거래가 오픈API 실수집 결과를 굳힌 것이다 (계약 결정 #40). 8필드가 한 덩어리가 아니다 — 5필드는 실측(verified)이고, 실거래가 원자료에 대응물이 없는 3필드(maintenanceFeeKRW · marketRisk · guaranteeAvailable)는 예시값 그대로 unverified 다 (SPEC 3.1). 그래서 dataGrade 는 여전히 C 다.",
+  "_fetchedAt": "fetched_at 은 **실제 수집 시각**이며 시연일이 아니다. 시연일과 벌어지는 것이 정상이고, 계보가 그것을 그대로 드러내는 것이 이 제품의 설계다 (결정 #40). 시연일로 고쳐 적지 않는다.",
+  "_regeneration": "다시 굳히려면 네트워크가 있는 상태에서 python -m firsthome.ingest.market 을 돌려 나온 값을 여기에 옮긴다. 절차와 그때 함께 재생성해야 하는 것들은 docs/engineering/REHEARSAL.md 1부에 있다.",
+  "regions": [
+    {
+      "payload": {
+        "code": "11440",
+        "name": "서울 마포구",
+        "jeonseMedianKRW": 650000000,
+        "monthlyDepositKRW": 100000000,
+        "monthlyRentKRW": 950000,
+        "maintenanceFeeKRW": 90000,
+        "jeonseRatioPct": 43.27,
+        "conversionRatePct": 4.82,
+        "marketRisk": "low",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-10T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "11620",
+        "name": "서울 관악구",
+        "jeonseMedianKRW": 500000000,
+        "monthlyDepositKRW": 80000000,
+        "monthlyRentKRW": 680000,
+        "maintenanceFeeKRW": 70000,
+        "jeonseRatioPct": 55.7,
+        "conversionRatePct": 4.62,
+        "marketRisk": "medium",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-12T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "11200",
+        "name": "서울 성동구",
+        "jeonseMedianKRW": 729000000,
+        "monthlyDepositKRW": 100000000,
+        "monthlyRentKRW": 1100000,
+        "maintenanceFeeKRW": 100000,
+        "jeonseRatioPct": 39.73,
+        "conversionRatePct": 4.74,
+        "marketRisk": "low",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-06T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "11350",
+        "name": "서울 노원구",
+        "jeonseMedianKRW": 300000000,
+        "monthlyDepositKRW": 37045000,
+        "monthlyRentKRW": 700000,
+        "maintenanceFeeKRW": 70000,
+        "jeonseRatioPct": 54.12,
+        "conversionRatePct": 4.94,
+        "marketRisk": "medium",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-12T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "41117",
+        "name": "경기 수원시 영통구",
+        "jeonseMedianKRW": 330000000,
+        "monthlyDepositKRW": 50000000,
+        "monthlyRentKRW": 800000,
+        "maintenanceFeeKRW": 80000,
+        "jeonseRatioPct": 61.33,
+        "conversionRatePct": 5.0,
+        "marketRisk": "medium",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-13T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "41281",
+        "name": "경기 고양시 덕양구",
+        "jeonseMedianKRW": 330000000,
+        "monthlyDepositKRW": 50000000,
+        "monthlyRentKRW": 500000,
+        "maintenanceFeeKRW": 70000,
+        "jeonseRatioPct": 71.1,
+        "conversionRatePct": 5.0,
+        "marketRisk": "medium",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "26350",
+        "name": "부산 해운대구",
+        "jeonseMedianKRW": 254775000,
+        "monthlyDepositKRW": 30000000,
+        "monthlyRentKRW": 800000,
+        "maintenanceFeeKRW": 70000,
+        "jeonseRatioPct": 60.02,
+        "conversionRatePct": 5.08,
+        "marketRisk": "low",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "30200",
+        "name": "대전 유성구",
+        "jeonseMedianKRW": 250000000,
+        "monthlyDepositKRW": 47210000,
+        "monthlyRentKRW": 220000,
+        "maintenanceFeeKRW": 60000,
+        "jeonseRatioPct": 73.3,
+        "conversionRatePct": 5.23,
+        "marketRisk": "medium",
+        "guaranteeAvailable": true,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "27260",
+        "name": "대구 수성구",
+        "jeonseMedianKRW": 300000000,
+        "monthlyDepositKRW": 20000000,
+        "monthlyRentKRW": 750000,
+        "maintenanceFeeKRW": 65000,
+        "jeonseRatioPct": 59.26,
+        "conversionRatePct": 5.14,
+        "marketRisk": "high",
+        "guaranteeAvailable": false,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-13T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    },
+    {
+      "payload": {
+        "code": "12330",
+        "name": "광주 광산구",
+        "jeonseMedianKRW": 163650000,
+        "monthlyDepositKRW": 20000000,
+        "monthlyRentKRW": 450000,
+        "maintenanceFeeKRW": 55000,
+        "jeonseRatioPct": 78.16,
+        "conversionRatePct": 5.71,
+        "marketRisk": "high",
+        "guaranteeAvailable": false,
+        "source": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)"
+      },
+      "provenance": {
+        "source_kind": "market",
+        "source_name": "국토교통부 실거래가 (일부 필드는 출처 미특정 — 필드별 계보 참조)",
+        "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+        "observed_at": "2026-08-14T00:00:00+09:00",
+        "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+        "verification": "unverified"
+      },
+      "fieldProvenance": {
+        "jeonseMedianKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyDepositKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "monthlyRentKRW": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털)",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "maintenanceFeeKRW": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "jeonseRatioPct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세·매매 실거래가 — 전세/매매의 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출)",
+          "source_ref": "https://www.data.go.kr/data/15126469/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "conversionRatePct": {
+          "source_kind": "market",
+          "source_name": "국토교통부 아파트 전월세 실거래가 (공공데이터포털) — 한국부동산원 전월세전환율 산식 적용 · 비의 중앙값 (셀 = 법정동+단지명+전용면적 구간, 우리 산출). 인용한 산식 페이지는 오피스텔 가격동향조사의 산출항목이며 아파트 대응 페이지는 찾지 못했다",
+          "source_ref": "https://www.data.go.kr/data/15126474/openapi.do",
+          "observed_at": "2026-08-14T00:00:00+09:00",
+          "fetched_at": "2026-08-15T19:49:32.142041+09:00",
+          "verification": "verified"
+        },
+        "marketRisk": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        },
+        "guaranteeAvailable": {
+          "source_kind": "market",
+          "source_name": "프로토타입 예시 데이터",
+          "source_ref": null,
+          "observed_at": null,
+          "fetched_at": null,
+          "verification": "unverified"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# KB 첫집 나침반 — 프로토타입 의존성
+# Python 3.11+ 권장 (개발/검증 환경: Python 3.13.7, Windows 11)
+
+fastapi>=0.115
+uvicorn>=0.30
+pydantic>=2.7
+
+# LLM 상담 레이어(A1) — 3단 프로바이더(OpenAI → Anthropic → offline).
+# 두 SDK 모두 없거나 API 키가 없어도 백엔드는 offline 템플릿 모드로 정상 동작합니다.
+# 심사위원은 키 없이 실행해도 모든 기능(지불능력·시나리오·정책·리스크)을 볼 수 있습니다.
+openai>=1.40
+anthropic>=0.40
+
+# 테스트 (TestClient 는 httpx 를 사용)
+pytest>=8.0
+httpx>=0.27
+
+# 계약 검증 — contracts/ 의 JSON Schema 2020-12 검증에 쓰입니다.
+# SPEC 9.1.2 "2xx만으로는 불합격, 계약 스키마와 일치해야 통과" 의 기반이기도 합니다.
+jsonschema>=4.20
+
+# 인증 — 비밀번호 저장 (SPEC 6.3 · Part 0-E [표준으로 채운 것]).
+# OWASP Password Storage Cheat Sheet 가 Argon2id 를 권고하고 파라미터도 그쪽 값을 인용한다
+# (m=19MiB · t=2 · p=1). 우리가 고른 값이 아니므로 ModelConstant 로 등재하지 않는다 —
+# 표준 인용을 (d) our_choice 로 등재하면 감도분석이 표준을 흔들어 보는 표가 된다.
+argon2-cffi>=23.1

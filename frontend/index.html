@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KB 첫집 나침반 · 청년 주거 금융 의사결정 에이전트</title>
+<meta name="description" content="소득·자산·지역을 입력하면 감당 가능한 주거비 상한을 계산하고, 전세·월세 총비용을 비교하며, 이용 가능한 청년 주거 정책까지 연결하는 의사결정 에이전트.">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231C1A17'/%3E%3Cpath d='M16 6 20 16 16 26 12 16Z' fill='%23FFB800'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+
+<!-- ══════════════ TOP BAR ══════════════ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34">
+          <circle cx="20" cy="20" r="19" fill="#1C1A17"/>
+          <circle cx="20" cy="20" r="13.5" fill="none" stroke="#4A423A" stroke-width="1"/>
+          <path d="M20 6.5 24.4 20 20 33.5 15.6 20Z" fill="#FFB800"/>
+          <path d="M15.6 20 24.4 20 20 33.5Z" fill="#8A6200"/>
+          <circle cx="20" cy="20" r="2.2" fill="#1C1A17"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>KB 첫집 나침반</strong>
+        <em>FirstHome&nbsp;Compass</em>
+      </span>
+    </a>
+
+    <div class="topbar-actions">
+      <span class="conn" id="connBadge" title="백엔드 연결 상태">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connText">연결 확인 중</span>
+      </span>
+      <!-- 직원 로그인. 판정 화면을 역할별로 포크하지 않는다 (SPEC 6.1 · D-9) —
+           로그인이 하는 일은 응답에 internal 필드가 실리게 하는 것뿐이다. -->
+      <div class="session" id="sessionBar"></div>
+      <button type="button" class="btn btn-ghost" id="btnSample">예시 프로필 채우기</button>
+    </div>
+  </div>
+</header>
+
+<!-- 로컬 판정 경로의 상태를 화면에 적는다. 침묵 폴백 금지 (SPEC 6.2 오프라인 정의 #3 · D-11) -->
+<div class="local-banner" id="localBanner" role="status" hidden></div>
+
+<main id="main" class="app">
+
+  <!-- ══════════════ LEFT · PROFILE FORM ══════════════ -->
+  <aside class="col-form">
+    <form class="panel form-panel" id="profileForm" novalidate>
+      <div class="panel-head">
+        <p class="eyebrow">STEP 01</p>
+        <h1 class="panel-title">내 상황 입력</h1>
+        <p class="panel-sub">7개 항목이면 충분합니다. 입력값은 브라우저를 벗어나지 않으며 어디에도 저장되지 않습니다.</p>
+      </div>
+
+      <div class="fieldset">
+        <p class="legend">기본 정보</p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="age">만 나이</label>
+            <div class="input-wrap">
+              <input type="number" id="age" name="age" value="28" min="19" max="70" step="1" inputmode="numeric">
+              <span class="unit">세</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="householdSize">가구원 수</label>
+            <div class="input-wrap">
+              <select id="householdSize" name="householdSize">
+                <option value="1" selected>1인</option>
+                <option value="2">2인</option>
+                <option value="3">3인</option>
+                <option value="4">4인 이상</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="regionCode">희망 거주 지역</label>
+          <div class="input-wrap">
+            <select id="regionCode" name="regionCode">
+              <option value="">불러오는 중…</option>
+            </select>
+          </div>
+          <p class="field-help" id="regionHelp">지역을 선택하면 해당 지역 시세로 시나리오를 계산합니다.</p>
+          <!-- 시세 항목 이상 신고 (SPEC 6.4). **익명에는 나오지 않는다** — 스크립트가
+               세션을 보고 비워 둔다. 숨기는 것이 권한이 아니라 API 가 401 로 막는다. -->
+          <p class="report-slot" id="regionReport"></p>
+        </div>
+      </div>
+
+      <div class="fieldset">
+        <p class="legend">소득 · 자산</p>
+
+        <div class="field">
+          <label for="annualIncome">연소득 <span class="lbl-note">세전</span></label>
+          <div class="input-wrap money">
+            <input type="number" id="annualIncome" name="annualIncome" value="4200" min="0" step="100" inputmode="numeric">
+            <span class="unit">만원</span>
+          </div>
+          <p class="field-help money-echo" data-echo-for="annualIncome"></p>
+        </div>
+
+        <div class="field">
+          <label for="monthlyNetIncome">월 실수령액</label>
+          <div class="input-wrap money">
+            <input type="number" id="monthlyNetIncome" name="monthlyNetIncome" value="300" min="0" step="10" inputmode="numeric">
+            <span class="unit">만원</span>
+          </div>
+          <p class="field-help money-echo" data-echo-for="monthlyNetIncome"></p>
+        </div>
+
+        <div class="field">
+          <label for="liquidAssets">보유 현금성 자산 <span class="lbl-note">보증금 가용</span></label>
+          <div class="input-wrap money">
+            <input type="number" id="liquidAssets" name="liquidAssets" value="4000" min="0" step="100" inputmode="numeric">
+            <span class="unit">만원</span>
+          </div>
+          <p class="field-help money-echo" data-echo-for="liquidAssets"></p>
+        </div>
+
+        <div class="field">
+          <label for="existingDebt">기존 대출 월 상환액</label>
+          <div class="input-wrap money">
+            <input type="number" id="existingDebt" name="existingDebt" value="30" min="0" step="5" inputmode="numeric">
+            <span class="unit">만원</span>
+          </div>
+          <p class="field-help money-echo" data-echo-for="existingDebt"></p>
+        </div>
+      </div>
+
+      <div class="fieldset">
+        <p class="legend">주거 조건</p>
+
+        <div class="field">
+          <span class="label-static">선호 임차 유형</span>
+          <div class="segmented" role="radiogroup" aria-label="선호 임차 유형" id="preferredType">
+            <button type="button" role="radio" aria-checked="false" data-value="jeonse">전세</button>
+            <button type="button" role="radio" aria-checked="false" data-value="monthly">월세</button>
+            <button type="button" role="radio" aria-checked="true"  data-value="any">상관없음</button>
+          </div>
+        </div>
+
+        <ul class="switch-list">
+          <li>
+            <label class="switch" for="isHomeless">
+              <span class="switch-copy">
+                <span class="switch-title">무주택 세대주</span>
+                <span class="switch-desc">대부분의 청년 정책 필수 요건</span>
+              </span>
+              <input type="checkbox" id="isHomeless" checked>
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </li>
+          <li>
+            <label class="switch" for="isSMEEmployee">
+              <span class="switch-copy">
+                <span class="switch-title">중소·중견기업 재직</span>
+                <span class="switch-desc">중기청 전세대출 대상 여부</span>
+              </span>
+              <input type="checkbox" id="isSMEEmployee" checked>
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </li>
+          <li>
+            <label class="switch" for="isNewlywed">
+              <span class="switch-copy">
+                <span class="switch-title">신혼부부 / 예비 신혼</span>
+                <span class="switch-desc">신혼 전용 상품 매칭</span>
+              </span>
+              <input type="checkbox" id="isNewlywed">
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="form-foot">
+        <button type="submit" class="btn btn-primary btn-block" id="btnAnalyze">
+          <span class="btn-label">주거비 진단 시작</span>
+          <svg class="btn-arrow" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+            <path d="M4 10h11M11 5.5 15.5 10 11 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <p class="form-note" id="formNote">4개 엔진이 순수 계산으로 판정합니다. 생성형 AI는 설명만 담당합니다.</p>
+      </div>
+    </form>
+  </aside>
+
+  <!-- ══════════════ RIGHT · RESULTS ══════════════ -->
+  <section class="col-results" aria-live="polite">
+
+    <!-- 0. 진단 전 온보딩 -->
+    <div id="onboarding">
+      <div class="hero">
+        <p class="hero-eyebrow">청년 주거 금융 의사결정 에이전트</p>
+        <h2 class="hero-title">“내가 지금 <em>얼마짜리 집</em>에<br>살아도 되는가?”</h2>
+        <p class="hero-body">
+          추천이 아니라 <strong>판정</strong>합니다. 감당 가능한 주거비 상한을 재무적으로 계산하고,
+          전세와 월세를 5년 총비용·현재가치로 비교한 뒤, 실제로 신청 가능한 제도까지 연결합니다.
+        </p>
+        <div class="hero-metrics">
+          <div><span class="hm-num" id="heroRegionCount">—</span><span class="hm-lbl">지역 시세 데이터</span></div>
+          <div><span class="hm-num">4</span><span class="hm-lbl">결정론적 판정 엔진</span></div>
+          <div><span class="hm-num">100%</span><span class="hm-lbl">근거 문장 동반</span></div>
+        </div>
+      </div>
+
+      <div class="engine-grid">
+        <article class="engine-card">
+          <span class="engine-no">E1</span>
+          <h3>주거지불능력</h3>
+          <p>가처분소득에서 생활비·부채·안전버퍼를 차감해 감당 가능한 월 주거비 상한과 권장액을 산출합니다.</p>
+        </article>
+        <article class="engine-card">
+          <span class="engine-no">E2</span>
+          <h3>정책 적격성 룰엔진</h3>
+          <p>나이·소득·자산·무주택·지역 조건을 제도별 규칙에 대입해 적격/조건부/부적격과 그 사유를 반환합니다.</p>
+        </article>
+        <article class="engine-card">
+          <span class="engine-no">E3</span>
+          <h3>전월세 총비용 비교</h3>
+          <p>대출이자·월세·관리비·보증금 기회비용을 합산해 5년 총비용과 현재가치(NPV)로 시나리오를 줄 세웁니다.</p>
+        </article>
+        <article class="engine-card">
+          <span class="engine-no">E4</span>
+          <h3>보증금 리스크 스캐너</h3>
+          <p>전세가율·보증보험 가입 가능 여부 등을 점수화해 보증금 미반환 위험도를 0~100으로 제시합니다.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- 1. 로딩 스켈레톤 -->
+    <div id="skeleton" hidden aria-hidden="true">
+      <div class="sk sk-hero"></div>
+      <div class="sk-row"><div class="sk sk-card"></div><div class="sk sk-card"></div></div>
+      <div class="sk sk-wide"></div>
+    </div>
+
+    <!-- 2. 결과 대시보드 -->
+    <div id="dashboard" hidden>
+
+      <!-- 2-1 종합 판정 -->
+      <section class="card card-verdict" id="cardVerdict">
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">STEP 02 · 종합 판정</p>
+            <h2 class="card-title">감당 가능한 주거비</h2>
+          </div>
+          <span class="chip chip-lg" id="bandChip"></span>
+        </header>
+
+        <div class="verdict-body">
+          <div class="verdict-figure">
+            <p class="fig-label">권장 월 주거비</p>
+            <p class="fig-hero" id="recAmount">—</p>
+            <p class="fig-sub">최대 상한 <strong id="maxAmount">—</strong> · 월세+관리비+대출이자 합산 기준</p>
+            <dl class="fig-stats">
+              <!-- F-1 (SPEC 5.2.1) — 여기 있던 <dt>슈바베지수</dt> 는 사라졌다.
+                   그 값은 권장액 ÷ 소득이었고 측정값이 아니라 상한 규칙의 되풀이였다.
+                   같은 비율이 필요하면 응답의 두 필드로 재현하되, 이름에 「규칙값」을 박는다. -->
+              <div><dt>권장액 소득비중 <small>규칙값</small></dt><dd id="recShare">—</dd></div>
+              <div><dt>월 실수령액</dt><dd id="netIncomeStat">—</dd></div>
+              <div><dt>가용 자산</dt><dd id="assetStat">—</dd></div>
+            </dl>
+          </div>
+          <figure class="verdict-schwabe">
+            <figcaption>
+              <b>슈바베지수 — 시나리오별 실측</b>
+              각 시나리오의 <b>실제 월 환산 주거비 ÷ 월 실수령액</b>입니다. 권장액이 아니라
+              그 안을 택했을 때 실제로 나가는 돈이며, <b>상한이 없습니다</b> — 주거비가 소득을
+              넘는 시나리오는 실재합니다. 소득이 0이면 이 비율은 정의되지 않아 0%가 아니라
+              「잴 수 없음」으로 표시합니다.
+            </figcaption>
+            <div id="schwabeSlot"></div>
+          </figure>
+        </div>
+
+        <div class="alloc">
+          <div class="alloc-head">
+            <h3>월 소득 배분 시뮬레이션</h3>
+            <span class="alloc-total" id="allocTotal"></span>
+          </div>
+          <div id="allocSlot"></div>
+          <ul class="legend-list" id="allocLegend"></ul>
+        </div>
+
+        <ul class="rationale" id="affordRationale"></ul>
+      </section>
+
+      <!-- 2-2 시나리오 -->
+      <section class="card" id="cardScenarios">
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">STEP 03 · 총비용 비교</p>
+            <h2 class="card-title">전세 vs 월세, 5년 뒤 누가 이기나</h2>
+            <p class="card-sub">보증금을 다른 곳에 넣었다면 벌었을 <strong>기회비용</strong>까지 포함한 실질 비용입니다.</p>
+          </div>
+        </header>
+
+        <div class="tco-compare">
+          <div class="tco-compare-head">
+            <h3>5년 총비용(TCO) 비교</h3>
+            <span class="hint">막대를 올려두면 상세 구성을 볼 수 있습니다</span>
+          </div>
+          <div id="tcoChartSlot"></div>
+          <ul class="legend-list" id="tcoLegend"></ul>
+        </div>
+
+        <div class="scenario-grid" id="scenarioGrid"></div>
+      </section>
+
+      <!-- 2-3 정책 -->
+      <section class="card" id="cardPolicies">
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">STEP 04 · 제도 매칭</p>
+            <h2 class="card-title">지금 신청 가능한 제도</h2>
+            <p class="card-sub">모든 판정에는 그렇게 판단한 <strong>사유</strong>가 붙습니다.</p>
+          </div>
+          <div class="filter-row" id="policyFilter" role="group" aria-label="정책 상태 필터">
+            <button type="button" class="pill is-on" data-filter="all">전체</button>
+            <button type="button" class="pill" data-filter="eligible">적격</button>
+            <button type="button" class="pill" data-filter="conditional">조건부</button>
+            <button type="button" class="pill" data-filter="ineligible">부적격</button>
+          </div>
+        </header>
+        <ul class="policy-list" id="policyList"></ul>
+      </section>
+
+      <!-- 2-4 리스크 -->
+      <section class="card" id="cardRisk">
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">STEP 05 · 보증금 안전성</p>
+            <h2 class="card-title">전세보증금 리스크 스캐너</h2>
+          </div>
+          <span class="chip chip-lg" id="riskChip"></span>
+        </header>
+        <div class="risk-body">
+          <div class="risk-meter">
+            <div id="riskMeterSlot"></div>
+            <p class="risk-score"><span id="riskScore">—</span><span class="risk-score-unit">/ 100</span></p>
+            <p class="risk-scope" id="riskScope"></p>
+          </div>
+          <ul class="factor-list" id="riskFactors"></ul>
+        </div>
+        <p class="risk-foot">점수는 개별 위험요인의 가중합입니다. 보증금 반환보증에 가입하면 시장 요인의 위험 기여도가 크게 낮아집니다.</p>
+      </section>
+
+      <!-- 2-5 데이터 등급 (SPEC 2.4 · D-13 · 10.2 6단계)
+           사유를 원인 유형별로 구분해 보인다 — stale(신선도) / unverified(검증) /
+           pending_review(승인 적체)는 대응 주체가 다르다. 한 글자로 뭉치면 그 구분이 사라진다. -->
+      <section class="card" id="cardGrade" hidden>
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">STEP 06 · 데이터 등급</p>
+            <h2 class="card-title">이 판정은 무엇을 근거로 했나</h2>
+            <p class="card-sub">거부하지 않고 <strong>등급을 붙입니다</strong>. 사유는 원인 유형별로 갈라 보여드립니다.</p>
+          </div>
+          <span class="chip chip-lg" id="gradeChip"></span>
+        </header>
+        <div id="gradeBody"></div>
+      </section>
+
+      <!-- 2-6 상담원 확장 (SPEC 6.1 · D-9) — **필드 유무로** 갈린다.
+           익명 응답에는 internal 키가 아예 없고, 그때 이 카드는 나오지 않는다.
+           버튼을 숨기는 것이 권한이 아니다 — 권한은 API 가 이미 막고 있다. -->
+      <section class="card card-internal" id="cardInternal" hidden>
+        <header class="card-head">
+          <div>
+            <p class="eyebrow">직원 전용 · 내부 정보</p>
+            <h2 class="card-title">규칙 버전 · 신선도 · 부적격 문턱</h2>
+            <p class="card-sub">고객에게 “연소득 때문에 안 됩니다”가 아니라 <strong>“문턱이 얼마인지”</strong>를 말하기 위한 값입니다.</p>
+          </div>
+          <button type="button" class="btn btn-ghost btn-xs" id="btnPrint">요약본 출력</button>
+        </header>
+        <div id="internalBody"></div>
+      </section>
+
+      <!-- 2-7 요약 -->
+      <section class="card card-summary" id="cardSummary">
+        <span class="summary-mark" aria-hidden="true">“</span>
+        <p id="summaryText"></p>
+        <p class="summary-meta" id="summaryMeta"></p>
+      </section>
+    </div>
+
+    <!-- 3. AI 상담 -->
+    <section class="card card-chat" id="cardChat">
+      <header class="card-head">
+        <div>
+          <p class="eyebrow">AI 상담</p>
+          <h2 class="card-title">숫자를 말로 물어보세요</h2>
+          <p class="card-sub">답변의 모든 숫자는 위 4개 엔진이 계산한 값입니다. 언어모델이 값을 지어내지 않습니다.</p>
+        </div>
+        <span class="chip chip-sm" id="chatModeChip">템플릿 모드</span>
+      </header>
+
+      <ol class="chat-log" id="chatLog"></ol>
+
+      <div class="chat-suggest" id="chatSuggest">
+        <button type="button" class="pill">전세랑 월세 중 뭐가 나아?</button>
+        <button type="button" class="pill">지금 소득으로 월세 얼마까지 괜찮아?</button>
+        <button type="button" class="pill">내가 받을 수 있는 대출 알려줘</button>
+        <button type="button" class="pill">전세 사기 위험은 어때?</button>
+      </div>
+
+      <form class="chat-input" id="chatForm">
+        <label class="sr-only" for="chatText">상담 질문 입력</label>
+        <input type="text" id="chatText" placeholder="예) 보증금 4천만원으로 마포구에서 가능한 선택지는?" autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-send" id="btnSend" aria-label="전송">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+            <path d="M3 10 17 3.5 12.5 17 10 11.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <p class="foot-disc">
+      <strong>데이터 고지</strong> — <strong>항목마다 다릅니다. 화면이 항목별로 표시합니다.</strong>
+      지역 시세의 전세 중위가·월세 보증금·월세·전세가율·전월세전환율 5개는
+      <strong>국토교통부 아파트 실거래가에서 수집한 실측값</strong>이고,
+      관리비·시장 위험도·보증 가능 여부 3개는 실거래가에 대응물이 없어
+      <strong>출처를 특정하지 못한 값</strong>입니다. 정책·상품 조건과 금리는
+      <strong>아직 출처를 특정하지 못한 시드값</strong>이며, 규칙 관리 화면에서 승인을 거친
+      규칙만 공고 원문에서 추출한 값으로 바뀝니다. 판정 모델의 임계·가중치 상당수는
+      <strong>우리가 정한 규범적 선택</strong>이고, 그 사실이 항목별 계보에 그대로 적혀 있습니다.
+      실제 조건은 취급 금융기관 및 소관 기관의 고시 기준을 따릅니다.
+      본 서비스는 금융상품 판매·중개·투자자문이 아니며, 제시된 판정은 참고 정보입니다.
+    </p>
+    <!-- ★ 팀 표기는 `Paddle` 이다. 여기만 `첫집나침반` 으로 남아 있었다 —
+         SPEC 11행 · 발표 덱 표지 · 참가신청서(fill_application.py 의 TEAM_NAME) ·
+         예선 체크리스트의 「표지 팀명 첫집나침반 → Paddle」 결정이 전부 Paddle 이다.
+         SPEC 9.4 가 기록한 예선의 유일한 계약 사고가 **팀명 변경 통지가 한쪽에만 간 것**
+         이었고, 그 잔여물이 심사위원이 보는 화면에 남아 있었다.
+         서비스명(「KB 첫집 나침반」)과 과제명은 그대로 둔다 — 바꾼 것은 팀 표기뿐이다. -->
+    <p class="foot-meta">
+      제8회 KB Future Finance AI Challenge 제출 프로토타입 · 팀 <strong>Paddle</strong>
+      <span class="foot-sep">·</span> KB국민은행과 무관한 학습용 결과물이며 로고·상표를 사용하지 않았습니다.
+    </p>
+  </div>
+</footer>
+
+<div class="viz-tip" id="vizTip" role="tooltip" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<!-- ══════════════ 이상 신고 (SPEC 6.4 · 7.1) ══════════════
+     ★ **대상을 자유 텍스트로 받지 않는다.** 아래 「항목」은 입력칸이 아니라 목록이고,
+       그 목록은 화면이 방금 그린 응답에서 만들어진다 — 상담원은 **본 것만** 신고한다.
+     ★ 자유 입력은 사유 하나뿐이다. 그 칸에 고객 상황이 섞이는 것을 기계로 막을 수
+       없으므로 문구로 적는다. 문구는 규율이지 구조가 아니며, 그 사실을 숨기지 않는다.
+     ★ 「닫기(처리 완료)」 버튼이 없다. SPEC 6.4 는 신고를 받은 뒤 규칙관리자가 수동으로
+       입력하거나 재추출을 지시한다고만 적었고 닫는 동작을 배정하지 않았다.
+       없는 기능을 있는 것처럼 그리지 않는다. -->
+<div class="report-modal" id="reportModal" role="dialog" aria-modal="true"
+     aria-labelledby="reportTitle" hidden>
+  <form class="report-panel" id="reportForm" novalidate>
+    <h2 class="report-title" id="reportTitle">이상 신고</h2>
+    <p class="report-target" id="reportTarget">—</p>
+
+    <label class="report-label" for="reportField">어느 항목이 잘못됐습니까</label>
+    <select id="reportField" class="report-select"></select>
+
+    <label class="report-label" for="reportReason">무엇이 어떻게 다릅니까</label>
+    <textarea id="reportReason" class="report-reason" rows="4" maxlength="2000"
+              placeholder="예) 이 제도는 2026-07 공고로 종료됐다고 기관에서 안내받았습니다."></textarea>
+
+    <p class="report-privacy" id="reportPrivacy"></p>
+
+    <div class="report-actions">
+      <button type="button" class="btn btn-ghost btn-xs" id="reportCancel">취소</button>
+      <button type="submit" class="btn btn-primary btn-xs" id="reportSubmit">신고 올리기</button>
+    </div>
+    <p class="report-note" id="reportNote" role="status"></p>
+  </form>
+</div>
+
+<!-- 생성물 4종 (SPEC D-11 · 계약 결정 #34). 손으로 고치지 않는다 —
+     `python scripts/gen_contracts.py` 가 낸다. 빌드툴·CDN 없이 <script src> 로 읽힌다.
+     ★ 파일이 없으면 전역이 undefined 다. `|| {}` 로 메우지 않는다 —
+       로컬 판정 경로가 꺼지고 화면이 그 사실을 적는다. -->
+<script src="generated/contract_constants.js"></script>
+<script src="generated/model_constants.js"></script>
+<script src="generated/policy_rules.js"></script>
+<script src="generated/regions.js"></script>
+<!-- 포맷 1개(SPEC 9.1.1) → 로컬 판정 경로(D-11) → 화면. 이 순서여야 한다. -->
+<script src="format.js"></script>
+<script src="local_engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

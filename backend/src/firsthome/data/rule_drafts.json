@@ -1,0 +1,713 @@
+{
+  "_disclaimer": "시연 대기 큐의 추출 초안을 **실제 LLM 호출 결과 그대로** 굳힌 것이다 (계약 결정 #42, #40 의 연장). 손으로 고친 값은 한 건도 없다 — 통과한 초안도 실패한 초안도 그 배치가 낸 그대로다. SPEC 9.2.1 표 마지막 줄이 키 없이 도는 후반부의 입력으로 이름 붙인 「draft 픽스처」가 이것이다.",
+  "_lineage": "**어떤 모델로 · 언제 · 어떤 원문에서** 추출했는지가 이 파일의 존재 이유다. 직전 시연이 쓰던 rehearsal-baseline.db 는 유실된 세션이 만든 파일이라 그 셋을 아무도 몰랐다 (REHEARSAL.md Part 5-⑤). 계보가 이 제품의 논지인데 시연의 중심 산출물이 계보 불명이었다.",
+  "_timestamps": "createdAt · extraction.startedAt · fetchedAt 은 전부 **실제 시각**이다. 시연일과 벌어지는 것이 정상이고 계보가 그것을 드러내는 것이 설계다 (결정 #40).",
+  "_text": "원문 텍스트를 여기 복사하지 않는다. 정본은 data/policy_sources/*.txt 하나뿐이고 (ingest/sources.py) 여기는 sha256Nfc 로 **그 파일이 그 파일인지**만 붙든다. 복사본을 두면 span 오프셋이 어느 텍스트 기준인지가 둘로 갈린다.",
+  "_regeneration": "다시 굳히려면 네트워크와 OPENAI_API_KEY 가 있는 상태에서 python backend/tests/store/refreeze_rule_drafts.py 를 돌린다. 그 스크립트는 ingest 의 적재·추출 경로를 **그대로** 부르고 결과를 이 파일로 쓴다.",
+  "extractionRun": {
+    "provider": "openai",
+    "modelRequested": "gpt-5.4-mini",
+    "modelReported": "gpt-5.4-mini-2026-03-17",
+    "startedAt": "2026-08-16T01:17:26.396156+09:00",
+    "finishedAt": "2026-08-16T01:18:40.347976+09:00",
+    "maxAttempts": 2,
+    "ruleDraftSchemaSha256": "70fe1c639ed92e4147a5ba8665b7ac862ff5d68e524a7f02dcb9d37b9ccf6f9b",
+    "pending": 3,
+    "extractionFailed": 4,
+    "_repeatedRuns": "배치를 여러 번 돌려 실패가 주사위인지 계통적인지 쟀다. **굳힌 것은 첫 회차**이며 「원하는 결과가 나온 회차」를 고르지 않았다. 아래 byPolicy 가 회차별 결과다.",
+    "repeatedRuns": [
+      {
+        "startedAt": "2026-08-16T01:17:26.396156+09:00",
+        "pending": 3,
+        "extractionFailed": 4,
+        "frozen": true,
+        "byPolicy": {
+          "buttress_youth": "extraction_failed",
+          "youth_monthly_loan": "extraction_failed",
+          "newlywed_jeonse": "pending",
+          "seoul_youth_rent": "pending",
+          "seoul_deposit_interest": "extraction_failed",
+          "housing_dream_savings": "extraction_failed",
+          "hug_deposit_guarantee": "pending"
+        }
+      },
+      {
+        "startedAt": "2026-08-16T01:19:33.771967+09:00",
+        "pending": 3,
+        "extractionFailed": 4,
+        "frozen": false,
+        "byPolicy": {
+          "buttress_youth": "extraction_failed",
+          "youth_monthly_loan": "pending",
+          "newlywed_jeonse": "pending",
+          "seoul_youth_rent": "extraction_failed",
+          "seoul_deposit_interest": "extraction_failed",
+          "housing_dream_savings": "extraction_failed",
+          "hug_deposit_guarantee": "pending"
+        }
+      },
+      {
+        "startedAt": "2026-08-16T01:20:35.815206+09:00",
+        "pending": 5,
+        "extractionFailed": 2,
+        "frozen": false,
+        "byPolicy": {
+          "buttress_youth": "extraction_failed",
+          "youth_monthly_loan": "pending",
+          "newlywed_jeonse": "pending",
+          "seoul_youth_rent": "pending",
+          "seoul_deposit_interest": "extraction_failed",
+          "housing_dream_savings": "pending",
+          "hug_deposit_guarantee": "pending"
+        }
+      }
+    ]
+  },
+  "policySources": [
+    {
+      "id": "src-buttress_youth",
+      "policyId": "buttress_youth",
+      "textFile": "data/policy_sources/buttress_youth.txt",
+      "sourceRef": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp",
+      "attribution": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년전용 버팀목전세자금 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 7763,
+      "sha256Nfc": "ee79f8e4f4ce313d5181fd72208738a8999d74041141d111374a705e8053f44d"
+    },
+    {
+      "id": "src-youth_monthly_loan",
+      "policyId": "youth_monthly_loan",
+      "textFile": "data/policy_sources/youth_monthly_loan.txt",
+      "sourceRef": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020701.jsp",
+      "attribution": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년전용 보증부월세대출 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 5344,
+      "sha256Nfc": "573b2d386d66108adfff8fa35618b05b80334d434f02b2310ebd62dcf514962b"
+    },
+    {
+      "id": "src-newlywed_jeonse",
+      "policyId": "newlywed_jeonse",
+      "textFile": "data/policy_sources/newlywed_jeonse.txt",
+      "sourceRef": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020401.jsp",
+      "attribution": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「신혼부부전용 전세자금 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 7487,
+      "sha256Nfc": "39e8f64d8a34881c33cbeb1db1658db5a2c3ff7f335abf235d856afaf629f76b"
+    },
+    {
+      "id": "src-seoul_youth_rent",
+      "policyId": "seoul_youth_rent",
+      "textFile": "data/policy_sources/seoul_youth_rent.txt",
+      "sourceRef": "https://www.seoul.go.kr/news/news_notice.do?bbsNo=277&nttNo=457234",
+      "attribution": "서울특별시 주택정책과 「2026년 서울시 청년월세지원 모집 공고」 (서울특별시 공고 제2026-1440호) · 공공누리 제4유형(출처표시+상업적이용금지+변경금지)",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 12248,
+      "sha256Nfc": "fbb7b3940e49411f98c0bfe9393828d2c7ec8210aecc81739afa1aef26d3be95"
+    },
+    {
+      "id": "src-seoul_deposit_interest",
+      "policyId": "seoul_deposit_interest",
+      "textFile": "data/policy_sources/seoul_deposit_interest.txt",
+      "sourceRef": "https://www.seoul.go.kr/news/news_notice.do?bbsNo=277&nttNo=458161",
+      "attribution": "서울특별시 주택정책과 「청년 임차보증금 이자지원사업 변경계획 공고(2026.6.5.개정시행)」 (서울특별시공고 제2026–1552호) · 공공누리 제4유형(출처표시+상업적이용금지+변경금지)",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 8093,
+      "sha256Nfc": "251e97ec76b43145bbc823ed677777a7122c6f4a7fc00926ea755f5d9b505036"
+    },
+    {
+      "id": "src-housing_dream_savings",
+      "policyId": "housing_dream_savings",
+      "textFile": "data/policy_sources/housing_dream_savings.txt",
+      "sourceRef": "https://nhuf.molit.go.kr/FP/FP07/FP0701/FP07010301.jsp",
+      "attribution": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년 주택드림 청약통장 상품 > 상품안내」 (상품안내) · 저작권법 제24조의2",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 4791,
+      "sha256Nfc": "c2a5d4ba7d0c9a8f6db57b052d18471f2be11aeb0e4e36b801b7342de1899353"
+    },
+    {
+      "id": "src-hug_deposit_guarantee",
+      "policyId": "hug_deposit_guarantee",
+      "textFile": "data/policy_sources/hug_deposit_guarantee.txt",
+      "sourceRef": "https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp",
+      "attribution": "주택도시보증공사(HUG) 「전세보증금반환보증 > 상품개요」 (상품안내) · 저작권법 제24조의2",
+      "fetchedAt": "2026-08-14T00:52:00+09:00",
+      "codepoints": 8341,
+      "sha256Nfc": "2329d75b6f7f3232efd6067e9f909b0266797cf95753a19ba0c6a6be0abe085a"
+    }
+  ],
+  "drafts": [
+    {
+      "id": "draft-000001-buttress_youth",
+      "policySourceId": "src-buttress_youth",
+      "policyId": "buttress_youth",
+      "status": "extraction_failed",
+      "payload": {},
+      "createdAt": "2026-08-16T01:17:26.760474+09:00",
+      "failureReason": "span_not_in_text: /conditionalChecks/10: 인용이 원문에 없다 '대출 신청 금액이 대출심사를 통해 산정한 금액의 30% 이하인 경우 연 0.2%p'",
+      "spans": [],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:17:26.760474+09:00",
+        "finishedAt": "2026-08-16T01:17:42.526138+09:00",
+        "attempts": 2,
+        "latencySeconds": 13.722,
+        "usage": {
+          "prompt_tokens": 16737,
+          "completion_tokens": 2405,
+          "total_tokens": 19142
+        },
+        "attemptCodes": [
+          [
+            "span_not_in_text"
+          ],
+          [
+            "span_not_in_text"
+          ]
+        ],
+        "codes": [
+          "span_not_in_text"
+        ],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년전용 버팀목전세자금 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+        "source_ref": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000002-youth_monthly_loan",
+      "policySourceId": "src-youth_monthly_loan",
+      "policyId": "youth_monthly_loan",
+      "status": "extraction_failed",
+      "payload": {},
+      "createdAt": "2026-08-16T01:17:42.526653+09:00",
+      "failureReason": "span_unexpected_field: /policy_id 는 근거를 요구하는 필드가 아니다",
+      "spans": [],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:17:42.526653+09:00",
+        "finishedAt": "2026-08-16T01:17:52.430526+09:00",
+        "attempts": 2,
+        "latencySeconds": 9.282,
+        "usage": {
+          "prompt_tokens": 13088,
+          "completion_tokens": 1844,
+          "total_tokens": 14932
+        },
+        "attemptCodes": [
+          [
+            "span_missing"
+          ],
+          [
+            "span_unexpected_field"
+          ]
+        ],
+        "codes": [
+          "span_unexpected_field"
+        ],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년전용 보증부월세대출 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+        "source_ref": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020701.jsp",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000003-newlywed_jeonse",
+      "policySourceId": "src-newlywed_jeonse",
+      "policyId": "newlywed_jeonse",
+      "status": "pending",
+      "payload": {
+        "policy_id": "newlywed_jeonse",
+        "criteria": {
+          "ageMin": null,
+          "ageMax": null,
+          "annualIncomeMaxKRW": 75000000,
+          "assetMaxKRW": 345000000,
+          "regionPrefixes": null,
+          "requireHomeless": true,
+          "requireNewlywed": true,
+          "requireSME": null
+        },
+        "maxAmountKRW": 250000000,
+        "rateRangePct": [
+          1.9,
+          3.3
+        ],
+        "conditionalChecks": [
+          "임차보증금의 80% 이내",
+          "자산심사 부적격자의 경우 가산금리가 부과",
+          "최종 우대금리의 적용은 수탁은행의 서류 심사 결과에 따라 결정되오니, 수탁은행 상담 필요"
+        ],
+        "not_found": [
+          "/criteria/ageMin",
+          "/criteria/ageMax",
+          "/criteria/regionPrefixes",
+          "/criteria/requireSME"
+        ]
+      },
+      "createdAt": "2026-08-16T01:17:52.430899+09:00",
+      "failureReason": null,
+      "spans": [
+        {
+          "id": "draft-000003-newlywed_jeonse-span-01",
+          "fieldPath": "/criteria/annualIncomeMaxKRW",
+          "start": 543,
+          "end": 562,
+          "quote": "부부합산 연소득 7.5천만원 이하,"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-02",
+          "fieldPath": "/criteria/assetMaxKRW",
+          "start": 563,
+          "end": 578,
+          "quote": "순자산가액 3.45억원 이하"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-03",
+          "fieldPath": "/criteria/requireHomeless",
+          "start": 579,
+          "end": 586,
+          "quote": "무주택 세대주"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-04",
+          "fieldPath": "/criteria/requireNewlywed",
+          "start": 587,
+          "end": 619,
+          "quote": "신혼부부(혼인기간 7년 이내 또는 3개월 이내 결혼예정자)"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-05",
+          "fieldPath": "/maxAmountKRW",
+          "start": 646,
+          "end": 655,
+          "quote": "수도권 2.5억원"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-06",
+          "fieldPath": "/rateRangePct",
+          "start": 625,
+          "end": 640,
+          "quote": "연 1.9% ∼ 연 3.3%"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-07",
+          "fieldPath": "/conditionalChecks/0",
+          "start": 671,
+          "end": 686,
+          "quote": "(임차보증금의 80% 이내)"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-08",
+          "fieldPath": "/conditionalChecks/1",
+          "start": 4786,
+          "end": 4810,
+          "quote": "※ 자산심사 부적격자의 경우 가산금리가 부과"
+        },
+        {
+          "id": "draft-000003-newlywed_jeonse-span-09",
+          "fieldPath": "/conditionalChecks/2",
+          "start": 4876,
+          "end": 4927,
+          "quote": "※ 최종 우대금리의 적용은 수탁은행의 서류 심사 결과에 따라 결정되오니, 수탁은행 상담 필요"
+        }
+      ],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:17:52.430899+09:00",
+        "finishedAt": "2026-08-16T01:17:56.286417+09:00",
+        "attempts": 1,
+        "latencySeconds": 3.558,
+        "usage": {
+          "prompt_tokens": 8048,
+          "completion_tokens": 587,
+          "total_tokens": 8635
+        },
+        "attemptCodes": [
+          []
+        ],
+        "codes": [],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「신혼부부전용 전세자금 > 대출안내」 (상품안내) · 저작권법 제24조의2",
+        "source_ref": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020401.jsp",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000004-seoul_youth_rent",
+      "policySourceId": "src-seoul_youth_rent",
+      "policyId": "seoul_youth_rent",
+      "status": "pending",
+      "payload": {
+        "policy_id": "seoul_youth_rent",
+        "criteria": {
+          "ageMin": 19,
+          "ageMax": 39,
+          "annualIncomeMaxKRW": null,
+          "assetMaxKRW": 130000000,
+          "regionPrefixes": null,
+          "requireHomeless": null,
+          "requireNewlywed": null,
+          "requireSME": null
+        },
+        "maxAmountKRW": 2000000,
+        "rateRangePct": null,
+        "conditionalChecks": [
+          "서류·자격 심사 ‘적격자’ 대상",
+          "지원 구간별 전산 추첨"
+        ],
+        "not_found": [
+          "/criteria/annualIncomeMaxKRW",
+          "/criteria/requireHomeless",
+          "/criteria/requireNewlywed",
+          "/criteria/requireSME",
+          "/rateRangePct"
+        ]
+      },
+      "createdAt": "2026-08-16T01:17:56.288793+09:00",
+      "failureReason": null,
+      "spans": [
+        {
+          "id": "draft-000004-seoul_youth_rent-span-01",
+          "fieldPath": "/criteria/ageMin",
+          "start": 248,
+          "end": 261,
+          "quote": "19세~39세 이하 청년"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-02",
+          "fieldPath": "/criteria/ageMax",
+          "start": 248,
+          "end": 261,
+          "quote": "19세~39세 이하 청년"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-03",
+          "fieldPath": "/criteria/assetMaxKRW",
+          "start": 4929,
+          "end": 4953,
+          "quote": "일반재산 총액 1억 3천만원을 초과하는 사람"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-04",
+          "fieldPath": "/criteria/regionPrefixes",
+          "start": 2124,
+          "end": 2149,
+          "quote": "서울에 주민등록이 되어있고 실제 거주하는 청년"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-05",
+          "fieldPath": "/maxAmountKRW",
+          "start": 801,
+          "end": 840,
+          "quote": "지원금액 : 월 최대 20만원(최대 12개월/240만원) ※ 생애 1회"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-06",
+          "fieldPath": "/conditionalChecks/0",
+          "start": 1273,
+          "end": 1304,
+          "quote": "서류·자격 심사 ‘적격자’ 대상, 지원 구간별 전산 추첨"
+        },
+        {
+          "id": "draft-000004-seoul_youth_rent-span-07",
+          "fieldPath": "/conditionalChecks/1",
+          "start": 1273,
+          "end": 1304,
+          "quote": "서류·자격 심사 ‘적격자’ 대상, 지원 구간별 전산 추첨"
+        }
+      ],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:17:56.288793+09:00",
+        "finishedAt": "2026-08-16T01:18:11.307961+09:00",
+        "attempts": 2,
+        "latencySeconds": 14.243,
+        "usage": {
+          "prompt_tokens": 21452,
+          "completion_tokens": 2615,
+          "total_tokens": 24067
+        },
+        "attemptCodes": [
+          [
+            "not_found_value_present"
+          ],
+          []
+        ],
+        "codes": [],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "서울특별시 주택정책과 「2026년 서울시 청년월세지원 모집 공고」 (서울특별시 공고 제2026-1440호) · 공공누리 제4유형(출처표시+상업적이용금지+변경금지)",
+        "source_ref": "https://www.seoul.go.kr/news/news_notice.do?bbsNo=277&nttNo=457234",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000005-seoul_deposit_interest",
+      "policySourceId": "src-seoul_deposit_interest",
+      "policyId": "seoul_deposit_interest",
+      "status": "extraction_failed",
+      "payload": {},
+      "createdAt": "2026-08-16T01:18:11.310489+09:00",
+      "failureReason": "span_not_in_text: /conditionalChecks/1: 인용이 원문에 없다 '※ 대출 신청 서류'",
+      "spans": [],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:18:11.310489+09:00",
+        "finishedAt": "2026-08-16T01:18:22.518499+09:00",
+        "attempts": 2,
+        "latencySeconds": 10.571,
+        "usage": {
+          "prompt_tokens": 16208,
+          "completion_tokens": 2095,
+          "total_tokens": 18303
+        },
+        "attemptCodes": [
+          [
+            "span_not_in_text"
+          ],
+          [
+            "span_not_in_text"
+          ]
+        ],
+        "codes": [
+          "span_not_in_text"
+        ],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "서울특별시 주택정책과 「청년 임차보증금 이자지원사업 변경계획 공고(2026.6.5.개정시행)」 (서울특별시공고 제2026–1552호) · 공공누리 제4유형(출처표시+상업적이용금지+변경금지)",
+        "source_ref": "https://www.seoul.go.kr/news/news_notice.do?bbsNo=277&nttNo=458161",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000006-housing_dream_savings",
+      "policySourceId": "src-housing_dream_savings",
+      "policyId": "housing_dream_savings",
+      "status": "extraction_failed",
+      "payload": {},
+      "createdAt": "2026-08-16T01:18:22.519014+09:00",
+      "failureReason": "span_not_in_text: /conditionalChecks/6: 인용이 원문에 없다 '2028년 12월 31일까지 청년 주택드림 청약통장에 가입하고 청년 주택드림 청약통장 가입 당시, 다음의 요건을 갖추어야 합니다.' / span_missing: /criteria/regionPrefixes 에 근거 구간이 없다",
+      "spans": [],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:18:22.519014+09:00",
+        "finishedAt": "2026-08-16T01:18:35.042317+09:00",
+        "attempts": 2,
+        "latencySeconds": 11.835,
+        "usage": {
+          "prompt_tokens": 12078,
+          "completion_tokens": 2330,
+          "total_tokens": 14408
+        },
+        "attemptCodes": [
+          [
+            "span_missing"
+          ],
+          [
+            "span_not_in_text",
+            "span_missing"
+          ]
+        ],
+        "codes": [
+          "span_not_in_text",
+          "span_missing"
+        ],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "국토교통부 주택도시기금 (포털 운영: 주택도시보증공사) 「청년 주택드림 청약통장 상품 > 상품안내」 (상품안내) · 저작권법 제24조의2",
+        "source_ref": "https://nhuf.molit.go.kr/FP/FP07/FP0701/FP07010301.jsp",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    },
+    {
+      "id": "draft-000007-hug_deposit_guarantee",
+      "policySourceId": "src-hug_deposit_guarantee",
+      "policyId": "hug_deposit_guarantee",
+      "status": "pending",
+      "payload": {
+        "policy_id": "hug_deposit_guarantee",
+        "criteria": {
+          "ageMin": 19,
+          "ageMax": null,
+          "annualIncomeMaxKRW": 50000000,
+          "assetMaxKRW": null,
+          "regionPrefixes": null,
+          "requireHomeless": null,
+          "requireNewlywed": null,
+          "requireSME": null
+        },
+        "maxAmountKRW": 700000000,
+        "rateRangePct": [
+          0.097,
+          0.211
+        ],
+        "conditionalChecks": [
+          "신청하려는 주택에 거주하면서 전입신고와 확정일자를 받았을 것",
+          "전세계약기간이 1년 이상일 것",
+          "공인중개사를 통해 체결(날인)한 전세계약서일 것",
+          "전세보증금(월세가 있는 경우 전월세전환율 적용 전세보증금)이 수도권 7억 이하, 그 외 지역 5억원 이하 일 것",
+          "전세보증금반환채권의 담보 및 양도를 금지하는 특약이 없을 것",
+          "건축물대장상 위반건축물로 기재되어 있지 않을 것(아파트 제외)",
+          "전세권이 설정된 경우 말소 또는 공사로 전세권을 이전할 것",
+          "질권설정 또는 채권양도 통지된 전세대출을 받지 않았을 것",
+          "임대인이 공사의 보증금지대상자가 아닐 것"
+        ],
+        "not_found": [
+          "/criteria/ageMax",
+          "/criteria/assetMaxKRW",
+          "/criteria/regionPrefixes",
+          "/criteria/requireHomeless",
+          "/criteria/requireNewlywed",
+          "/criteria/requireSME"
+        ]
+      },
+      "createdAt": "2026-08-16T01:18:35.042760+09:00",
+      "failureReason": null,
+      "spans": [
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-01",
+          "fieldPath": "/criteria/ageMin",
+          "start": 7781,
+          "end": 7823,
+          "quote": "전세금안심대출보증\n\n전세보증금의 5% 이상을 지급한 만 19세 이상의 임차인"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-02",
+          "fieldPath": "/criteria/annualIncomeMaxKRW",
+          "start": 6104,
+          "end": 6134,
+          "quote": "보증신청인(배우자포함)의 연소득이 5천만원 이하인 경우"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-03",
+          "fieldPath": "/maxAmountKRW",
+          "start": 336,
+          "end": 356,
+          "quote": "수도권 7억원 그외 지역 5억원 이하"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-04",
+          "fieldPath": "/rateRangePct",
+          "start": 5476,
+          "end": 5484,
+          "quote": "연 0.097%"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-05",
+          "fieldPath": "/conditionalChecks/0",
+          "start": 1729,
+          "end": 1762,
+          "quote": "신청하려는 주택에 거주하면서 전입신고와 확정일자를 받았을 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-06",
+          "fieldPath": "/conditionalChecks/1",
+          "start": 2339,
+          "end": 2355,
+          "quote": "전세계약기간이 1년 이상일 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-07",
+          "fieldPath": "/conditionalChecks/2",
+          "start": 2358,
+          "end": 2384,
+          "quote": "공인중개사를 통해 체결(날인)한 전세계약서일 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-08",
+          "fieldPath": "/conditionalChecks/3",
+          "start": 2466,
+          "end": 2528,
+          "quote": "전세보증금(월세가 있는 경우 전월세전환율 적용 전세보증금)이 수도권 7억 이하, 그 외 지역 5억원 이하 일 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-09",
+          "fieldPath": "/conditionalChecks/4",
+          "start": 2611,
+          "end": 2644,
+          "quote": "전세보증금반환채권의 담보 및 양도를 금지하는 특약이 없을 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-10",
+          "fieldPath": "/conditionalChecks/5",
+          "start": 2660,
+          "end": 2694,
+          "quote": "건축물대장상 위반건축물로 기재되어 있지 않을 것(아파트 제외)"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-11",
+          "fieldPath": "/conditionalChecks/6",
+          "start": 2867,
+          "end": 2899,
+          "quote": "전세권이 설정된 경우 말소 또는 공사로 전세권을 이전할 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-12",
+          "fieldPath": "/conditionalChecks/7",
+          "start": 2940,
+          "end": 2971,
+          "quote": "질권설정 또는 채권양도 통지된 전세대출을 받지 않았을 것"
+        },
+        {
+          "id": "draft-000007-hug_deposit_guarantee-span-13",
+          "fieldPath": "/conditionalChecks/8",
+          "start": 3060,
+          "end": 3082,
+          "quote": "임대인이 공사의 보증금지대상자가 아닐 것"
+        }
+      ],
+      "extraction": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "startedAt": "2026-08-16T01:18:35.042760+09:00",
+        "finishedAt": "2026-08-16T01:18:40.345339+09:00",
+        "attempts": 1,
+        "latencySeconds": 4.958,
+        "usage": {
+          "prompt_tokens": 8348,
+          "completion_tokens": 980,
+          "total_tokens": 9328
+        },
+        "attemptCodes": [
+          []
+        ],
+        "codes": [],
+        "ambiguousSpans": 0
+      },
+      "provenance": {
+        "source_kind": "statute",
+        "source_name": "주택도시보증공사(HUG) 「전세보증금반환보증 > 상품개요」 (상품안내) · 저작권법 제24조의2",
+        "source_ref": "https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp",
+        "observed_at": null,
+        "fetched_at": "2026-08-14T00:52:00+09:00",
+        "verification": "unverified"
+      }
+    }
+  ]
+}

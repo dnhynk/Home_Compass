@@ -1,0 +1,182 @@
+{
+  "_disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.",
+  "policies": [
+    {
+      "id": "buttress_youth",
+      "name": "청년전용 버팀목전세자금대출",
+      "category": "대출",
+      "summary": "무주택 청년의 전세보증금을 저리로 지원하는 주택도시기금 대출",
+      "maxAmountKRW": 200000000,
+      "rateRangePct": [1.5, 2.9],
+      "source": "주택도시기금",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 34,
+        "annualIncomeMaxKRW": 50000000,
+        "assetMaxKRW": 337000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": [],
+      "notes": [
+        "세대주(예비 세대주 포함) 요건 및 임차 전용면적·보증금 한도는 취급 은행에서 최종 확인이 필요합니다."
+      ]
+    },
+    {
+      "id": "youth_monthly_loan",
+      "name": "청년전용 보증부월세대출",
+      "category": "대출",
+      "summary": "보증금과 월세를 함께 지원하는 청년 전용 주택도시기금 대출",
+      "maxAmountKRW": 45000000,
+      "rateRangePct": [1.0, 1.3],
+      "source": "주택도시기금",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 34,
+        "annualIncomeMaxKRW": 50000000,
+        "assetMaxKRW": 337000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": []
+    },
+    {
+      "id": "newlywed_jeonse",
+      "name": "신혼부부 전용 전세자금대출",
+      "category": "대출",
+      "summary": "혼인 기간 요건을 충족하는 신혼부부 대상 전세자금 대출",
+      "maxAmountKRW": 300000000,
+      "rateRangePct": [1.5, 2.7],
+      "source": "주택도시기금",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 200,
+        "annualIncomeMaxKRW": 75000000,
+        "assetMaxKRW": 337000000,
+        "requireHomeless": true,
+        "requireNewlywed": true,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": []
+    },
+    {
+      "id": "youth_rent_support",
+      "name": "청년월세 한시 특별지원",
+      "category": "지원금",
+      "summary": "저소득 무주택 청년에게 월세 일부를 현금으로 지원하는 제도",
+      "maxAmountKRW": 4800000,
+      "rateRangePct": [0.0, 0.0],
+      "source": "국토교통부",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 관할 지자체 공고 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 34,
+        "annualIncomeMaxKRW": 30000000,
+        "assetMaxKRW": 122000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": [
+        "원가구(부모) 소득·자산 요건이 별도로 적용될 수 있습니다."
+      ]
+    },
+    {
+      "id": "seoul_youth_rent",
+      "name": "서울시 청년월세지원",
+      "category": "지원금",
+      "summary": "서울 거주 청년 1인가구에 월세를 한시적으로 지원",
+      "maxAmountKRW": 2400000,
+      "rateRangePct": [0.0, 0.0],
+      "source": "서울특별시",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 관할 지자체 공고 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 39,
+        "annualIncomeMaxKRW": 30000000,
+        "assetMaxKRW": 122000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": ["11"]
+      },
+      "conditionalChecks": [
+        "지자체 예산 소진 시 조기 마감될 수 있으며, 모집 공고 기간에만 신청할 수 있습니다."
+      ]
+    },
+    {
+      "id": "seoul_deposit_interest",
+      "name": "서울시 청년 임차보증금 이자지원",
+      "category": "이자지원",
+      "summary": "서울 거주 청년의 임차보증금 대출 이자 일부를 서울시가 지원",
+      "maxAmountKRW": 200000000,
+      "rateRangePct": [0.0, 2.0],
+      "source": "서울특별시",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 협약 금융기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 39,
+        "annualIncomeMaxKRW": 47000000,
+        "assetMaxKRW": 337000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": ["11"]
+      },
+      "conditionalChecks": []
+    },
+    {
+      "id": "housing_dream_savings",
+      "name": "청년 주택드림 청약통장",
+      "category": "저축",
+      "summary": "청약 기능과 우대금리를 결합한 청년 전용 주택청약 저축",
+      "maxAmountKRW": 50000000,
+      "rateRangePct": [2.0, 4.5],
+      "source": "주택도시기금",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 34,
+        "annualIncomeMaxKRW": 50000000,
+        "assetMaxKRW": 1000000000,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": []
+    },
+    {
+      "id": "hug_deposit_guarantee",
+      "name": "전세보증금반환보증",
+      "category": "보증",
+      "summary": "임대인이 보증금을 돌려주지 못할 때 보증기관이 대신 지급하는 보증 상품",
+      "maxAmountKRW": 700000000,
+      "rateRangePct": [0.1, 0.2],
+      "source": "주택도시보증공사(HUG)",
+      "disclaimer": "프로토타입 시연용 예시 수치입니다. 실제 조건은 보증기관 고시 기준을 따릅니다.",
+      "criteria": {
+        "ageMin": 0,
+        "ageMax": 200,
+        "annualIncomeMaxKRW": 1000000000,
+        "assetMaxKRW": 10000000000,
+        "requireHomeless": false,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": []
+      },
+      "conditionalChecks": [
+        "주택 유형·전세가율·선순위 채권 규모에 따라 보증 가입이 제한될 수 있습니다."
+      ]
+    }
+  ]
+}

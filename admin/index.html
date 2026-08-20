@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>규칙 검토·승인 · KB 첫집 나침반</title>
+<meta name="description" content="추출된 정책 규칙을 원문 근거와 대조하고, 승인 시 판정이 어떻게 바뀌는지 회귀 사례로 확인한 뒤 승인·반려하는 규칙관리자 화면.">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231C1A17'/%3E%3Cpath d='M16 6 20 16 16 26 12 16Z' fill='%23FFB800'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+
+<!-- ══════════════ TOP BAR ══════════════ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34">
+          <circle cx="20" cy="20" r="19" fill="#1C1A17"/>
+          <circle cx="20" cy="20" r="13.5" fill="none" stroke="#4A423A" stroke-width="1"/>
+          <path d="M20 6.5 24.4 20 20 33.5 15.6 20Z" fill="#FFB800"/>
+          <path d="M15.6 20 24.4 20 20 33.5Z" fill="#8A6200"/>
+          <circle cx="20" cy="20" r="2.2" fill="#1C1A17"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>KB 첫집 나침반</strong>
+        <em>규칙 검토·승인</em>
+      </span>
+    </a>
+
+    <div class="topbar-actions">
+      <span class="conn" id="connBadge" title="백엔드 연결 상태">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connText">연결 확인 중</span>
+      </span>
+      <!-- SPEC 7.3 장치 1 — 「admin 진입 시 **상시 배지**」.
+           ★ 세 수를 **한 수로 뭉치지 않는다.** 초안은 승인·반려로 큐를 떠나지만 신고는
+             떠나는 경로가 없다. 더하면 그 합은 밀린 일이 아니라 누적 카운터가 되고,
+             늘 커지기만 하는 수는 정보가 아니다.
+           ★ `overdue` 는 **없다.** SLA N 이 미정이라 그 판정이 존재할 수 없고,
+             「초과 0건」으로 그리면 그것은 거짓이다 (SPEC 7.3). -->
+      <span class="who queue-badge" id="queueBadge" hidden></span>
+      <span class="who" id="whoBadge" hidden></span>
+      <button type="button" class="btn btn-ghost" id="btnLogout" hidden>로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="app">
+
+  <!-- ══════════════ 0. 로그인 게이트 ══════════════ -->
+  <!--
+    ★ 이 화면은 **버튼을 숨겨서 권한을 지키지 않는다.** 권한 검사는 API 계층이 하고
+      (SPEC 6.1), 여기서 감추는 것은 편의일 뿐이다. 상담원으로 로그인해도 아래 목록은
+      403 으로 비고, 그 사실을 그대로 적는다.
+  -->
+  <section class="gate" id="gate">
+    <form class="panel gate-panel" id="loginForm" novalidate>
+      <div class="panel-head">
+        <p class="eyebrow">규칙관리자 전용</p>
+        <h1 class="panel-title">검토·승인 화면</h1>
+        <p class="panel-sub">
+          승인은 판정을 바꾸는 유일한 경로입니다. 로그인해야 대기 큐가 열립니다.
+        </p>
+      </div>
+      <div class="field">
+        <label for="username">아이디</label>
+        <div class="input-wrap"><input type="text" id="username" autocomplete="username" value="rulemanager"></div>
+      </div>
+      <div class="field">
+        <label for="password">비밀번호</label>
+        <div class="input-wrap"><input type="password" id="password" autocomplete="current-password"></div>
+      </div>
+      <p class="gate-note" id="loginNote" role="status"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="btnLogin">로그인</button>
+      <p class="form-note">
+        시드 계정 비밀번호는 저장소에 커밋되지 않습니다. 기동 시 환경변수로 주입하거나,
+        주입하지 않으면 콘솔에 1회만 출력됩니다 (SPEC 6.3).
+      </p>
+    </form>
+  </section>
+
+  <!-- ══════════════ 1. 상태 화면 (SPEC 7.2 관측 지표 · 7.3 대기 큐) ══════════════ -->
+  <!--
+    ★ **없는 값을 0 으로 그리지 않는다.** 「0% 실패율」과 「아직 한 번도 안 돌았다」는
+      다른 사실이다. 0 으로 그리면 이 화면이 [문제 없음]을 말하게 되고, 그것이 관측
+      화면이 낼 수 있는 가장 나쁜 거짓말이다. 값이 없으면 없다고 적는다.
+
+    ★ **판정선을 그리지 않는다.** 셋 다 미정이고, 미정인 것을 정한 척하지 않는다 —
+        · 추출 성공률 합격선 — 두지 않는다 (사용자 결정 · 계약 결정 #33)
+        · 신선도 임계   — 미정 (SPEC 2.4 · 계약 결정 #39)
+        · 대기 큐 SLA N — 미정 (SPEC 7.3)
+      그래서 이 화면에는 초록/빨강 판정 배지가 없다. 숫자와 그 숫자가 무엇을 세었는지만
+      있다. 판정처럼 보이는 색을 입히면 임계가 없는데 있는 것처럼 읽힌다.
+
+    ★ **외부 APM 이 없다** (SPEC 7.2). 출처는 저장소의 감사기록과 파일 로그 둘뿐이며,
+      각 카드가 자기 출처를 적는다.
+  -->
+  <section class="panel status-panel" id="statusPanel" hidden>
+    <div class="panel-head">
+      <p class="eyebrow">STEP 00 · 상태</p>
+      <h2 class="panel-title">관측 지표</h2>
+      <p class="panel-sub" id="statusSummary">불러오는 중…</p>
+    </div>
+    <div class="metrics" id="metricGrid"></div>
+    <p class="status-foot" id="statusFoot"></p>
+  </section>
+
+  <!-- ══════════════ 2. 작업대 ══════════════ -->
+  <div class="desk" id="desk" hidden>
+
+    <!-- ────────── 왼쪽 · 대기 큐 ────────── -->
+    <aside class="col-queue">
+      <section class="panel queue-panel">
+        <div class="panel-head">
+          <p class="eyebrow">STEP 01 · 대기 큐</p>
+          <h2 class="panel-title">추출된 규칙 초안</h2>
+          <p class="panel-sub" id="queueSummary">불러오는 중…</p>
+        </div>
+
+        <ul class="queue" id="queueList"></ul>
+
+        <!-- ────── 현장 신고 (SPEC 6.4) ──────
+             ★ **별도 유형이다.** 위 목록은 기계가 추출한 초안이고 이쪽은 사람이 올린
+               신고다. 둘을 한 목록에 섞으면 검토자가 [무엇이 이것을 말했는가]를 가릴 수
+               없게 된다 — 초안에는 원문 근거가 있고 신고에는 없다.
+             ★ 신고를 **닫는 버튼이 없다.** SPEC 6.4 는 규칙관리자가 수동 입력하거나
+               재추출을 지시한다고만 적었고 그 동작을 어느 단계에도 배정하지 않았다.
+               그래서 신고는 이 큐에 계속 쌓인다 — 그 사실을 화면에 적는다.
+               파수병(test_report_screens.py)이 이 규율을 지키므로, 이 주석은 금지
+               토큰을 **글자 그대로 적지 않는다** (오프셋 파수병과 같은 규약). -->
+        <div class="panel-head report-head">
+          <p class="eyebrow">STEP 01-B · 현장 신고</p>
+          <h2 class="panel-title">상담원이 올린 이상 신고</h2>
+          <p class="panel-sub" id="reportSummary">불러오는 중…</p>
+        </div>
+        <ul class="queue reports" id="reportList"></ul>
+
+        <div class="queue-foot">
+          <p class="batch-note">
+            <strong>일괄 승인은 검토를 건너뛰는 것이 아니라 반영을 묶는 것입니다.</strong>
+            건별로 아래 네 항목을 확인한 뒤 선택하세요. 한 건이라도 실패하면
+            <em>전체가 반영되지 않습니다.</em>
+          </p>
+          <button type="button" class="btn btn-outline btn-block" id="btnBatch" disabled>
+            선택한 <span id="batchCount">0</span>건 일괄 승인
+          </button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ────────── 오른쪽 · 검토 ────────── -->
+    <section class="col-review" aria-live="polite">
+
+      <div class="empty" id="reviewEmpty">
+        <h2>왼쪽에서 초안을 하나 고르세요</h2>
+        <p>
+          SPEC 4.4 가 요구하는 네 항목 — 근거 원문 대조 · 승인 영향 사례 · 변경 전/후 diff ·
+          반려 사유 — 이 이 자리에 함께 나옵니다. 넷을 보지 않고 누르는 승인을 막는 것이
+          이 화면의 목적입니다.
+        </p>
+      </div>
+
+      <div id="review" hidden>
+
+        <!-- 검토 대상 머리말 -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow" id="reviewEyebrow">검토 대상</p>
+              <h2 class="card-title" id="reviewTitle">—</h2>
+            </div>
+            <span class="chip chip-lg" id="changeTypeChip">—</span>
+          </header>
+          <dl class="meta-grid" id="reviewMeta"></dl>
+          <p class="attribution" id="attribution"></p>
+
+          <!-- 추출 실패 — 사유와 어긋난 자리.
+               서버는 `failureReason` 을 큐와 상세 양쪽에 싣는데 화면이 안 그려서
+               규칙관리자는 `extraction_failed` 라는 상태 문자열만 봤다. 사유를 봐야
+               재추출을 지시할지 수동으로 입력할지 정할 수 있다. -->
+          <div class="failure" id="failureBox" hidden>
+            <p class="failure-head">추출에 실패한 초안입니다 — 승인·반려할 수 없습니다.</p>
+            <ul class="failure-list" id="failureList"></ul>
+            <!-- ★ 「규칙 내용은 저장되지 않았다」고 적지 않는다. 실패 경로가 둘이고
+                 그중 검증 통과 후 저장소가 근거를 거부한 경로(`span_store_rejected`)는
+                 payload 가 남는다. 두 경로에 **다 참인 것**만 적는다. -->
+            <p class="failure-foot">
+              사유는 추출 검증기가 남긴 것입니다. 이 초안은 승인 대상이 아니므로
+              <strong>어떤 판정에도 참여하지 않습니다</strong> — 재추출을 지시하거나
+              수동으로 입력해야 합니다.
+            </p>
+          </div>
+        </section>
+
+        <!-- 6.4 — 이 정책을 겨눈 현장 신고 (잠정 병합 규칙)
+             검토자는 「기계가 이렇게 추출했고, 현장에서는 이런 문제가 보고됐다」를
+             함께 본다. 신고는 초안의 **컨텍스트**이지 초안의 일부가 아니다. -->
+        <section class="card card-reports" id="draftReports" hidden>
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">6.4 — 현장 신고</p>
+              <h2 class="card-title">같은 제도에 올라온 신고</h2>
+            </div>
+            <span class="chip" id="draftReportChip">—</span>
+          </header>
+          <p class="card-lead">
+            <strong>신고는 제안이지 변경이 아닙니다.</strong> 아래 내용은 승인 대상이 아니며,
+            이 초안을 승인·반려해도 신고 기록은 그대로 남습니다.
+          </p>
+          <ul class="report-context" id="draftReportList"></ul>
+        </section>
+
+        <!-- 4.4 #1 · #3 — 필드별 근거 + 변경 -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">4.4 ① · ③ — 필드별 근거와 변경</p>
+              <h2 class="card-title">무엇이 어떻게 바뀌는가</h2>
+            </div>
+          </header>
+          <p class="card-lead">
+            행을 누르면 오른쪽 원문에서 그 근거 구간이 강조됩니다.
+            <strong>「모름」(not_found)과 「없음」(null)은 다른 사실입니다.</strong>
+          </p>
+          <div class="table-scroll">
+            <table class="fields" id="fieldTable">
+              <thead>
+                <tr>
+                  <th scope="col">필드</th>
+                  <th scope="col">현행</th>
+                  <th scope="col">승인 후</th>
+                  <th scope="col">초안이 말한 것</th>
+                  <th scope="col">근거 원문</th>
+                </tr>
+              </thead>
+              <tbody id="fieldBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4.4 #1 — 원문 대조 -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">4.4 ① — 근거 원문</p>
+              <h2 class="card-title">원문 대조</h2>
+            </div>
+            <span class="chip" id="sourceChip">—</span>
+          </header>
+          <p class="card-lead">
+            구간은 서버가 <strong>유니코드 코드포인트</strong> 기준으로 잘라 보냅니다
+            (SPEC 4.2.1). 화면은 받은 조각을 순서대로 그릴 뿐 오프셋을 다시 계산하지 않습니다.
+          </p>
+          <div class="source" id="sourceView" tabindex="0"></div>
+        </section>
+
+        <!-- 4.4 #2 — 승인 영향 -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">4.4 ② — 승인 영향</p>
+              <h2 class="card-title">승인하면 판정이 이렇게 바뀝니다</h2>
+            </div>
+            <span class="chip" id="impactChip">—</span>
+          </header>
+          <p class="card-lead" id="impactLead">
+            모집단은 <code>contracts/regression_profiles.json</code> 의 합성 프로필입니다.
+            실사용 프로필은 쓰지 않습니다 (SPEC 7.1 · 9.2.2).
+            <strong>이 계산은 저장소를 건드리지 않습니다 — 승인은 아직 일어나지 않았습니다.</strong>
+          </p>
+          <div class="table-scroll">
+            <table class="impact" id="impactTable">
+              <thead>
+                <tr>
+                  <th scope="col">프로필</th>
+                  <th scope="col">이 정책의 판정</th>
+                  <th scope="col">달라진 것</th>
+                </tr>
+              </thead>
+              <tbody id="impactBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 이 화면이 할 수 없는 것 -->
+        <section class="card card-limits">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">한계</p>
+              <h2 class="card-title">이 화면이 보여 줄 수 없는 것</h2>
+            </div>
+          </header>
+          <ul class="limits" id="limitList"></ul>
+        </section>
+
+        <!-- 4.4 #4 — 결정 -->
+        <section class="card card-decide">
+          <header class="card-head">
+            <div>
+              <p class="eyebrow">STEP 02 · 결정</p>
+              <h2 class="card-title">승인 또는 반려</h2>
+            </div>
+          </header>
+
+          <!-- 결정이 막힌 이유. 실패 초안과 이미 처리된 초안에서 뜬다.
+               서버(`_pending_draft_or_error`)가 409 로 막는 것과 **같은 규칙**이며,
+               화면은 거들 뿐이다 (SPEC D-9). -->
+          <p class="decide-blocked" id="decideBlocked" role="status" hidden></p>
+
+          <div class="decide-grid">
+            <div class="decide-col">
+              <p class="decide-lead">승인하면 새 규칙 버전이 생기고 즉시 판정에 참여합니다.</p>
+              <label class="field-inline" for="approveReason">승인 사유 <span class="opt">(선택)</span></label>
+              <input type="text" id="approveReason" maxlength="2000" placeholder="예) 2026-08-14 공고문과 대조 완료">
+              <button type="button" class="btn btn-primary btn-block" id="btnApprove">승인</button>
+            </div>
+            <div class="decide-col decide-reject">
+              <p class="decide-lead">
+                <strong>반려에는 사유가 필수입니다.</strong>
+                서버와 저장소가 각각 한 겹씩 막고 있으며, 이 화면이 세 번째 겹입니다.
+              </p>
+              <label class="field-inline" for="rejectReason">반려 사유 <span class="req">(필수)</span></label>
+              <input type="text" id="rejectReason" maxlength="2000" placeholder="예) 3조 인용이 원문과 다르다" required>
+              <p class="reason-hint" id="reasonHint">사유를 입력해야 반려할 수 있습니다.</p>
+              <button type="button" class="btn btn-danger btn-block" id="btnReject" disabled>반려</button>
+            </div>
+          </div>
+
+          <p class="decide-result" id="decideResult" role="status"></p>
+        </section>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+# 기본: 저장소 안에서는 LF 로 정규화하고, 체크아웃 시 플랫폼 관행을 따른다.
+* text=auto
+
+# 배치 파일만 예외 — 어느 플랫폼에서 체크아웃해도 CRLF 여야 한다.
+#
+# cmd.exe 는 배치 파일을 매 명령마다 바이트 오프셋으로 재탐색한다. 줄바꿈이 LF 로
+# 바뀌면 오프셋이 밀려 한국어 echo 줄이 문자 중간에서 잘리고, 잘린 조각을 명령으로
+# 실행하려다 파서가 붕괴한다. 예선에서 실제로 발생한 사고이며 SPEC Part 0-A 에
+# "실행 미검증" 으로 기록되어 있다.
+#
+# core.autocrlf=true 인 윈도우 작업트리에서는 이 사고가 보이지 않는다 — git 이
+# 체크아웃 때 CRLF 로 되돌려주기 때문이다. 저장소 blob 은 LF 이므로 리눅스나
+# autocrlf=false 인 환경에서 clone 하면 그대로 깨진다. eol=crlf 는 그 경로를 막는다.
+# backend/tests/crosscheck/test_scripts_encoding.py 가 작업트리 바이트로 이것을 검사한다.
+*.bat text eol=crlf
+
+# contracts/ 는 바이트 비교 대상이다 — 어느 플랫폼에서도 LF 여야 한다.
+#
+# D-12 의 재생성 diff 는 "앱에서 스키마를 재생성해 커밋본과 바이트 비교" 다.
+# 생성기는 LF 로 쓰는데, core.autocrlf=true 인 윈도우 작업트리에서는 위의 * text=auto
+# 때문에 contracts/*.json 이 CRLF 로 체크아웃된다(실측: model_constants.json 1285/1285줄).
+# 그러면 재생성 비교가 **윈도우에서만 깨지고 리눅스 CI 에서는 통과한다** — Part 0-A 의
+# "각자는 맞는데 합치면 틀린" 유형 그 자체이고, 시연 머신이 윈도우라 더 나쁘다.
+#
+# 비교 전에 개행을 정규화하는 우회는 쓰지 않는다. D-12 가 바이트 비교라고 못 박았고,
+# 비교기가 문자열을 주무르기 시작하면 무엇이든 통과시킬 수 있다.
+#
+# *.json 만 걸지 않고 디렉터리째 거는 이유: 앞으로 들어올 생성물(9.1.1 포맷 골든 픽스처,
+# 9.2.2 합성 프로필 세트)이 같은 함정에 다시 빠지지 않게 한다.
+contracts/** text eol=lf
+
+# frontend/generated/ 도 같다 — D-11 의 프론트 생성물이 여기 산다.
+#
+# `contracts/**` 와 **같은 사고, 다른 디렉터리**다. 생성기(`scripts/gen_contracts.py`)는
+# 두 곳에 같은 규칙(UTF-8 · BOM 없음 · LF)으로 쓰는데, 디렉터리가 갈렸으므로 규칙도
+# 따라가지 않으면 프론트 생성물만 CRLF 로 체크아웃되어 재생성 비교가 **윈도우에서만**
+# 깨진다. 이 부류로 이미 다섯 번 깨졌고 시연 머신이 윈도우다.
+#
+# `frontend/**` 가 아니라 `frontend/generated/**` 인 이유: `app.js` 등은 `web` 소유이고
+# 사람이 쓰는 파일이라 플랫폼 관행(`* text=auto`)을 그대로 두는 것이 맞다. 여기 걸리는
+# 것은 **바이트 비교 대상**뿐이어야 한다.
+frontend/generated/** text eol=lf
+
+# data/policy_sources/ 는 span 오프셋의 기준이다 — 한 바이트도 변환하지 않는다.
+#
+# 위의 * text=auto 가 걸리면 개행이 플랫폼별로 바뀐다. 그 순간 같은 커밋인데도
+# 윈도우 체크아웃과 리눅스 체크아웃의 **코드포인트 수가 달라지고**, SPEC 4.2.1 의
+# span `(start, end)` 가 통째로 밀린다. 실측: `youth_rent_support.txt` 에 CRLF 가
+# 1개 있어 text=auto 상태에서 이미 읽는 방식에 따라 2,691 / 2,690 으로 갈렸다.
+#
+# contracts/** 를 eol=lf 로 고정한 것과 같은 종류의 사고이며(#12), 여기서는 LF 로
+# 고정하는 것으로도 부족하다 — 원문은 우리가 쓴 것이 아니라 **받은 것**이므로
+# 어느 쪽으로도 바꾸지 않는 `-text` 가 맞다.
+data/policy_sources/** -text
+
+# 바이너리 — 어떤 변환도 하지 않는다.
+*.pptx binary
+*.png binary
+*.hwp binary
+*.pdf binary

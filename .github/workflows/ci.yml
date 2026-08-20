@@ -1,0 +1,84 @@
+name: CI
+
+# SPEC D-10 "규율이 아니라 구조로 막는다" 의 집행 지점.
+# 워커의 "테스트 통과했습니다" 는 근거가 아니다. 여기가 빨간불이면 머지하지 않는다.
+#
+# 주의 — 이 워크플로는 개발 인프라이지 시연 경로가 아니다. SPEC D-8 의
+# "네트워크 의존 금지" 는 발표 노트북에서 도는 경로에 걸리는 제약이며 CI 에는 걸리지 않는다.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: backend tests + 교차 검사
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: 의존성 설치
+        run: python -m pip install --upgrade pip && pip install -r backend/requirements.txt
+
+      - name: 발표 자료 생성기 의존성 (제품 의존성과 분리한다)
+        # 발표 자료는 **생성물**이다 (SPEC 9.4 [모든 생성물]). 그 재생성 대조를 CI 가
+        # 지려면 생성기를 돌릴 수 있어야 한다. `backend/requirements.txt` 에 섞지 않는
+        # 이유는 그 파일이 심사위원이 **제품을** 돌리는 목록이기 때문이다 —
+        # 제품은 python-pptx 없이 완전히 동작한다.
+        run: pip install -r docs/competition/requirements.txt
+
+      - name: 전체 테스트
+        run: python -m pytest backend/tests -q
+
+      - name: 생성물 diff 강제가 살아 있는지 (SPEC 1.2 · D-11 · D-12)
+        # 부트스트랩 때 이 자리는 "openapi.json 이 아직 없다"를 고정했고, Wave 2 에서
+        # 산출물이 생기자 설계대로 빨간불이 났다. 이제 강제는 pytest 로 옮겨갔다 —
+        # backend/tests/crosscheck/test_generated_contracts_diff.py 가 앱에서 스키마를
+        # 재생성해 커밋본과 바이트 비교한다.
+        #
+        # 그래서 여기서 볼 것이 바뀐다: **그 강제가 사라지지 않았는지**를 본다.
+        # 파일이 지워지면 pytest 는 조용히 초록이 된다. 없는 테스트는 실패하지 않는다.
+        # 위 "전체 테스트" 단계가 이미 이 테스트를 돌리므로 실행은 중복이지만,
+        # 중복인 것은 실행이지 방어가 아니다.
+        #
+        # `cmd || (echo ...; exit 1)` 을 쓰지 않는다 — 괄호는 서브셸이라 exit 이 전파되지
+        # 않고, 스크립트가 `bash -e` 로 돌 때만 우연히 실패한다. 가드가 셸 옵션에 의존하면
+        # 언젠가 메시지만 찍고 초록으로 지나간다. 그러면 없는 것만 못하다.
+        #
+        # D-11 의 프론트 생성물도 **같은 이유로 같은 자리에** 넣는다. 생성물 셋과 그것을
+        # 붙드는 테스트가 지워지면 pytest 는 조용히 초록이 되고, 그 순간 `frontend/` 의
+        # 판정 사본은 다시 손으로 쓴 숫자로 돌아간다 — D-11 이 없애려는 상태 그 자체다.
+        # 목록에 생성기(`gen_contracts.py`)가 한 번만 있는 것은 그것이 셋을 다 내기 때문이다.
+        run: |
+          fail=0
+          for f in contracts/openapi.json \
+                   scripts/gen_contracts.py \
+                   backend/tests/crosscheck/test_generated_contracts_diff.py \
+                   backend/tests/crosscheck/test_generated_frontend_diff.py \
+                   frontend/generated/model_constants.js \
+                   frontend/generated/policy_rules.js \
+                   frontend/generated/regions.js \
+                   frontend/generated/contract_constants.js; do
+            if [ ! -f "$f" ]; then
+              echo "::error::D-11 · D-12 생성물 diff 강제가 깨졌다 — 없는 파일: $f"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          python -m pytest backend/tests/crosscheck/test_generated_contracts_diff.py \
+                           backend/tests/crosscheck/test_generated_frontend_diff.py -q

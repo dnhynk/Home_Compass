@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dnhynk/KB_AI/contracts/model_constants.registry.schema.json",
+  "title": "ModelConstant registry",
+  "description": "`model_constants.json` 의 형태를 고정한다. 손으로 쓴 코디네이터 계약이며 생성물이 아니다.\n\n★ 이 파일은 원래 없었다. `model_constants.json` 의 `$schema` 가 부트스트랩부터 이 경로를 가리켰으나 파일이 존재하지 않아, 레지스트리는 **어떤 스키마 검증도 받지 않은 채** 26 → 68 키로 자랐다. W-engines-4 가 새 `value_type` 3종을 넣을 때 아무 저항이 없었다는 것을 보고해 드러났다.\n\n**여기서 보는 것은 형태뿐이다.** JSON Schema 2020-12 에는 다른 필드의 값을 참조하는 수단이 없으므로(`$data` 는 Ajv 확장이다), `value_type` 이 `valueTypeVocabulary` 에 선언된 것인지 같은 교차 불변식은 `test_registry_schema.py` 가 붙든다. 둘을 합쳐야 계약이 닫힌다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "registryVersion",
+    "description",
+    "injectionContract",
+    "valueTypeVocabulary",
+    "classificationLegend",
+    "seedRule",
+    "entries"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "registryVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "키 공간이 바뀌면 major, 값만 바뀌면 minor. ENGINE_VERSION 과 같은 기준이다."
+    },
+    "frozenAtCommit": {
+      "type": "string",
+      "minLength": 7,
+      "description": "frozen_current_value 가 코드 리터럴과 일치하던 시점. 1-② 이후로는 국면의 잔재다."
+    },
+    "description": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "injectionContract": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "SPEC 5.1.1 의 주입 형식. 엔진이 각자 다른 방식을 발명하지 않게 한다."
+    },
+    "valueTypeVocabulary": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "★ 각 항목의 값은 **그 타입이 무엇을 뜻하는지**다. 빈 설명을 금지한다 — 단위 혼동이 예선 80만/81만 사고의 원인이었다."
+    },
+    "engineConsumers": {
+      "type": "object",
+      "required": ["engines", "nonEngineConsumers"],
+      "properties": {
+        "engines": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "pattern": "^[a-z_]+$"},
+          "description": "판정 엔진에 해당하는 `engine` 값의 목록. 이 목록에 속한 항목의 key 집합이 `engines.required_constant_keys()` 와 일치해야 한다."
+        },
+        "nonEngineConsumers": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1},
+          "description": "★ 엔진이 조회하지 않는 소비자와 그 설명. SPEC Part 0-E #4 의 운영 임계가 여기 걸린다. 빈 설명을 금지한다 — 왜 엔진 밖인지가 곧 근거다."
+        }
+      },
+      "patternProperties": {"^\\$": {"type": "string"}},
+      "additionalProperties": false,
+      "description": "★ 등재된 전체 키와 엔진이 조회하는 키가 같지 않다는 사실을 계약에 세운다. 이 구분이 없으면 교차 테스트가 둘을 등호로 묶고, 그 등호는 SPEC Part 0-E #4 가 요구한 비엔진 운영 임계의 등재를 막는다."
+    },
+    "classificationLegend": {
+      "type": "object",
+      "required": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "seedRule": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "knownIncomplete": {
+      "type": "object"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "engine",
+        "legacy_symbol",
+        "spec_class",
+        "value_type",
+        "frozen_current_value",
+        "spec_action",
+        "seed_provenance"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z_]+\\.[a-z0-9_]+$",
+          "description": "<engine>.<snake_case_symbol>. 엔진 접두사가 소유를 드러낸다."
+        },
+        "engine": {
+          "type": "string",
+          "pattern": "^[a-z_]+$"
+        },
+        "legacy_symbol": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "description": "외부화 전 모듈 전역 이름. 인라인 리터럴이었던 키는 이름이 없었으므로 null 이다 — 빈 문자열로 메우지 않는다."
+        },
+        "spec_class": {
+          "enum": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "description": "Part 0-C. (a) 법정 · (b) 통계 · (c) 시장 · (d) 규범."
+        },
+        "value_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "★ valueTypeVocabulary 에 선언된 것이어야 한다. 그 대조는 스키마가 못 하므로 교차 테스트가 한다."
+        },
+        "frozen_current_value": {
+          "description": "저장소가 시드하는 값. 타입은 value_type 이 정한다.",
+          "not": {
+            "type": "null"
+          }
+        },
+        "spec_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "이 상수가 코드 어디에서 쓰이는지. 근거 위치다."
+        },
+        "$comment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normative_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "(d) 가 우리 선택임을 드러내는 문장. 준거가 있으면 함께 적는다."
+        },
+        "open_questions": {
+          "type": "string",
+          "minLength": 1,
+          "description": "출처가 승인된 뒤에도 남은 물음. pending_diligence 와 다르다 — 그쪽은 출처 자체가 미승인이라는 뜻이다."
+        },
+        "pending_diligence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "★ 이 필드가 있으면 seed_provenance 에 준거를 적지 않는다. 승인 전의 후보를 계보에 적으면 심사에서 반박당한다."
+        },
+        "slated_for_removal": {
+          "type": "string",
+          "minLength": 1,
+          "description": "없앨 예정이라는 사실과 언제·왜. 허용목록에 숨기지 않고 등재로 처리하는 이유다."
+        },
+        "seed_provenance": {
+          "$ref": "provenance.schema.json"
+        }
+      }
+    }
+  }
+}

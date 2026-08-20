@@ -1,0 +1,46 @@
+#!/bin/sh
+# main 직접 푸시 차단.
+#
+# 왜 훅인가: 이 저장소는 Free 플랜 private 이라 GitHub 브랜치 보호/룰셋을 쓸 수 없다
+# ("Upgrade to GitHub Pro or make this repository public"). 서버측 강제가 불가능하므로
+# 클라이언트측에서 막는다.
+#
+# 왜 이게 워커에게도 걸리는가: 워커는 `git worktree` 로 만들어진 별도 작업트리에서 돌고,
+# git config 는 공용 디렉터리에 있어 모든 워크트리가 공유한다. core.hooksPath=.githooks 를
+# 한 번 설정하면 모든 워크트리에 적용된다.
+#
+# 한계 (숨기지 않는다): `git push --no-verify` 로 우회할 수 있다. 서버측 강제가 아니다.
+# 실질적 게이트는 코디네이터가 PR 을 CI 통과 확인 후에만 머지한다는 절차다.
+#
+# SPEC 9.4 — 워커는 자기 소유 경로만 수정하고, main 합류는 PR 로만 한다.
+
+set -e
+
+protected='refs/heads/main'
+z40='0000000000000000000000000000000000000000'
+
+while read -r _local_ref _local_sha remote_ref remote_sha; do
+    [ "$remote_ref" = "$protected" ] || continue
+
+    if [ "$COORDINATOR_PUSH" = "1" ]; then
+        echo "pre-push: COORDINATOR_PUSH=1 — main 직접 푸시를 허용합니다." >&2
+        continue
+    fi
+
+    echo "" >&2
+    echo "  ✗ main 으로 직접 푸시할 수 없습니다." >&2
+    echo "" >&2
+    if [ "$remote_sha" = "$z40" ]; then
+        echo "    (main 을 새로 만들려는 푸시입니다)" >&2
+    fi
+    echo "    작업은 자기 브랜치에 올리고 GitHub PR 로 합류시키세요:" >&2
+    echo "" >&2
+    echo "      git push -u origin <your-branch>" >&2
+    echo "      gh pr create --base main" >&2
+    echo "" >&2
+    echo "    머지는 코디네이터가 CI 통과와 소유 경로 준수를 확인한 뒤 수행합니다." >&2
+    echo "" >&2
+    exit 1
+done
+
+exit 0

@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dnhynk/KB_AI/contracts/rule_draft.schema.json",
+  "title": "RuleDraft",
+  "description": "SPEC 4.2.3. LLM 이 제도 문서에서 추출한 판정 규칙. 손으로 쓴 코디네이터 계약이며 생성물이 아니다.\n★ 판정에 실제로 쓰이는 필드만 정의한다. 일반적 규칙 표현 언어를 만들지 않는다 — 쓰지 않는 표현력은 검증 불가능한 표면만 늘린다 (SPEC 4.2.3).\n필드 집합의 근거는 코드다: criteria 8개는 engines/eligibility.py 가 전수 소비하고, maxAmountKRW 는 eligibility 정렬과 tco 대출한도에, rateRangePct 는 tco 금리에, conditionalChecks 는 eligibility 의 conditional 판정에 쓰인다. category·summary·notes·disclaimer·source 는 표시 전용이므로 제외했다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "criteria",
+    "maxAmountKRW",
+    "rateRangePct",
+    "conditionalChecks",
+    "not_found"
+  ],
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "이 초안이 대상으로 하는 정책. 기존 policies.json 의 id 와 대응한다."
+    },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ageMax",
+        "ageMin",
+        "annualIncomeMaxKRW",
+        "assetMaxKRW",
+        "regionPrefixes",
+        "requireHomeless",
+        "requireNewlywed",
+        "requireSME"
+      ],
+      "properties": {
+        "ageMin": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 199,
+          "description": "신청 가능 최소 연령(만). 원문에 없으면 null + not_found."
+        },
+        "ageMax": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 199,
+          "description": "신청 가능 최대 연령(만). 「상한 없음」은 null 로 적는다 — 파수병 200 을 쓰지 않는다 (1-③ 에서 제거 예정)."
+        },
+        "annualIncomeMaxKRW": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "연소득 상한(원). 「제한 없음」은 null."
+        },
+        "assetMaxKRW": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "자산 상한(원). 「제한 없음」은 null."
+        },
+        "requireHomeless": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "무주택 요건 여부."
+        },
+        "requireNewlywed": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "신혼부부 요건 여부."
+        },
+        "requireSME": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "중소기업 재직 요건 여부."
+        },
+        "regionPrefixes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{2,5}$"
+          },
+          "description": "적용 지역의 법정동코드 접두사. 전국이면 null."
+        }
+      },
+      "description": "engines/eligibility.py 가 소비하는 고정 필드 집합. 늘리려면 SPEC 8.2 절차."
+    },
+    "maxAmountKRW": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "대출·지원 한도(원). eligibility 정렬 키이자 tco 대출한도."
+    },
+    "rateRangePct": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ],
+      "description": "금리 구간 [하한, 상한] (퍼센트 포인트). 단일 금리도 [x, x] 로 적는다."
+    },
+    "conditionalChecks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "충족 여부를 서류·예산 등으로 따로 확인해야 하는 항목. 있으면 판정이 conditional 이 된다. 없으면 빈 배열."
+    },
+    "not_found": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^/(policy_id|criteria/[A-Za-z]+|maxAmountKRW|rateRangePct|conditionalChecks)$"
+      },
+      "description": "★ SPEC 4.2 의 [추정 금지] 를 담는 자리. 원문에 없는 값은 여기에 RFC 6901 JSON Pointer 로 적고 해당 필드를 null 로 둔다. **빈 칸을 그럴듯한 값으로 채우는 것이 이 단계의 지배적 실패 양상이므로 프롬프트와 스키마 양쪽에서 강제한다.**\nnot_found 에 적힌 필드는 span 이 없어야 정상이다 (SPEC 4.2.2)."
+    }
+  },
+  "$comment": "span 은 이 문서에 담지 않는다. RuleSpanMapping 이 별도 엔티티이고 field_path 로 이 문서의 위치를 가리킨다 (계약 결정 #7). 그래야 추출 결과와 근거 매핑이 각각 독립적으로 검증된다.",
+  "examples": [
+    {
+      "policy_id": "buttress_youth",
+      "criteria": {
+        "ageMin": 19,
+        "ageMax": 34,
+        "annualIncomeMaxKRW": 50000000,
+        "assetMaxKRW": null,
+        "requireHomeless": true,
+        "requireNewlywed": false,
+        "requireSME": false,
+        "regionPrefixes": null
+      },
+      "maxAmountKRW": 200000000,
+      "rateRangePct": [
+        1.5,
+        2.9
+      ],
+      "conditionalChecks": [
+        "기금 소진 시 조기 마감될 수 있다"
+      ],
+      "not_found": [
+        "/criteria/assetMaxKRW"
+      ]
+    }
+  ]
+}

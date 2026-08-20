@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/dnhynk/KB_AI/contracts/provenance.schema.json",
+  "$id": "https://github.com/dnhynk/Home_Compass/contracts/provenance.schema.json",
   "title": "Provenance",
   "description": "SPEC 2.1. Attached to every fact — both collected data (D-5) and model constants (Part 0-C). Hand-written coordinator source, NOT a generated artifact.",
   "type": "object",

@@ -90,7 +90,7 @@ class TestTheAdminScreenIsServedFromTheSameOrigin:
         """`web` 을 밀어내지 않았다 — 6단계 소유이며 한 글자도 건드리지 않았다."""
         response = client.get("/", follow_redirects=True)
         assert response.status_code == 200, response.text
-        assert "KB 첫집 나침반" in response.text
+        assert "Home_Compass" in response.text
 
     def test_the_api_still_wins_over_the_static_mounts(self, client):
         assert client.get("/api/health").status_code == 200

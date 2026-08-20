@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title KB First-Home Compass
+title Home_Compass
 
 rem -------------------------------------------------------------------------
 rem This file is saved in CP949 (Korean ANSI) with CRLF line endings and
@@ -13,7 +13,7 @@ rem Keep this file CP949 + CRLF. Re-saving it as UTF-8 reintroduces the bug.
 rem -------------------------------------------------------------------------
 
 echo ============================================
-echo  KB 첫집 나침반 (FirstHome Compass)
+echo  Home_Compass
 echo  청년 주거 금융 의사결정 에이전트
 echo ============================================
 echo.

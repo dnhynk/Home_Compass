@@ -37,8 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _console import force_utf8_stdout  # noqa: E402
 
-REPO = "dnhynk/KB_AI"
-RUN_ID = "run_c43a66d30d6f"
+REPO = "dnhynk/Home_Compass"
 
 # --- SPEC 9.4 소유 경로 배정표의 기계 판독본 -------------------------------
 # SPEC 이 정본이다. 이 표는 거울이며, 어긋나면 SPEC 을 따른다.
@@ -369,10 +368,10 @@ def main() -> int:
     prs = gather_prs()
 
     print("=" * 78)
-    print(f"  KB_AI 코디네이터 상태판   run={RUN_ID}  repo={REPO}")
+    print(f"  Home_Compass 코디네이터 상태판   repo={REPO}")
     print("=" * 78)
 
-    print("\n[ ORCA 과업 ]")
+    print("\n[ ORCA 과업 — 현재 런타임 전체 ]")
     if not tasks:
         print("  (없음 — orca 런타임이 안 떴거나 Run 이 비었다)")
     for t in tasks:

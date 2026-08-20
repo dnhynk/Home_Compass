@@ -1,4 +1,4 @@
-"""KB 첫집 나침반 — deterministic decision engines.
+"""Home_Compass — deterministic decision engines.
 
 `analyze()` is the single orchestration entry point: it runs E1 -> E2 -> E3 -> E4
 in dependency order and assembles the exact response object described in the

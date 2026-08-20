@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title KB First-Home Compass - 시세 수집 배치
+title Home_Compass - 시세 수집 배치
 
 rem -------------------------------------------------------------------------
 rem This file is saved in CP949 (Korean ANSI) with CRLF line endings and

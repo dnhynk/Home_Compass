@@ -43,8 +43,8 @@ from playwright.sync_api import sync_playwright
 
 HERE = pathlib.Path(__file__).resolve().parent
 # Derive the page from this file's own location. The previous hard-coded
-# absolute path (C:/Users/dongh/KB_AI/prototype/frontend) outlived the tree it
-# named and the script died on ERR_FILE_NOT_FOUND before checking anything.
+# absolute repository path outlived the tree it named, and the script died on
+# ERR_FILE_NOT_FOUND before checking anything.
 INDEX = HERE.parent / "index.html"
 URL = os.environ.get("QA_URL") or INDEX.as_uri()
 

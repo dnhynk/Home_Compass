@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/dnhynk/KB_AI/contracts/rule_draft.schema.json",
+  "$id": "https://github.com/dnhynk/Home_Compass/contracts/rule_draft.schema.json",
   "title": "RuleDraft",
   "description": "SPEC 4.2.3. LLM 이 제도 문서에서 추출한 판정 규칙. 손으로 쓴 코디네이터 계약이며 생성물이 아니다.\n★ 판정에 실제로 쓰이는 필드만 정의한다. 일반적 규칙 표현 언어를 만들지 않는다 — 쓰지 않는 표현력은 검증 불가능한 표면만 늘린다 (SPEC 4.2.3).\n필드 집합의 근거는 코드다: criteria 8개는 engines/eligibility.py 가 전수 소비하고, maxAmountKRW 는 eligibility 정렬과 tco 대출한도에, rateRangePct 는 tco 금리에, conditionalChecks 는 eligibility 의 conditional 판정에 쓰인다. category·summary·notes·disclaimer·source 는 표시 전용이므로 제외했다.",
   "type": "object",

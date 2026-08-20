@@ -2762,7 +2762,7 @@
   },
   "info": {
     "description": "청년 주거 금융 의사결정 엔진 — 4대 결정론적 엔진 + LLM 상담 레이어",
-    "title": "KB 첫집 나침반 API",
+    "title": "Home_Compass API",
     "version": "2.0.0",
     "x-engine-version": "3.0.0"
   },

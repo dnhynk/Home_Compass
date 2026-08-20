@@ -434,8 +434,8 @@ conversionRatePct  = conversion_rate_pct(median(전세보증금), median(월세�
 # D. 재현
 
 ```bash
-# 최초 1회 — API 키 (커밋 금지, gitignore 됨)
-copy C:\Users\dongh\KB_AI\.env .env
+# 최초 1회 — 템플릿을 복사한 뒤 MOLIT_API_KEY 입력 (커밋 금지, gitignore 됨)
+copy .env.example .env
 
 # 실수집 + 캐시 저장 (API 60건)
 python docs/engineering/diligence/scripts/bias_measure.py \

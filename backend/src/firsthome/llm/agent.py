@@ -44,7 +44,7 @@ ANTHROPIC_MAX_TOKENS = 8192
 LLM_TIMEOUT_SECONDS = 30.0
 LLM_MAX_ATTEMPTS = 2  # 1 initial call + 1 retry
 
-SYSTEM_PROMPT = """당신은 'KB 첫집 나침반'의 청년 주거 금융 상담 에이전트입니다.
+SYSTEM_PROMPT = """당신은 'Home_Compass'의 청년 주거 금융 상담 에이전트입니다.
 
 절대 규칙:
 1. 금액, 비율, 점수 등 모든 숫자는 반드시 제공된 도구(tool)를 호출해서 얻으십시오.

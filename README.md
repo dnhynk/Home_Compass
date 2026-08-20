@@ -1,288 +1,125 @@
-# KB 첫집 나침반 (FirstHome Compass) — 프로토타입
+# Home_Compass
 
-> "내가 지금 얼마짜리 집에 살아도 되는가?"에 **숫자로** 답하고,
-> 그 결정을 실행할 **정책·금융상품까지 연결**하는 청년 주거 금융 의사결정 에이전트.
+청년 임차 가구가 보증금·월세·대출 조건을 함께 비교하고, 상담사와 정책 운영자가 같은 근거를 검토할 수 있도록 만든 주거 금융 의사결정 서비스입니다.
 
----
+2026 금융 AI Challenge 개인 참가 프로젝트로 개발하고 있습니다. 특정 금융기관의 상품을 추천하거나 심사를 대신하지 않으며, 입력값과 공개 정책·시장 데이터에 기반한 의사결정 보조 정보를 제공합니다.
 
-## 1. 실행법 (3줄)
+## 제공 기능
 
-```bat
-cd C:\Users\dongh\KB_AI\prototype
-run.bat
-:: 브라우저에서 http://127.0.0.1:8000 접속
+- 시민용 분석: 월 부담액, 초기 필요자금, 비상자금, DSR과 스트레스 금리를 반영한 시나리오 비교
+- 정책 탐색: 사용자 조건과 정책 규칙을 대조하고 근거·제외 사유를 함께 표시
+- AI 상담: OpenAI 또는 Anthropic 연동, 키가 없을 때는 규칙 기반 오프라인 응답
+- 상담원 확장: 판정 근거·내부 필드 확인, 요약본 출력과 데이터 이상 신고
+- 정책 운영 워크플로: 정책 원문 수집, 초안 검증, 승인, 배치 처리와 감사 이력
+
+핵심 계산과 판정은 결정론적 엔진이 담당합니다. LLM은 설명과 대화에만 사용되며 계산 결과나 정책 적격 판정을 임의로 바꾸지 않습니다.
+
+## 구조
+
+```text
+frontend/                    시민용 Vanilla JS 화면
+admin/                       규칙 관리자 검토·승인 화면
+backend/src/firsthome/       FastAPI API, 계산 엔진, 인증, 저장소, 수집 파이프라인
+backend/tests/               단위·통합·계약·교차 검증 테스트
+contracts/                   손으로 쓴 검증 계약과 생성된 OpenAPI 스냅샷
+data/                        정책 원문 입력
+scripts/                     개발 기동, 시드, 수집, 계약 생성, 검증 도구
+docs/                        설계·운영·검증 문서
 ```
 
-`run.bat`은 의존성 설치 → 엔진 테스트 → uvicorn 기동을 한 번에 수행합니다.
+브라우저와 API는 같은 오리진에서 제공됩니다. 현재 세션 저장소는 프로세스 메모리를 사용하므로 Uvicorn은 반드시 단일 worker로 실행해야 합니다.
+
+## 빠른 시작
+
+요구 사항은 Python 3.11 이상입니다. Windows에서는 저장소 루트에서 다음 명령으로 의존성 설치, 테스트, 데이터 시드와 서버 기동을 한 번에 수행할 수 있습니다.
+
+```bat
+scripts\dev.bat
+```
+
 수동으로 실행하려면:
 
-```bat
-python -m pip install -r requirements.txt
-cd backend
-python -m uvicorn app:app --host 127.0.0.1 --port 8000
+```powershell
+python -m pip install -r backend\requirements.txt
+python scripts\seed_store.py
+Set-Location backend\src
+python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-### 🔑 API 키는 선택 사항입니다
+기동 후 사용할 주소:
 
-**키가 하나도 없어도 전 기능이 정상 동작합니다.** 프로필 분석·시나리오 비교·정책 매칭·
-리스크 스캔은 전부 로컬 결정론적 엔진이 계산하므로 네트워크조차 필요 없습니다.
-AI 상담 탭만 규칙 기반 한국어 템플릿(`offline` 모드)으로 응답합니다.
+- 시민 화면: http://127.0.0.1:8000/
+- 규칙 관리자 화면: http://127.0.0.1:8000/admin/
+- API 문서: http://127.0.0.1:8000/docs
+- 상태 확인: http://127.0.0.1:8000/api/health
 
-키를 넣으면 **LLM 상담이 활성화**되어, 자연어 질문을 받아 4대 엔진을 tool calling으로
-호출하고 근거 기반 답변을 생성합니다.
+처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `FIRSTHOME_SEED_COUNSELOR_PASSWORD`와 `FIRSTHOME_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 않습니다.
 
-| 우선순위 | 환경변수 | 프로바이더 | `/api/health` 의 `llm` |
-|---|---|---|---|
-| 1 | `OPENAI_API_KEY` | OpenAI function calling | `openai` |
-| 2 | `ANTHROPIC_API_KEY` | Anthropic tool use | `anthropic` |
-| 3 | (없음) | 규칙 기반 한국어 템플릿 | `offline` |
+개발 환경에서 두 값을 생략하면 임시 비밀번호가 표준 오류에 한 번 출력됩니다. 공개 배포 설정은 별도 하드닝 작업에서 fail-closed 방식으로 전환할 예정입니다.
 
-설정 방법 — 리포지토리 루트에 `.env` 파일을 두면 자동으로 읽습니다
-(`prototype/.env.example` 참고, `python-dotenv` 불필요):
+## 선택적 LLM 연동
 
-```
-OPENAI_API_KEY=sk-proj-...
-OPENAI_MODEL=            # 비워두면 gpt-5.4-mini
+저장소 루트의 `.env.example`을 `.env`로 복사하고 사용할 제공자의 키를 입력합니다.
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-셸 환경변수로도 됩니다. 셸 값이 `.env` 값보다 우선합니다.
+- `OPENAI_API_KEY`, `OPENAI_MODEL`
+- `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`
 
-```bat
-set OPENAI_API_KEY=sk-proj-...
+우선순위는 OpenAI, Anthropic, 오프라인 순입니다. API 키가 없어도 시민 분석, 정책 판정, 리스크 계산과 운영 워크플로는 동작합니다.
+
+## 저장소와 경로 설정
+
+주요 런타임 환경변수:
+
+| 변수 | 용도 |
+| --- | --- |
+| `FIRSTHOME_STORE_URL` | 저장소 URL. 기본값은 `backend/var/firsthome.db`를 사용하는 SQLite |
+| `FIRSTHOME_LOG_FILE` | 구조화 JSONL 로그 경로 |
+| `FIRSTHOME_FRONTEND_DIR` | 시민용 정적 파일 디렉터리 |
+| `FIRSTHOME_ADMIN_DIR` | 운영용 정적 파일 디렉터리 |
+| `FIRSTHOME_CONTRACTS_DIR` | JSON Schema·OpenAPI 계약 디렉터리 |
+| `MOLIT_API_KEY` | 국토교통부 실거래가 OpenAPI 인증키 |
+
+공개 배포에서는 단일 인스턴스·단일 worker와 영구 볼륨의 SQLite를 전제로 합니다. 호스팅별 설정과 보안 경계는 배포 하드닝 후 이 문서에 확정합니다.
+
+## 데이터 파이프라인
+
+시장 데이터 파이프라인은 국토교통부 실거래가 원천을 수집·정규화·검증한 뒤 승인된 스냅샷만 분석에 사용합니다. 정책 파이프라인은 원문과 추출 초안을 분리하고, 계약 검증·승인·감사 이력을 거쳐 활성 규칙으로 전환합니다.
+
+원천 수집 예시:
+
+```powershell
+$env:MOLIT_API_KEY = "<service-key>"
+Push-Location backend\src
+python -m firsthome.ingest.market --from-env
+Pop-Location
 ```
 
-> `.env`는 `.gitignore`에 등록되어 있으며 `prototype/` 안에는 실제 키를 두지 않습니다.
-> 값에 따옴표나 홑화살괄호가 섞여도(`<sk-proj-...>`) 자동으로 제거됩니다.
+상세 옵션은 같은 디렉터리에서 `python -m firsthome.ingest.market --help`로 확인할 수 있습니다. 저장소 구성은 [저장소 문서](backend/src/firsthome/store/README.md)를 참고하세요.
 
----
+## API와 계약
 
-## 2. 아키텍처
+주요 공개 API는 지역 목록, 시장·정책 메타데이터, 시민 분석, AI 상담, 인증과 리포트·정책 운영 엔드포인트로 구성됩니다. 실행 중인 서버의 `/docs`에서 현재 계약을 확인할 수 있습니다.
 
-```
-                          ┌───────────────────────────────────────────┐
-   브라우저 (Vanilla JS)   │  prototype/frontend/  index.html/app.js   │
-                          │  프로필 입력 → 대시보드 → AI 상담 채팅      │
-                          └────────────────────┬──────────────────────┘
-                                               │ fetch (JSON)
-                     ┌─────────────────────────▼──────────────────────┐
-                     │  FastAPI  app.py   (CORS + 정적파일 서빙)       │
-                     │  /api/health  /api/regions                      │
-                     │  /api/analyze  /api/chat                        │
-                     └───────┬─────────────────────────┬───────────────┘
-                             │                         │
-              ┌──────────────▼───────────┐   ┌─────────▼──────────────────┐
-              │  engines/__init__.py     │   │  engines/agent.py   (A1)   │
-              │  analyze() 오케스트레이션 │◀──│  TOOL_SPECS 단일 정의       │
-              │  E1 → E2 → E3 → E4       │   │   ├ to_openai_tools()      │
-              └──────────────┬───────────┘   │   └ to_anthropic_tools()   │
-                             │               │  ┌──────────────────────┐  │
-                             │               │  │1 OpenAI  (function   │  │
-                             │               │  │          calling)    │  │
-                             │               │  │2 Anthropic (tool use)│  │
-                             │               │  │3 offline 한국어 템플릿│  │
-                             │               │  └──────────────────────┘  │
-                             │               └─────────────┬──────────────┘
-                             │                             │
-                             │               ┌─────────────▼──────────────┐
-                             │               │  engines/config.py         │
-                             │               │  .env 탐색·파싱 (무의존성)  │
-                             │               │  프로바이더 우선순위 결정   │
-                             │               └────────────────────────────┘
-      ┌──────────────┬───────┴───────┬────────────────┐
-      ▼              ▼               ▼                ▼
-┌───────────┐  ┌───────────┐  ┌────────────┐  ┌────────────┐
-│ E1        │  │ E2        │  │ E3         │  │ E4         │
-│ 주거지불   │  │ 정책·상품  │  │ 전월세     │  │ 보증금     │
-│ 능력      │  │ 적격성     │  │ 총비용     │  │ 리스크     │
-│affordabi- │  │eligibility│  │ TCO / NPV  │  │ 스캐너     │
-│lity.py    │  │.py        │  │ tco.py     │  │ risk.py    │
-└─────┬─────┘  └─────┬─────┘  └─────┬──────┘  └─────┬──────┘
-      └──────────────┴──────────────┴───────────────┘
-                             │
-                   ┌─────────▼──────────┐
-                   │ data/policies.json │  정책 10건 (source + disclaimer 필수)
-                   │ data/regions.json  │  지역 10곳 (서울4·경기2·지방4)
-                   └────────────────────┘
+HTTP 계약의 커밋된 스냅샷은 `contracts/openapi.json`이며 애플리케이션 코드에서 생성됩니다. 같은 디렉터리의 provenance·규칙 초안·모델 상수 스키마는 사람이 관리하는 입력 계약입니다. 생성 산출물은 다음 명령으로 갱신합니다.
 
-  핵심 설계 원칙: LLM은 자연어 인터페이스일 뿐, 숫자는 100% 결정론적 엔진이 계산한다.
-  → 4대 엔진은 순수 함수(입출력만 존재, 시계·난수·I/O 없음)이며
-    모든 반환값에 `rationale: list[str]` 근거 배열을 포함한다. (설명가능성 / XAI)
+```powershell
+python scripts\gen_contracts.py
 ```
 
-### 디렉토리
+## 검증
 
-```
-prototype/
-├─ backend/
-│  ├─ app.py                 FastAPI 진입점 (CORS · 정적 서빙 · 오류 봉투)
-│  ├─ engines/
-│  │  ├─ __init__.py         analyze() 오케스트레이터 + 데이터 로더
-│  │  ├─ config.py           .env 탐색/파싱 + 프로바이더 우선순위 (무의존성)
-│  │  ├─ common.py           공용 순수 헬퍼 (금액 포맷·반올림)
-│  │  ├─ affordability.py    E1 주거지불능력
-│  │  ├─ eligibility.py      E2 정책·상품 적격성 룰엔진
-│  │  ├─ tco.py              E3 전월세 총비용/NPV 비교
-│  │  ├─ risk.py             E4 전세보증금 리스크 스캐너
-│  │  └─ agent.py            A1 3단 프로바이더 (OpenAI / Anthropic / offline)
-│  ├─ data/{policies,regions}.json
-│  └─ tests/test_engines.py  pytest 44개
-├─ frontend/                 (W2 담당)
-├─ .env.example              키 템플릿 (실제 키는 리포지토리 루트 .env 에)
-├─ requirements.txt
-├─ run.bat
-└─ README.md
+```powershell
+python -m pytest backend\tests -q
+python scripts\gen_contracts.py --check
+python scripts\check_dev_bat.py
 ```
 
----
+첫 명령은 전체 자동 테스트이고, 두 번째 명령은 생성 계약의 바이트 일치를 확인합니다. 마지막 명령은 Windows에서 `dev.bat`이 실제 서버까지 기동하는 수동 스모크입니다. 전체 테스트 수는 구현과 함께 변하므로 README에 고정하지 않습니다. 실행 결과가 없는 상태에서 완료나 정상 동작을 주장하지 않습니다.
 
-## 3. API 표
+## 고지
 
-Base URL: `http://127.0.0.1:8000`
-
-| Method | Path | 권한 | 설명 |
-|---|---|---|---|
-| `GET` | `/api/health` | 익명 | 헬스체크 · LLM 프로바이더 · **배치 상태 · 데이터 신선도** (SPEC 8.1) |
-| `GET` | `/api/regions` | 익명 | 지역 시세 |
-| `GET` | `/api/meta` | 익명 | 엔진 버전 · 고지 문구 |
-| `POST` | `/api/analyze` | 익명 (로그인 시 확장) | **메인** — E1~E4 일괄 실행 + `dataGrade` · `provenance` (D-13) |
-| `POST` | `/api/chat` | 익명 | 자연어 상담 (tool-calling) |
-| `POST` | `/api/auth/login` · `/logout` | — | 서버 세션 (`HttpOnly` 쿠키 + CSRF) |
-| `GET` | `/api/auth/session` | 익명 | 내가 누구인가. 익명은 401 이 아니라 200 |
-| `POST` | `/api/reports` | **상담원**+ | 이상 신고 생성 (SPEC 6.4) |
-| `GET` | `/api/admin/drafts` | **규칙관리자** | 추출 초안 대기 큐 |
-| `GET` | `/api/admin/drafts/{id}` | **규칙관리자** | 초안 상세 — 원문 세그먼트 · 근거 span |
-| `GET` | `/api/admin/drafts/{id}/impact` | **규칙관리자** | 승인 시 판정이 어떻게 바뀌는가 (SPEC 4.4 #2) |
-| `POST` | `/api/admin/drafts/{id}/approve` · `/reject` | **규칙관리자** | 승인·반려. 반려에는 사유가 필수 |
-| `POST` | `/api/admin/drafts/batch-approve` | **규칙관리자** | 일괄 승인 — 반영은 원자적, 기록은 건별 |
-| `GET` | `/api/admin/reports` | **규칙관리자** | 이상 신고 큐 (초안과 별도 유형) |
-| `GET` | `/api/admin/audit` | **규칙관리자** | 감사추적 (append-only) |
-| `GET` | `/api/admin/status` | **규칙관리자** | 관측 지표 (SPEC 7.2) |
-| `GET` | `/docs` | 익명 | 자동 생성 API 문서 (Swagger UI) |
-
-> **이 표는 요약이고 정본은 `contracts/openapi.json` 이다.** 응답 필드·단위·반올림·타임아웃은
-> 그 파일이 코드에서 생성하며 재생성 diff 테스트가 커밋본과 바이트 비교한다 (SPEC D-12).
-> **권한 검사는 API 계층이 한다** — 화면이 버튼을 숨기는 것으로 대신하지 않는다 (SPEC 6.1).
-
-### 열거형
-
-| 필드 | 값 |
-|---|---|
-| `affordability.band` | `safe` \| `caution` \| `risk` |
-| `policies[].status` | `eligible` \| `conditional` \| `ineligible` |
-| `scenarios[].verdict` | `affordable` \| `stretch` \| `unaffordable` |
-| `scenarios[].type` | `jeonse` \| `monthly` |
-| `risk.factors[].impact` | `low` \| `medium` \| `high` |
-| `risk.band` | `low` \| `medium` \| `high` |
-| 요청 `preferredType` | `jeonse` \| `monthly` \| `any` |
-
-### 오류 응답 (공통)
-
-모든 4xx/5xx는 동일한 봉투를 사용합니다.
-
-```json
-{ "error": { "code": "invalid_region", "message": "알 수 없는 지역 코드입니다: 00000" } }
-```
-
-| HTTP | code | 발생 조건 |
-|---|---|---|
-| 400 | `invalid_region` | `regionCode`가 `regions.json`에 없음 |
-| 422 | `validation_error` | 타입/범위/열거형 위반 |
-| 500 | `internal_error` | 처리되지 않은 예외 |
-
-### 요청 예시
-
-```bat
-curl -X POST http://127.0.0.1:8000/api/analyze ^
-  -H "Content-Type: application/json" ^
-  -d "{\"age\":28,\"annualIncomeKRW\":42000000,\"monthlyNetIncomeKRW\":3000000,\"liquidAssetsKRW\":40000000,\"existingDebtMonthlyKRW\":300000,\"householdSize\":1,\"regionCode\":\"11440\",\"isHomeless\":true,\"isNewlywed\":false,\"isSMEEmployee\":true,\"preferredType\":\"any\"}"
-```
-
-모든 요청 필드는 **선택**입니다(누락 시 안전한 기본값 사용). `regionCode`를 비우면
-첫 번째 지역이 기본 적용됩니다.
-
----
-
-## 4. 4대 엔진 산식 요약
-
-| 엔진 | 핵심 산식 | 주요 상수 |
-|---|---|---|
-| **E1** 주거지불능력 | `상한 = min(가처분소득×30%, 소득−생활비−부채−버퍼)`<br>`권장 = min(상한×85%, 소득×25%)` | 생활비 1인 120만원(+가구원), 버퍼 소득의 10% |
-| **E2** 적격성 | 연령·소득·자산·무주택·신혼·중소기업·지역 요건을 항목별로 판정<br>하드 요건 실패 → `ineligible` / 외부 확인 필요 → `conditional` | 경계값 마진 5% |
-| **E3** 총비용 | `TCO = 이자 + 월세 + 관리비 + 기회비용 + 보증료` (5년)<br>`NPV = Σ Cₜ/(1+r)^t`, `월환산 = TCO/60` | 기회비용·할인율 연 3.0%, 보증료 연 0.15%, LTV 80% |
-| **E4** 보증금 리스크 | 전세가율 + 보증보험 가능성 + 대출비중 + 보증금 규모 + 지역 여건<br>합산 0~100 (낮을수록 안전) | `low ≤34`, `medium ≤64`, `high >64` |
-
-> **보증금은 비용이 아니다.** 계약 종료 시 돌려받으므로 총비용에는 포함하지 않고,
-> 묶이는 자기자본의 **기회비용만** 반영합니다. 이것이 단순 월세 비교와의 결정적 차이입니다.
-
----
-
-## 5. 테스트
-
-```bat
-cd backend
-python -m pytest tests -q
-```
-
-44개 테스트가 4대 엔진의 경계값(0소득 / 고소득 / 과다부채 / 다인가구 /
-연령·지역 부적격 / 보증금 0원), 결정론성, API 계약 형태, 오류 봉투,
-그리고 프로바이더 추상화(.env 파싱·우선순위·툴 스키마 변환 일치)를 검증합니다.
-
-테스트는 **키가 있어도 절대 실제 API를 호출하지 않습니다** — LLM 관련 테스트는
-`no_keys` 픽스처로 offline 경로를 강제합니다.
-
----
-
-## 6. 데이터 정직성 고지
-
-- `data/*.json`의 모든 정책·시세 수치는 **프로토타입 시연용 예시**이며, 각 항목에
-  `source`(출처 기관)와 `disclaimer` 필드를 필수로 포함합니다.
-- 실제 KB 상품의 구체적 금리·한도는 사용하지 않았습니다. 정책 조건은 공개된
-  일반 요건(만 19~34세, 무주택 등) 수준으로만 기술했습니다.
-- 응답의 `meta.disclaimer`와 각 정책의 `disclaimer`가 항상 함께 전달되므로
-  UI 하단에 반드시 노출해야 합니다.
-
-> 프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다.
-
----
-
-## 7. LLM 프로바이더 설계
-
-### 툴 스키마 단일 정의
-
-4대 엔진의 툴 스키마는 `engines/agent.py`의 **`TOOL_SPECS` 한 곳에만** 정의되어 있고,
-`to_openai_tools()` / `to_anthropic_tools()`가 각 SDK 포맷으로 기계적으로 변환합니다.
-두 프로바이더의 툴 정의가 구조적으로 어긋날 수 없으며, 이를 테스트로 강제합니다.
-
-```
-TOOL_SPECS  ─┬─ to_openai_tools()    → {"type":"function","function":{name,description,parameters}}
-             └─ to_anthropic_tools() → {name, description, input_schema}
-```
-
-### 모델 선택 근거
-
-기본 모델은 **`gpt-5.4-mini`** 입니다 — 기억에 의존한 하드코딩이 아니라, 실제 키로
-`client.models.list()`(121개 확인) 후 후보군에 **실제 function calling 요청을 보내
-검증**하고, 전체 2턴 루프(툴 콜 → 엔진 결과 주입 → 한국어 최종 답변) 품질과 지연을
-비교해 선정했습니다. mini 티어라 대화형 응답에 적합한 비용·지연을 유지하면서도,
-비교 대상 중 유일하게 `stretch` 판정과 실제 의사결정 변수(보증금 조달 가능 여부)까지
-짚어냈습니다. `OPENAI_MODEL` 환경변수로 덮어쓸 수 있습니다.
-
-### `.env` 로딩
-
-`python-dotenv`에 의존하지 않고 `engines/config.py`가 직접 처리합니다.
-`prototype/backend/`에서 상위 디렉토리로 올라가며 `.env`를 탐색하고,
-BOM·CRLF·`export ` 접두사·주석을 허용하며, 값에서 앞뒤 **공백·따옴표·홑화살괄호(`<>`)**
-를 반복 제거합니다(`"<sk-proj-...>"` → `sk-proj-...`). 실제로 발생한 붙여넣기 사고를
-방어하기 위한 것이며, 값 내부 문자는 건드리지 않습니다.
-
-허용 목록(`OPENAI_API_KEY`, `OPENAI_MODEL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`)에
-있는 키만 가져오므로 `.env`가 `PATH` 같은 변수를 오염시킬 수 없습니다.
-이미 설정된 셸 환경변수가 `.env` 값보다 우선하므로, `set OPENAI_API_KEY=` 로
-일시적으로 offline 모드를 강제할 수 있습니다.
-
-### 장애 시 동작
-
-live 프로바이더 호출이 어떤 이유로든(SDK 미설치·네트워크·API 오류·빈 응답) 실패하면
-**예외를 사용자에게 노출하지 않고** offline 템플릿 결과로 자동 강등하며, 응답에
-`degradedFrom` 필드로 어떤 프로바이더가 실패했는지 남깁니다. 시연 중 스택 트레이스가
-화면에 뜨는 일은 없습니다.
+Home_Compass의 결과는 정보 제공 목적이며 금융상품의 승인, 법률·세무 자문 또는 투자 권유가 아닙니다. 실제 계약 전에는 최신 원문과 해당 기관의 공식 안내를 확인해야 합니다.

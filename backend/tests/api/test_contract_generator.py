@@ -31,7 +31,7 @@ def test_rendering_obeys_the_declared_serialization_rules():
     document = json.loads(rendered)
     assert list(document) == sorted(document)
     # 한국어가 유니코드 이스케이프로 부풀지 않고 그대로 실렸는가 (ensure_ascii=False).
-    assert app.title in rendered and app.title.isascii() is False
+    assert app.description in rendered and app.description.isascii() is False
 
 
 def test_building_the_document_does_not_poison_the_live_app():

@@ -1,5 +1,8 @@
 # 코디네이터 운영 절차
 
+> **현재 맥락:** 아래 Orca Run과 예선 서술은 이전 구현 세션의 운영 기록이다.
+> 현재 저장소는 공개 `dnhynk/Home_Compass`이며 서비스는 개인 참가로 운영한다.
+
 SPEC 9.4(병렬 에이전트 작업 규칙)의 실행 형태. **SPEC 이 정본이고 이 문서는 절차다.**
 충돌하면 SPEC 을 따르고 이 문서를 고친다.
 
@@ -13,9 +16,10 @@ SPEC Part 0-A 가 기록한 예선의 유일한 계약 사고는 **코디네이�
 
 | | |
 |---|---|
-| Orca Run | `run_c43a66d30d6f` |
-| 저장소 | `dnhynk/KB_AI` (private) · 기본 브랜치 `main` |
-| 상태판 | `python scripts/coord_status.py` |
+| 이전 Orca Run (기록) | `run_c43a66d30d6f` |
+| 당시 저장소 (기록) | `dnhynk/KB_AI` (private) · 기본 브랜치 `main` |
+| 현재 저장소 | `dnhynk/Home_Compass` (public) · 기본 브랜치 `main` |
+| 현재 상태판 | `python scripts/coord_status.py` — 현재 저장소 PR과 현재 Orca 런타임 전체를 표시 |
 | 자동 게이트 | CI(GitHub Actions) + 소유 경로 검사(상태판) + pre-push 훅 |
 | 워커 배치 | Orca 최상위 워크트리 1개당 워커 1대, `claude` |
 

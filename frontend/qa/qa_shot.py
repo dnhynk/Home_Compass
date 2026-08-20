@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Visual QA harness — KB 첫집 나침반 frontend.
+"""Visual QA harness — Home_Compass frontend.
 Drives the real flow with Playwright, captures full-page screenshots at
 desktop + mobile, and reports console errors / overflow / contrast issues.
 

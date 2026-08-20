@@ -1,5 +1,5 @@
 /* ============================================================
-   KB 첫집 나침반 — 규칙 검토·승인 화면 (admin)
+   Home_Compass — 규칙 검토·승인 화면 (admin)
    Vanilla CSS. No build step, no CDN, no external font request.
 
    ★ 팔레트·타이포·기하는 `frontend/styles.css` 와 **같은 값**이다. 두 화면이 같은
@@ -12,10 +12,10 @@
   color-scheme: light;
 
   /* — brand ————————————————————————————— */
-  --kb-yellow:        #FFB800;
-  --kb-yellow-deep:   #D99C00;
-  --kb-yellow-tint:   #FFF3D2;
-  --kb-yellow-wash:   #FFFAEE;
+  --accent-yellow:        #FFB800;
+  --accent-yellow-deep:   #D99C00;
+  --accent-yellow-tint:   #FFF3D2;
+  --accent-yellow-wash:   #FFFAEE;
 
   /* — ink / surface (warm neutral ramp) ————————— */
   --ink-1:  #1B1915;
@@ -75,7 +75,7 @@ svg { display: block; }
 strong { font-weight: 650; }
 code { font-family: var(--mono); font-size: .92em; }
 
-::selection { background: var(--kb-yellow-tint); color: var(--ink-1); }
+::selection { background: var(--accent-yellow-tint); color: var(--ink-1); }
 :focus-visible { outline: 2.5px solid var(--ink-1); outline-offset: 2px; border-radius: 4px; }
 
 .skip-link {
@@ -151,7 +151,7 @@ code { font-family: var(--mono); font-size: .92em; }
 .panel-head { margin-bottom: 16px; }
 .eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--kb-yellow-deep); margin-bottom: 6px;
+  color: var(--accent-yellow-deep); margin-bottom: 6px;
 }
 .panel-title, .card-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
 .panel-sub, .card-lead { font-size: 13.5px; color: var(--ink-3); margin-top: 6px; }
@@ -182,8 +182,8 @@ code { font-family: var(--mono); font-size: .92em; }
   border: 1px solid transparent; transition: background .12s, border-color .12s, color .12s;
 }
 .btn-block { width: 100%; }
-.btn-primary { background: var(--kb-yellow); color: var(--ink-1); }
-.btn-primary:hover:not(:disabled) { background: var(--kb-yellow-deep); }
+.btn-primary { background: var(--accent-yellow); color: var(--ink-1); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-yellow-deep); }
 .btn-outline { background: var(--surface); border-color: var(--line-strong); color: var(--ink-1); }
 .btn-outline:hover:not(:disabled) { border-color: var(--ink-3); }
 .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-2); font-size: 13px; padding: 7px 12px; }
@@ -199,8 +199,8 @@ code { font-family: var(--mono); font-size: .92em; }
   background: var(--surface); text-align: left; width: 100%;
 }
 .queue-item:hover { border-color: var(--line-strong); background: var(--plane); }
-.queue-item.active { border-color: var(--kb-yellow-deep); background: var(--kb-yellow-wash); }
-.queue-item input[type="checkbox"] { margin-top: 4px; width: 15px; height: 15px; accent-color: var(--kb-yellow-deep); }
+.queue-item.active { border-color: var(--accent-yellow-deep); background: var(--accent-yellow-wash); }
+.queue-item input[type="checkbox"] { margin-top: 4px; width: 15px; height: 15px; accent-color: var(--accent-yellow-deep); }
 .queue-open { display: block; width: 100%; text-align: left; padding: 0; }
 .queue-policy { display: block; font-weight: 650; font-size: 14px; }
 .queue-id { font-family: var(--mono); font-size: 11.5px; color: var(--ink-4); word-break: break-all; }
@@ -214,10 +214,10 @@ code { font-family: var(--mono); font-size: .92em; }
    같은 큐 패널 안에 있지만 다른 목록이고, 항목마다 유형 칩이 앞에 선다.
    색만으로 나르지 않는다 — 칩에 「현장 신고」라는 글자가 함께 있다. */
 .report-head { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
-.report-item { grid-template-columns: auto minmax(0, 1fr); background: var(--kb-yellow-wash); }
-.report-item:hover { background: var(--kb-yellow-wash); border-color: var(--kb-yellow-deep); }
+.report-item { grid-template-columns: auto minmax(0, 1fr); background: var(--accent-yellow-wash); }
+.report-item:hover { background: var(--accent-yellow-wash); border-color: var(--accent-yellow-deep); }
 .report-chip {
-  background: var(--kb-yellow-tint); border-color: var(--kb-yellow-deep);
+  background: var(--accent-yellow-tint); border-color: var(--accent-yellow-deep);
   color: var(--ink-1); align-self: start;
 }
 .report-body { min-width: 0; }
@@ -232,8 +232,8 @@ code { font-family: var(--mono); font-size: .92em; }
 }
 .report-context { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .report-context-item {
-  padding: 11px 12px; border: 1px solid var(--kb-yellow-deep);
-  border-radius: var(--r-md); background: var(--kb-yellow-wash);
+  padding: 11px 12px; border: 1px solid var(--accent-yellow-deep);
+  border-radius: var(--r-md); background: var(--accent-yellow-wash);
 }
 
 /* ── 상태 화면 (SPEC 7.2 · 7.3) ────────────────────────────
@@ -258,7 +258,7 @@ code { font-family: var(--mono); font-size: .92em; }
 .metric-unit { font-size: 15px; font-weight: 650; color: var(--ink-3); margin-left: 3px; }
 /* 관측이 없는 자리. **0 과 다른 것으로 보여야 한다** — 크기와 색을 함께 낮춘다. */
 .metric-value.is-none { font-size: 17px; color: var(--ink-4); font-weight: 650; }
-.metric-sub { font-size: 12.5px; color: var(--ink-2); }
+.metric-sub { font-size: 12.5px; color: var(--ink-2); overflow-wrap: anywhere; }
 .metric-sub code { color: var(--ink-3); }
 .metric-note {
   margin-top: 3px; padding-top: 8px; border-top: 1px dashed var(--line-strong);
@@ -284,7 +284,7 @@ code { font-family: var(--mono); font-size: .92em; }
 }
 .chip-lg { font-size: 13px; padding: 6px 13px; }
 .chip.is-new { background: var(--info-bg); color: var(--info-ink); border-color: var(--info); }
-.chip.is-change { background: var(--kb-yellow-tint); color: #7A5600; border-color: var(--kb-yellow-deep); }
+.chip.is-change { background: var(--accent-yellow-tint); color: #7A5600; border-color: var(--accent-yellow-deep); }
 .chip.is-warn { background: var(--caution-bg); color: var(--caution-ink); border-color: var(--caution); }
 .chip.is-good { background: var(--good-bg); color: var(--good-ink); border-color: var(--good); }
 
@@ -361,8 +361,8 @@ tbody tr:last-child td { border-bottom: 0; }
 
 .fields tbody tr.selectable { cursor: pointer; }
 .fields tbody tr.selectable:hover { background: var(--plane); }
-.fields tbody tr.active { background: var(--kb-yellow-wash); }
-.fields tbody tr.is-changed td:first-child { box-shadow: inset 3px 0 0 var(--kb-yellow-deep); }
+.fields tbody tr.active { background: var(--accent-yellow-wash); }
+.fields tbody tr.is-changed td:first-child { box-shadow: inset 3px 0 0 var(--accent-yellow-deep); }
 .fields tbody tr.is-inherited { color: var(--ink-3); background: var(--plane); }
 .f-label { font-weight: 650; color: var(--ink-1); }
 .f-path { display: block; font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
@@ -370,13 +370,13 @@ tbody tr:last-child td { border-bottom: 0; }
 .f-val.was { color: var(--ink-3); }
 .f-note { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.45; }
 .f-quote {
-  font-size: 12px; color: var(--ink-2); background: var(--kb-yellow-wash);
-  border: 1px solid var(--kb-yellow-tint); border-radius: var(--r-sm); padding: 5px 8px;
+  font-size: 12px; color: var(--ink-2); background: var(--accent-yellow-wash);
+  border: 1px solid var(--accent-yellow-tint); border-radius: var(--r-sm); padding: 5px 8px;
   display: inline-block; max-width: 44ch;
 }
 .f-nospan { font-size: 12px; color: var(--ink-4); }
 
-.impact tbody tr.is-changed { background: var(--kb-yellow-wash); }
+.impact tbody tr.is-changed { background: var(--accent-yellow-wash); }
 .impact-axis { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; max-width: 46ch; }
 .impact-arrow { color: var(--ink-4); padding: 0 4px; }
 .impact-diff { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
@@ -391,12 +391,12 @@ tbody tr:last-child td { border-bottom: 0; }
   padding: 18px; max-height: 460px; overflow-y: auto;
 }
 .source mark {
-  background: var(--kb-yellow-tint); color: inherit;
-  border-bottom: 2px solid var(--kb-yellow-deep); border-radius: 3px 3px 0 0;
+  background: var(--accent-yellow-tint); color: inherit;
+  border-bottom: 2px solid var(--accent-yellow-deep); border-radius: 3px 3px 0 0;
   padding: 1px 0;
 }
 .source mark.multi { background: var(--caution-bg); border-bottom-color: var(--caution); }
-.source mark.active { background: var(--kb-yellow); box-shadow: 0 0 0 3px var(--kb-yellow-tint); }
+.source mark.active { background: var(--accent-yellow); box-shadow: 0 0 0 3px var(--accent-yellow-tint); }
 
 /* ── limits ────────────────────────────────────────────── */
 .card-limits { background: var(--plane); }

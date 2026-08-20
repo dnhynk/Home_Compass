@@ -1,4 +1,4 @@
-# KB 첫집 나침반 — 프로토타입 의존성
+# Home_Compass — 프로토타입 의존성
 # Python 3.11+ 권장 (개발/검증 환경: Python 3.13.7, Windows 11)
 
 fastapi>=0.115

@@ -1,10 +1,11 @@
-"""KB 첫집 나침반 — FastAPI entry point.
+"""Home_Compass — FastAPI entry point.
 
 Thin HTTP layer over the deterministic engines. It does three things and
 nothing else: validate input, call `engines.analyze()` / `engines.agent.chat()`,
 and serve the vanilla frontend as static files.
 
-Run:  uvicorn app:app --host 127.0.0.1 --port 8000   (from prototype/backend)
+Run:  python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000
+      (from backend/src)
 """
 
 from __future__ import annotations
@@ -303,7 +304,7 @@ boot_seed_accounts()
 SESSIONS = SessionStore()
 
 app = FastAPI(
-    title="KB 첫집 나침반 API",
+    title="Home_Compass API",
     version=ENGINE_VERSION,
     description="청년 주거 금융 의사결정 엔진 — 4대 결정론적 엔진 + LLM 상담 레이어",
 )
@@ -3827,8 +3828,8 @@ else:  # pragma: no cover - only hit before the frontend exists
     def _placeholder() -> str:
         return (
             "<!doctype html><meta charset='utf-8'>"
-            "<title>KB 첫집 나침반</title>"
-            "<h1>KB 첫집 나침반 백엔드가 실행 중입니다.</h1>"
+            "<title>Home_Compass</title>"
+            "<h1>Home_Compass 백엔드가 실행 중입니다.</h1>"
             f"<p>프론트엔드({FRONTEND_DIR})가 아직 없습니다.</p>"
             "<p>API 문서: <a href='/docs'>/docs</a></p>"
         )

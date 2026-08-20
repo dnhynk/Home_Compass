@@ -1,5 +1,5 @@
 /* ============================================================
-   KB 첫집 나침반 — FirstHome Compass · frontend controller
+   Home_Compass · frontend controller
    Vanilla JS. No framework, no bundler, no external request.
    Charts are hand-built inline SVG.
 
@@ -1484,7 +1484,7 @@
     renderLocalPathBanner();
     syncMoneyEcho();
     pushMsg('bot',
-      '안녕하세요. KB 첫집 나침반입니다.\n' +
+      '안녕하세요. Home_Compass입니다.\n' +
       '왼쪽에 상황을 입력하고 진단을 실행하면, 계산된 숫자를 근거로 답변해 드립니다. ' +
       '저는 값을 만들어내지 않고 4개 판정 엔진이 계산한 결과만 인용합니다.',
       [{ tool: 'ready', args: {}, resultSummary: '엔진 대기' }]);

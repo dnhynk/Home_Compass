@@ -1,17 +1,17 @@
 /* ============================================================
-   KB 첫집 나침반 — FirstHome Compass
+   Home_Compass
    Vanilla CSS. No build step, no CDN, no external font request.
-   Light theme only. Warm neutral plane + KB yellow accent.
+   Light theme only. Warm neutral plane + yellow accent.
    ============================================================ */
 
 :root {
   color-scheme: light;
 
   /* — brand ————————————————————————————— */
-  --kb-yellow:        #FFB800;
-  --kb-yellow-deep:   #D99C00;
-  --kb-yellow-tint:   #FFF3D2;
-  --kb-yellow-wash:   #FFFAEE;
+  --accent-yellow:        #FFB800;
+  --accent-yellow-deep:   #D99C00;
+  --accent-yellow-tint:   #FFF3D2;
+  --accent-yellow-wash:   #FFFAEE;
 
   /* — ink / surface (warm neutral ramp) ————————— */
   /* ink-3 / ink-4 are the de-emphasis steps. They are held at WCAG AA 4.5:1
@@ -84,7 +84,7 @@ button { cursor: pointer; background: none; border: 0; }
 svg { display: block; }
 strong { font-weight: 650; }
 
-::selection { background: var(--kb-yellow-tint); color: var(--ink-1); }
+::selection { background: var(--accent-yellow-tint); color: var(--ink-1); }
 
 :focus-visible {
   outline: 2.5px solid var(--ink-1);
@@ -150,7 +150,7 @@ strong { font-weight: 650; }
 }
 .conn[data-state="live"]   .conn-dot { background: var(--good); box-shadow: 0 0 0 3px rgba(12,163,12,.16); }
 .conn[data-state="offline"].conn      { border-color: var(--line); }
-.conn[data-state="offline"] .conn-dot { background: var(--kb-yellow-deep); box-shadow: 0 0 0 3px rgba(217,156,0,.16); }
+.conn[data-state="offline"] .conn-dot { background: var(--accent-yellow-deep); box-shadow: 0 0 0 3px rgba(217,156,0,.16); }
 /* local = 백엔드 미연결이지만 생성물로 판정이 성립하는 상태.
    disabled = 생성물이 없어 판정 자체를 하지 않는 상태 (D-11). 둘을 같은 색으로 뭉치지 않는다. */
 .conn[data-state="local"]  .conn-dot  { background: var(--caution); box-shadow: 0 0 0 3px rgba(236,131,90,.18); }
@@ -168,7 +168,8 @@ strong { font-weight: 650; }
   .conn #connText { display: none; }
 }
 @media (max-width: 400px) {
-  .brand-text strong { font-size: 15px; }
+  .brand-mark { display: none; }
+  .brand-text strong { font-size: 13px; letter-spacing: -.03em; }
   .btn-ghost { padding: 0 10px; font-size: 12px; }
 }
 
@@ -185,7 +186,7 @@ strong { font-weight: 650; }
   height: 32px; padding: 0 13px; font-size: 12.5px;
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2);
 }
-.btn-ghost:hover { background: var(--kb-yellow-wash); border-color: var(--kb-yellow); color: var(--ink-1); }
+.btn-ghost:hover { background: var(--accent-yellow-wash); border-color: var(--accent-yellow); color: var(--ink-1); }
 .btn-primary {
   background: var(--ink-1); color: #fff;
   box-shadow: 0 1px 2px rgba(27,25,21,.2), 0 12px 24px -14px rgba(27,25,21,.6);
@@ -272,7 +273,7 @@ strong { font-weight: 650; }
 .form-panel { overflow: hidden; }
 .panel-head {
   padding: clamp(20px, 2vw, 26px) clamp(18px, 2vw, 24px) 20px;
-  background: linear-gradient(168deg, var(--kb-yellow-wash) 0%, var(--surface) 78%);
+  background: linear-gradient(168deg, var(--accent-yellow-wash) 0%, var(--surface) 78%);
   border-bottom: 1px solid var(--line-soft);
 }
 .panel-title { font-size: 21px; font-weight: 750; letter-spacing: -.035em; }
@@ -307,7 +308,7 @@ strong { font-weight: 650; }
 }
 .input-wrap:focus-within {
   background: var(--surface);
-  border-color: var(--kb-yellow-deep);
+  border-color: var(--accent-yellow-deep);
   box-shadow: 0 0 0 3px rgba(255,184,0,.2);
 }
 .input-wrap input, .input-wrap select {
@@ -382,7 +383,7 @@ strong { font-weight: 650; }
   background: #fff; box-shadow: 0 1px 3px rgba(27,25,21,.32);
   transition: transform .2s cubic-bezier(.2,.7,.3,1);
 }
-.switch input:checked + .switch-track { background: var(--kb-yellow); }
+.switch input:checked + .switch-track { background: var(--accent-yellow); }
 .switch input:checked + .switch-track .switch-thumb { transform: translateX(18px); }
 .switch input:focus-visible + .switch-track { outline: 2.5px solid var(--ink-1); outline-offset: 2px; }
 
@@ -412,7 +413,7 @@ strong { font-weight: 650; }
 .hero > * { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase;
-  color: var(--kb-yellow); margin-bottom: 16px;
+  color: var(--accent-yellow); margin-bottom: 16px;
 }
 .hero-title {
   font-size: clamp(28px, 3.7vw, 46px); font-weight: 780;
@@ -445,13 +446,13 @@ strong { font-weight: 650; }
   transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
 }
 .engine-card:hover {
-  border-color: var(--kb-yellow); transform: translateY(-2px);
+  border-color: var(--accent-yellow); transform: translateY(-2px);
   box-shadow: var(--shadow-1);
 }
 .engine-no {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 30px; height: 22px; padding: 0 8px; border-radius: 6px;
-  background: var(--kb-yellow-tint); color: #8A6200;
+  background: var(--accent-yellow-tint); color: #8A6200;
   font-size: 11px; font-weight: 750; letter-spacing: .06em; margin-bottom: 11px;
 }
 .engine-card h3 { font-size: 15px; font-weight: 700; letter-spacing: -.025em; }
@@ -495,7 +496,7 @@ strong { font-weight: 650; }
 .chip-caution  { background: var(--caution-bg);  color: var(--caution-ink);  border-color: rgba(236,131,90,.34); }
 .chip-critical { background: var(--critical-bg); color: var(--critical-ink); border-color: rgba(208,59,59,.26); }
 .chip-neutral  { background: var(--plane-sunk);  color: var(--ink-2);        border-color: var(--line); }
-.chip-brand    { background: var(--kb-yellow-tint); color: #7A5700;          border-color: rgba(217,156,0,.35); }
+.chip-brand    { background: var(--accent-yellow-tint); color: #7A5700;          border-color: rgba(217,156,0,.35); }
 
 /* ── verdict card ──────────────────────────────────────── */
 .verdict-body {
@@ -589,7 +590,7 @@ strong { font-weight: 650; }
 /* ── rationale ─────────────────────────────────────────── */
 .rationale {
   margin-top: 22px; padding: 16px 18px;
-  background: var(--kb-yellow-wash);
+  background: var(--accent-yellow-wash);
   border: 1px solid rgba(217,156,0,.22);
   border-radius: var(--r-md);
   display: flex; flex-direction: column; gap: 8px;
@@ -601,7 +602,7 @@ strong { font-weight: 650; }
 .rationale li::before {
   content: ""; position: absolute; left: 4px; top: .62em;
   width: 7px; height: 7px; border-radius: 2px;
-  background: var(--kb-yellow); transform: rotate(45deg);
+  background: var(--accent-yellow); transform: rotate(45deg);
 }
 
 /* ── TCO compare ───────────────────────────────────────── */
@@ -680,11 +681,11 @@ strong { font-weight: 650; }
   transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
 }
 .scenario:hover { border-color: var(--line-strong); box-shadow: var(--shadow-1); transform: translateY(-2px); }
-.scenario.is-best { border-color: var(--kb-yellow); box-shadow: 0 0 0 3px rgba(255,184,0,.16); }
+.scenario.is-best { border-color: var(--accent-yellow); box-shadow: 0 0 0 3px rgba(255,184,0,.16); }
 .sc-flag {
   position: absolute; top: -10px; left: 14px;
   height: 21px; padding: 0 9px; border-radius: 999px;
-  background: var(--kb-yellow); color: #4A3600;
+  background: var(--accent-yellow); color: #4A3600;
   font-size: 10.5px; font-weight: 750; letter-spacing: .02em;
   display: inline-flex; align-items: center;
 }
@@ -818,7 +819,7 @@ strong { font-weight: 650; }
 }
 .summary-mark {
   position: absolute; top: 6px; left: 18px;
-  font-size: 78px; line-height: 1; color: var(--kb-yellow);
+  font-size: 78px; line-height: 1; color: var(--accent-yellow);
   opacity: .28; font-family: Georgia, "Times New Roman", serif;
 }
 .card-summary p:first-of-type {
@@ -845,8 +846,8 @@ strong { font-weight: 650; }
   display: grid; place-items: center;
   font-size: 11px; font-weight: 750; letter-spacing: -.02em;
 }
-.msg-bot .msg-avatar { background: var(--ink-1); color: var(--kb-yellow); }
-.msg-user .msg-avatar { background: var(--kb-yellow-tint); color: #7A5700; }
+.msg-bot .msg-avatar { background: var(--ink-1); color: var(--accent-yellow); }
+.msg-user .msg-avatar { background: var(--accent-yellow-tint); color: #7A5700; }
 .msg-bubble {
   padding: 12px 15px; border-radius: 14px;
   font-size: 13.5px; line-height: 1.68; letter-spacing: -.012em;
@@ -886,7 +887,7 @@ strong { font-weight: 650; }
   transition: border-color .14s ease, background .14s ease, box-shadow .14s ease;
 }
 .chat-input input:focus {
-  background: var(--surface); border-color: var(--kb-yellow-deep);
+  background: var(--surface); border-color: var(--accent-yellow-deep);
   box-shadow: 0 0 0 3px rgba(255,184,0,.2);
 }
 .chat-input input::placeholder { color: var(--ink-4); }
@@ -952,7 +953,7 @@ strong { font-weight: 650; }
   box-shadow: 0 16px 40px -12px rgba(27,25,21,.55);
   animation: rise .3s cubic-bezier(.2,.7,.25,1) both;
 }
-.toast b { color: var(--kb-yellow); font-weight: 700; }
+.toast b { color: var(--accent-yellow); font-weight: 700; }
 
 /* ============================================================
    이상 신고 (SPEC 6.4 · 7.1)
@@ -1027,11 +1028,11 @@ strong { font-weight: 650; }
   background: var(--surface); color: var(--ink-1);
   border: 1px solid var(--line); border-radius: var(--r-sm);
 }
-.session-form input:focus-visible { outline: 2px solid var(--kb-yellow-deep); outline-offset: 1px; }
+.session-form input:focus-visible { outline: 2px solid var(--accent-yellow-deep); outline-offset: 1px; }
 .session-who { font-size: 12px; font-weight: 650; color: var(--ink-1); }
 .session-role {
   margin-left: 4px; padding: 1px 6px; border-radius: 999px;
-  background: var(--kb-yellow-tint); color: #6B4E00; font-size: 10.5px; font-weight: 700;
+  background: var(--accent-yellow-tint); color: #6B4E00; font-size: 10.5px; font-weight: 700;
 }
 .btn-xs { height: 30px; padding: 0 11px; font-size: 12px; }
 
@@ -1049,7 +1050,7 @@ strong { font-weight: 650; }
   font-size: 12.5px; line-height: 1.6;
   border-bottom: 1px solid var(--line);
 }
-.local-banner[data-kind="local"] { background: var(--kb-yellow-wash); color: #5A4200; }
+.local-banner[data-kind="local"] { background: var(--accent-yellow-wash); color: #5A4200; }
 .local-banner[data-kind="disabled"] { background: var(--critical-bg); color: var(--critical-ink); }
 .local-banner code {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -1104,7 +1105,7 @@ strong { font-weight: 650; }
 }
 
 /* ── 내부 정보 (SPEC 6.1) ────────────────────────────────── */
-.card-internal { border-color: var(--line-strong); background: var(--kb-yellow-wash); }
+.card-internal { border-color: var(--line-strong); background: var(--accent-yellow-wash); }
 #internalBody h4 {
   margin-top: 18px; font-size: 13px; font-weight: 700; color: var(--ink-1);
 }

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-build_ppt.py - Technical specification deck builder for "KB 첫집 나침반".
+build_ppt.py - Technical specification deck builder for "Home_Compass".
 
-Generates docs/기술설명서_KB첫집나침반.pptx (16:9, 15 slides, 맑은 고딕).
+Generates docs/competition/기술설명서_Home_Compass.pptx (16:9, 15 slides, 맑은 고딕).
 All architecture / engine-flow diagrams are drawn with real pptx shapes
 (rectangles, arrows, connectors) - never as plain bullet text.
 
@@ -40,7 +40,7 @@ from pptx.util import Emu, Inches, Pt
 # --------------------------------------------------------------------------
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_PATH = os.path.join(HERE, "기술설명서_KB첫집나침반.pptx")
+OUT_PATH = os.path.join(HERE, "기술설명서_Home_Compass.pptx")
 
 FONT = "맑은 고딕"
 
@@ -75,7 +75,7 @@ FOOTER_Y = 6.92
 #: 받아 쓴다. 15장이던 시절 이 수가 여러 자리에 박혀 있었고, 본선 산출물 넷을 더하면서
 #: 그 자리들이 전부 낡을 뻔했다 (이 덱이 「15종」에서 이미 겪은 부류다).
 TOTAL_SLIDES = 0  # build() 가 채운다
-FOOTER_TEXT = "KB 첫집 나침반 (FirstHome Compass)  ·  제8회 KB Future Finance AI Challenge 기술설명서"
+FOOTER_TEXT = "Home_Compass  ·  2026 금융 AI Challenge 기술설명서"
 
 DISCLAIMER = (
     "프로토타입 시연용 예시 수치입니다. 실제 조건은 취급 금융기관 고시 기준을 따릅니다."
@@ -332,10 +332,10 @@ def slide_01_cover(prs):
     style_run(needle2.text_frame.paragraphs[0].add_run(), 1, False, DARK)
 
     txbox(slide, 1.10, 1.55, 8.6, 0.4,
-          [("제8회 KB Future Finance AI Challenge  ·  기술설명서", 12, True, YELLOW)])
+          [("2026 금융 AI Challenge  ·  기술설명서", 12, True, YELLOW)])
     txbox(slide, 1.10, 2.05, 8.6, 1.3,
-          [("KB 첫집 나침반", 46, True, WHITE),
-           ("FirstHome Compass", 15, False, GRAY_LT, 8)], line_spacing=1.0)
+          [("Home_Compass", 46, True, WHITE),
+           ("청년 주거 금융 의사결정 서비스", 15, False, GRAY_LT, 8)], line_spacing=1.0)
     rect(slide, 1.14, 3.62, 1.5, 0.05, fill=YELLOW, line=None,
          shape_type=MSO_SHAPE.RECTANGLE)
     txbox(slide, 1.10, 3.88, 8.3, 1.5,
@@ -351,10 +351,10 @@ def slide_01_cover(prs):
     rect(slide, 6.42, 5.72, 3.0, 0.9, fill=RGBColor(0x38, 0x38, 0x38), line=None,
          radius=0.10, align=PP_ALIGN.LEFT, insets=(0.24, 0.14, 0.20, 0.12),
          anchor=MSO_ANCHOR.MIDDLE,
-         items=[("팀명", 9.5, True, YELLOW),
-                # Team name is "Paddle"; "KB 첫집 나침반" is the service/과제명.
-                # Keep the two distinct — the 참가신청서 uses the same split.
-                ("Paddle", 12, True, WHITE, 3)])
+         items=[("참가 구분", 9.5, True, YELLOW),
+                # 개인 참가다. 팀명 자리가 아니라 참가 구분 자리로 쓴다 —
+                # 과제명(서비스명)은 표지 제목이 이미 지고 있다.
+                ("개인 참가", 12, True, WHITE, 3)])
     txbox(slide, 1.10, 6.82, 6.0, 0.3, [("2026년 8월 3일", 10.5, False, GRAY_LT)])
     return slide
 
@@ -426,7 +426,7 @@ def slide_03_gap(prs):
 
     rect(slide, CONTENT_X, 4.70, CONTENT_W, 1.60, fill=DARK, line=None, radius=0.08,
          align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP, insets=(0.34, 0.20, 0.30, 0.16),
-         items=[("TO-BE  ·  KB 첫집 나침반", 11, True, YELLOW),
+         items=[("TO-BE  ·  Home_Compass", 11, True, YELLOW),
                 ("① 감당 가능 월주거비 상한을 숫자로 판정하고  ② 전세·월세를 총비용(TCO)과 현재가치(NPV)로 비교하며",
                  12.5, False, WHITE, 8),
                 ("③ 제도별 적격 여부를 사유와 함께 판정하고  ④ 보증금 리스크를 0~100점으로 계량합니다.",
@@ -440,7 +440,7 @@ def slide_03_gap(prs):
 
 def slide_04_overview(prs):
     slide = new_slide(
-        prs, 4, "서비스 개요 — KB 첫집 나침반",
+        prs, 4, "서비스 개요 — Home_Compass",
         "프로필 입력 3분 → 지불능력·시나리오·정책·리스크를 한 화면에서 판정",
         eyebrow="SOLUTION",
     )
@@ -1501,7 +1501,7 @@ def slide_19_impact(prs):
          items=[("맺음말", 10, True, YELLOW),
                 ("청년에게 필요한 것은 더 많은 상품 정보가 아니라, “나는 지금 얼마짜리 집에 살아도 되는가”에 대한 답입니다.",
                  14, True, WHITE, 6),
-                ("KB 첫집 나침반은 그 답을 숫자와 근거로 제시하고, 실행 가능한 다음 단계까지 연결합니다.",
+                ("Home_Compass는 그 답을 숫자와 근거로 제시하고, 실행 가능한 다음 단계까지 연결합니다.",
                  12, False, GRAY_LT, 5)])
     return slide
 
@@ -1536,9 +1536,9 @@ def build() -> str:
     prs.slide_height = Inches(SLIDE_H)
 
     cp = prs.core_properties
-    cp.title = "KB 첫집 나침반 기술설명서"
-    cp.subject = "제8회 KB Future Finance AI Challenge"
-    cp.author = "Paddle"
+    cp.title = "Home_Compass 기술설명서"
+    cp.subject = "2026 금융 AI Challenge"
+    cp.author = "개인 참가"
 
     builders = [
         slide_01_cover, slide_02_problem, slide_03_gap, slide_04_overview,

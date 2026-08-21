@@ -36,7 +36,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DECK_DIR = REPO_ROOT / "docs" / "competition"
 BUILDER = DECK_DIR / "build_ppt.py"
-DECK = DECK_DIR / "기술설명서_KB첫집나침반.pptx"
+DECK = DECK_DIR / "기술설명서_Home_Compass.pptx"
 
 
 def _require_pptx():

@@ -39,7 +39,7 @@ SCRIPTS = REPO_ROOT / "scripts"
 GENERATED = REPO_ROOT / "frontend" / "generated"
 OPENAPI = REPO_ROOT / "contracts" / "openapi.json"
 GENERATOR = SCRIPTS / "gen_contracts.py"
-ELIGIBILITY = SRC / "firsthome" / "engines" / "eligibility.py"
+ELIGIBILITY = SRC / "home_compass" / "engines" / "eligibility.py"
 
 sys.path.insert(0, str(SRC))
 sys.path.insert(0, str(SCRIPTS))
@@ -48,10 +48,10 @@ sys.path.insert(0, str(SCRIPTS))
 #: 내든 통과하는 항등식이 된다. 6단계 `web` 워커가 `<script src>` 로 거는 이름과
 #: `window` 전역 이름이 여기 박혀 있고, 바뀌면 이 파일이 먼저 깨진다.
 ARTIFACTS = {
-    "web-model-constants": ("model_constants.js", "FIRSTHOME_MODEL_CONSTANTS"),
-    "web-policy-rules": ("policy_rules.js", "FIRSTHOME_POLICY_RULES"),
-    "web-regions": ("regions.js", "FIRSTHOME_REGIONS"),
-    "web-contract-constants": ("contract_constants.js", "FIRSTHOME_CONTRACT_CONSTANTS"),
+    "web-model-constants": ("model_constants.js", "HOME_COMPASS_MODEL_CONSTANTS"),
+    "web-policy-rules": ("policy_rules.js", "HOME_COMPASS_POLICY_RULES"),
+    "web-regions": ("regions.js", "HOME_COMPASS_REGIONS"),
+    "web-contract-constants": ("contract_constants.js", "HOME_COMPASS_CONTRACT_CONSTANTS"),
 }
 
 _MODULE_RE = re.compile(r"\Awindow\.(?P<name>[A-Z0-9_]+) = (?P<payload>\{.*\});\n\Z", re.DOTALL)
@@ -80,7 +80,7 @@ def split_module(text: str) -> tuple[str, str, dict]:
 def rendered() -> dict[str, str]:
     """생성기가 **지금** 만들어 내는 것. 저장소는 세션 임시본이다 (conftest 가 시드한다)."""
     import gen_contracts
-    from firsthome.store import store_from_env
+    from home_compass.store import store_from_env
 
     with store_from_env() as store:
         return gen_contracts.render_all(store)
@@ -217,8 +217,8 @@ def test_the_artifacts_do_not_carry_the_developers_db_state():
     `gen_contracts.py` 는 임시 저장소를 스스로 시드해서 읽는다. 오염된 저장소를
     환경변수로 걸어도 결과가 커밋본과 같아야 그 격리가 실제로 작동하는 것이다.
     """
-    from firsthome.store import STORE_URL_ENV, create_store
-    from firsthome.store.seed import seed_all
+    from home_compass.store import STORE_URL_ENV, create_store
+    from home_compass.store.seed import seed_all
 
     with tempfile.TemporaryDirectory() as tmp:
         url = f"sqlite://{Path(tmp) / 'polluted.db'}"
@@ -270,7 +270,7 @@ def test_policy_rules_are_not_empty(payloads: dict[str, dict]):
 @pytest.mark.parametrize("name", sorted(ARTIFACTS))
 def test_every_artifact_carries_the_same_engine_version(name: str, payloads: dict[str, dict]):
     """세 생성물이 같은 실행에서 나왔는지 소비자가 런타임에 확인할 수 있어야 한다."""
-    from firsthome.common import ENGINE_VERSION
+    from home_compass.common import ENGINE_VERSION
 
     assert payloads[name]["$generated"]["engineVersion"] == ENGINE_VERSION
 
@@ -341,7 +341,7 @@ def test_regions_are_not_empty(payloads: dict[str, dict]):
 
 def test_region_fact_fields_are_the_stores_eight(payloads: dict[str, dict]):
     """정본은 `store.models.REGION_FACT_FIELDS` 다. 생성기가 목록을 다시 적으면 정본이 둘이 된다."""
-    from firsthome.store.models import REGION_FACT_FIELDS
+    from home_compass.store.models import REGION_FACT_FIELDS
 
     assert payloads["web-regions"]["$factFields"] == sorted(REGION_FACT_FIELDS)
 
@@ -353,7 +353,7 @@ def test_region_payload_is_exactly_what_the_engine_receives(payloads: dict[str, 
     여기서 필드를 투영하면 「무엇을 골랐나」가 두 번째 계약이 되고, 저장소가 필드를
     늘려도 생성물은 조용히 예전 것만 낸다.
     """
-    from firsthome.store import store_from_env
+    from home_compass.store import store_from_env
 
     with store_from_env() as store:
         expected = [region.to_engine_dict() for region in store.regions.list()]
@@ -369,7 +369,7 @@ def test_every_region_carries_field_level_provenance(payloads: dict[str, dict]):
     `guaranteeAvailable`)가 그 구분을 필요로 하는 자리이며, 10.2 6단계 완료 기준의
     「`dataGrade` 사유가 원인 유형별로 구분되어 표시된다」가 여기에 걸린다.
     """
-    from firsthome.store.models import REGION_FACT_FIELDS
+    from home_compass.store.models import REGION_FACT_FIELDS
 
     for entry in payloads["web-regions"]["regions"]:
         field_provenance = entry["fieldProvenance"]
@@ -383,7 +383,7 @@ def test_every_region_carries_field_level_provenance(payloads: dict[str, dict]):
 
 def test_the_record_provenance_is_the_worst_of_the_field_provenances(payloads: dict[str, dict]):
     """SPEC 2.4 — 가장 나쁜 것이 이긴다. 요약이 필드보다 좋으면 그 레코드는 거짓말을 한다."""
-    from firsthome.store.models import worst_verification
+    from home_compass.store.models import worst_verification
 
     for entry in payloads["web-regions"]["regions"]:
         worst = worst_verification(
@@ -410,7 +410,7 @@ def test_model_constants_carry_value_verification_and_source_kind(payloads: dict
 
 def test_model_constant_values_are_the_stores_values(payloads: dict[str, dict]):
     """생성물의 값이 곧 판정에 쓰이는 값이어야 한다 — 아니면 사본이 거짓말을 한다."""
-    from firsthome.store import store_from_env
+    from home_compass.store import store_from_env
 
     with store_from_env() as store:
         mapping = store.model_constants.as_mapping()

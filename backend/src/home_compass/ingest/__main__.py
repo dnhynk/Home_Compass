@@ -1,11 +1,11 @@
-"""실기동 - `python -m firsthome.ingest`.
+"""실기동 - `python -m home_compass.ingest`.
 
 SPEC 9.3 #3 의 **배치 작업** 대응물이다 — 배치를 실제로 실행하고 저장소 변화 전후를 찍는다.
 수집 대장의 숫자가 **저장소에 실제로 들어간 텍스트**와 일치하는지도 여기서 눈으로 확인한다.
 
-    python -m firsthome.ingest                       # 임시 DB 에 실행 후 정리
-    python -m firsthome.ingest --db ./var/collect.db # 파일을 남긴다
-    FIRSTHOME_STORE_URL=sqlite://./var/x.db python -m firsthome.ingest --from-env
+    python -m home_compass.ingest                       # 임시 DB 에 실행 후 정리
+    python -m home_compass.ingest --db ./var/collect.db # 파일을 남긴다
+    HOME_COMPASS_STORE_URL=sqlite://./var/x.db python -m home_compass.ingest --from-env
 
 성공하면 0, 하나라도 어긋나면 1로 끝난다.
 """
@@ -237,7 +237,7 @@ def run(url: str) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ingest 실기동 (수집 -> 적재)")
     parser.add_argument("--db", help="SQLite 파일 경로. 없으면 임시 파일에 실행한다")
-    parser.add_argument("--from-env", action="store_true", help="FIRSTHOME_STORE_URL 을 쓴다")
+    parser.add_argument("--from-env", action="store_true", help="HOME_COMPASS_STORE_URL 을 쓴다")
     args = parser.parse_args(argv)
 
     if args.from_env:

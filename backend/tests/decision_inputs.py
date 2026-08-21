@@ -1,7 +1,7 @@
 """판정 입력(지역·정책)을 테스트에 공급한다 — 컷오버 후의 경로는 저장소 하나다.
 
 컷오버 전에는 `engines.load_regions()` · `engines.load_policies()` 가 이 자리를 맡았다.
-그 둘은 `backend/src/firsthome/data/*.json` 을 `lru_cache(maxsize=1)` 로 읽었고,
+그 둘은 `backend/src/home_compass/data/*.json` 을 `lru_cache(maxsize=1)` 로 읽었고,
 SPEC 2.3 이 정면으로 금지하는 프로세스 수명 캐시였다. 지금 엔진에는 그 경로가 없다.
 
 테스트가 **저장소에서** 읽는 이유는 편의가 아니다. api 가 요청마다 저장소에서 읽어
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from firsthome.store import store_from_env
+from home_compass.store import store_from_env
 
 #: 테스트의 요청 시각. 실기동에서 `main.request_now()` 가 서는 자리이며, 테스트는 그것을
 #: 고정값으로 대신한다 (SPEC 5.3 — 결정성 테스트는 클럭을 고정한다).

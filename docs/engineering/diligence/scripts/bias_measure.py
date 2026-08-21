@@ -23,7 +23,7 @@
 
 집계 조건은 현행 파이프라인과 **동일하게** 건다 — 아파트 · 85m^2 이하 · 최근 3개월 ·
 같은 시군구. 조건을 바꾸면 편향이 아니라 조건 차이를 재게 된다. 그래서 정규화·중앙값·
-산식은 전부 `firsthome.ingest.market` 의 함수를 그대로 부른다.
+산식은 전부 `home_compass.ingest.market` 의 함수를 그대로 부른다.
 
 짝짓기 규약 (이 스크립트의 유일한 새 선택)
 ------------------------------------------
@@ -56,7 +56,7 @@ from typing import Any, Iterable, Mapping, Sequence
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "backend" / "src"))
 
-from firsthome.ingest.market.pipeline import (  # noqa: E402
+from home_compass.ingest.market.pipeline import (  # noqa: E402
     LOOKBACK_KEY,
     MAX_AREA_KEY,
     MAX_ATTEMPTS_KEY,
@@ -71,11 +71,11 @@ from firsthome.ingest.market.pipeline import (  # noqa: E402
     normalize_trades,
     window_months,
 )
-from firsthome.ingest.market.source import MolitClient  # noqa: E402
+from home_compass.ingest.market.source import MolitClient  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 
-REGIONS_JSON = REPO_ROOT / "backend" / "src" / "firsthome" / "data" / "regions.json"
+REGIONS_JSON = REPO_ROOT / "backend" / "src" / "home_compass" / "data" / "regions.json"
 CONSTANTS_JSON = REPO_ROOT / "contracts" / "model_constants.json"
 
 #: 한국부동산원 공표값 — **주택유형 = 아파트 · 시군구 단위**. 6차 실사가 KOSIS 그리드에서

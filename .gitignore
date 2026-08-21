@@ -27,6 +27,6 @@ archive/
 .impeccable/
 *.tmp
 
-# 저장소 런타임 산출물 — DEFAULT_STORE_URL 이 backend/var/firsthome.db 다 (W-store 요청)
+# 저장소 런타임 산출물 — DEFAULT_STORE_URL 이 backend/var/home_compass.db 다 (W-store 요청)
 backend/var/
 *.db

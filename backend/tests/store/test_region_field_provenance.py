@@ -21,8 +21,8 @@ from __future__ import annotations
 import pytest
 from conftest import UNVERIFIED_MARKET, make_region
 
-from firsthome.store.errors import ProvenanceError, StoreError
-from firsthome.store.models import (
+from home_compass.store.errors import ProvenanceError, StoreError
+from home_compass.store.models import (
     REGION_FACT_FIELDS,
     Provenance,
     Region,

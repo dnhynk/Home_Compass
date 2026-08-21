@@ -20,9 +20,9 @@ echo.
 cd /d "%~dp0.."
 
 rem SPEC 1.3 - 시연에서 배치를 눈앞에서 돌려야 하므로 별도 명령으로 실행 가능해야 한다.
-rem 진입점의 정본은 firsthome.ingest.market 이며 이 배치는 그것을 부르기만 한다.
+rem 진입점의 정본은 home_compass.ingest.market 이며 이 배치는 그것을 부르기만 한다.
 set PYTHONPATH=%CD%\backend\src
-python -m firsthome.ingest.market %*
+python -m home_compass.ingest.market %*
 set RC=%ERRORLEVEL%
 
 if %RC% neq 0 (

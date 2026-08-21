@@ -30,7 +30,7 @@ from jsonschema import Draft202012Validator
 
 REPO = Path(__file__).resolve().parents[3]
 SCHEMA_PATH = REPO / "contracts" / "rule_draft.schema.json"
-ELIGIBILITY = REPO / "backend" / "src" / "firsthome" / "engines" / "eligibility.py"
+ELIGIBILITY = REPO / "backend" / "src" / "home_compass" / "engines" / "eligibility.py"
 
 
 @pytest.fixture(scope="module")

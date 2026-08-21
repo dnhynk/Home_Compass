@@ -86,7 +86,7 @@ def test_the_uncovered_note_is_not_empty(profile_set):
 
 @pytest.fixture(scope="module")
 def decide(by_id):
-    from firsthome.engines import analyze
+    from home_compass.engines import analyze
     from decision_inputs import FROZEN_NOW, store_policies, store_regions
     from seed_constants import frozen_seed
 
@@ -102,7 +102,7 @@ def decide(by_id):
 
 def test_non_metro_actually_selects_a_different_guarantee_cap(by_id):
     """F-4 수도권/비수도권 분기가 실제로 갈리는가 — 7억 대 5억."""
-    from firsthome.engines import guarantee_deposit_cap_for
+    from home_compass.engines import guarantee_deposit_cap_for
     from decision_inputs import store_regions
     from seed_constants import frozen_seed
 
@@ -117,7 +117,7 @@ def test_non_metro_actually_selects_a_different_guarantee_cap(by_id):
 
 def test_metro_gyeonggi_is_metro_but_not_seoul(by_id):
     """수도권 접두가 '11' 만이 아님을 고정한다. 시드가 서울뿐이면 '41'·'28' 이 죽은 값이 된다."""
-    from firsthome.engines import guarantee_deposit_cap_for
+    from home_compass.engines import guarantee_deposit_cap_for
     from decision_inputs import store_regions
     from seed_constants import frozen_seed
 

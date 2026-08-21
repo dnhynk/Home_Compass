@@ -9,7 +9,7 @@ Wave 2 컷오버 이후 `api` 는 모델 상수를 **저장소에서만** 읽는
 때문이다. 시드는 설치 단계이고 기동은 검증 단계다. 둘을 섞지 않는다.
 
     python scripts/seed_store.py
-    python scripts/seed_store.py --url sqlite://./backend/var/firsthome.db
+    python scripts/seed_store.py --url sqlite://./backend/var/home_compass.db
 
 두 번 돌려도 결과가 같다 (`seed_all` 이 멱등이다). 종료코드 0 = 성공.
 """
@@ -27,9 +27,9 @@ from _console import force_utf8_stdout
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "backend" / "src"))
 
-from firsthome.engines import required_constant_keys  # noqa: E402
-from firsthome.store import DEFAULT_STORE_URL, STORE_URL_ENV, create_store  # noqa: E402
-from firsthome.store.seed import seed_all  # noqa: E402
+from home_compass.engines import required_constant_keys  # noqa: E402
+from home_compass.store import DEFAULT_STORE_URL, STORE_URL_ENV, create_store  # noqa: E402
+from home_compass.store.seed import seed_all  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -20,7 +20,7 @@
 따라서 스레드마다 SQLite 커넥션이 다르고, 직렬화는 GIL 이 아니라 DB 잠금이 결정한다.
 동기 엔드포인트는 Starlette 의 워커 스레드풀에서 돌므로 파이썬 레벨에서도 겹친다.
 
-격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로 돌리고
+격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로 돌리고
 세션 원장을 비운다. `conftest.py` 의 세션 저장소는 여기서 건드리지 않는다.
 """
 
@@ -34,16 +34,16 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME
-from firsthome.auth import ensure_seed_accounts
-from firsthome.main import app
-from firsthome.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME
+from home_compass.auth import ensure_seed_accounts
+from home_compass.main import app
+from home_compass.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
+from home_compass.store.seed import seed_all
 
 T0 = datetime(2026, 8, 14, 9, 0, tzinfo=timezone.utc)
 
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 #: 같은 초안에 동시에 달려드는 요청 수. 2 로는 인터리빙이 운에 좌우된다.
 CLAIMERS = 8
@@ -288,8 +288,8 @@ class TestTheClaimIsReleasedWhenTheApprovalCannotFinish:
         실패하면 `pending` 으로 되돌린다. 되돌리지 않으면 원자화가 [한 번만 일어난다]를
         [한 번도 못 일어난다]로 바꿔 놓는다.
         """
-        from firsthome.store.errors import StoreError
-        from firsthome.store.sqlite_store import _RuleVersions
+        from home_compass.store.errors import StoreError
+        from home_compass.store.sqlite_store import _RuleVersions
 
         draft_id = seed_draft(store_url, "draft-rollback")
         csrf = as_rule_manager(client)

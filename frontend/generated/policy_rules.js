@@ -9,23 +9,23 @@
    손으로 고치면 backend/tests/crosscheck/test_generated_frontend_diff.py 의
    바이트 비교가 깨진다. 되돌리려면 위 재생성 명령을 돌린다.
 
-   이 파일이 없거나 로드에 실패하면 window.FIRSTHOME_POLICY_RULES 은 undefined 다.
+   이 파일이 없거나 로드에 실패하면 window.HOME_COMPASS_POLICY_RULES 은 undefined 다.
    소비자는 그 자리에서 로컬 판정 경로를 끄고 화면에 명시한다 — 기본값으로 메우는
    침묵 폴백을 금지한다 (SPEC D-11 · 6.2 오프라인 동작 정의 #3).
    ============================================================ */
-window.FIRSTHOME_POLICY_RULES = {
+window.HOME_COMPASS_POLICY_RULES = {
   "$activePredicate": "status = 'approved' AND (effective_from IS NULL OR effective_from <= now) AND (effective_to IS NULL OR now < effective_to) — SPEC 2.3. 이 배열은 승인된 규칙 **전부**이며, 소비자가 자기 시각으로 이 술어를 적용한다. 적용하지 않으면 종료된 규칙이 판정에 실린다.",
   "$generated": {
     "artifact": "web-policy-rules",
     "command": "python scripts/gen_contracts.py",
     "doNotEdit": true,
     "engineVersion": "3.0.0",
-    "global": "FIRSTHOME_POLICY_RULES",
-    "noSilentFallback": "이 파일이 없으면 window.FIRSTHOME_POLICY_RULES 은 undefined 다. 기본값·빈 값으로 대체하지 않는다. 판정 경로를 끄고 화면에 명시한다 (SPEC D-11).",
+    "global": "HOME_COMPASS_POLICY_RULES",
+    "noSilentFallback": "이 파일이 없으면 window.HOME_COMPASS_POLICY_RULES 은 undefined 다. 기본값·빈 값으로 대체하지 않는다. 판정 경로를 끄고 화면에 명시한다 (SPEC D-11).",
     "shapeDocumentedIn": "contracts/README.md 결정 #34",
     "source": "store 의 승인된 RuleVersion (SPEC 1.2 · D-11 · 2.3)"
   },
-  "$noRuleFunctions": "요건은 데이터다. 이 파일은 판정 함수를 담지 않는다 — 해석기는 소비자가 쓰고, 그 해석은 backend/src/firsthome/engines/eligibility.py 와 같아야 한다 (SPEC D-11).",
+  "$noRuleFunctions": "요건은 데이터다. 이 파일은 판정 함수를 담지 않는다 — 해석기는 소비자가 쓰고, 그 해석은 backend/src/home_compass/engines/eligibility.py 와 같아야 한다 (SPEC D-11).",
   "criteriaFields": [
     "ageMax",
     "ageMin",

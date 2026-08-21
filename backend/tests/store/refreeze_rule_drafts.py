@@ -42,18 +42,18 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "backend" / "src"))
 
-from firsthome.config import openai_model  # noqa: E402
-from firsthome.ingest.extraction import (  # noqa: E402
+from home_compass.config import openai_model  # noqa: E402
+from home_compass.ingest.extraction import (  # noqa: E402
     MAX_ATTEMPTS_KEY,
     default_targets,
     extract_one,
 )
-from firsthome.ingest.extraction_verify import rule_draft_schema  # noqa: E402
-from firsthome.ingest.loader import load_policy_sources  # noqa: E402
-from firsthome.ingest.sources import loadable_sources  # noqa: E402
-from firsthome.llm.extraction import extraction_provider  # noqa: E402
-from firsthome.store import create_store  # noqa: E402
-from firsthome.store.seed import SEED_DATA_DIR, seed_model_constants  # noqa: E402
+from home_compass.ingest.extraction_verify import rule_draft_schema  # noqa: E402
+from home_compass.ingest.loader import load_policy_sources  # noqa: E402
+from home_compass.ingest.sources import loadable_sources  # noqa: E402
+from home_compass.llm.extraction import extraction_provider  # noqa: E402
+from home_compass.store import create_store  # noqa: E402
+from home_compass.store.seed import SEED_DATA_DIR, seed_model_constants  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 FIXTURE = SEED_DATA_DIR / "rule_drafts.json"

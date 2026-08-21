@@ -34,19 +34,19 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.engines import analyze, required_constant_keys  # noqa: E402
-from firsthome.engines.affordability import assess_affordability  # noqa: E402
-from firsthome.engines.eligibility import evaluate_policies  # noqa: E402
-from firsthome.engines.risk import scan_deposit_risk  # noqa: E402
-from firsthome.engines.tco import build_scenarios  # noqa: E402
-from firsthome.main import load_model_constants  # noqa: E402
-from firsthome.store import create_store, store_from_env  # noqa: E402
-from firsthome.store.seed import seed_model_constants  # noqa: E402
+from home_compass.engines import analyze, required_constant_keys  # noqa: E402
+from home_compass.engines.affordability import assess_affordability  # noqa: E402
+from home_compass.engines.eligibility import evaluate_policies  # noqa: E402
+from home_compass.engines.risk import scan_deposit_risk  # noqa: E402
+from home_compass.engines.tco import build_scenarios  # noqa: E402
+from home_compass.main import load_model_constants  # noqa: E402
+from home_compass.store import create_store, store_from_env  # noqa: E402
+from home_compass.store.seed import seed_model_constants  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed, load_registry  # noqa: E402
 from snapshot_util import dumps, load_profiles, split_snapshot  # noqa: E402
 
-ENGINES_DIR = Path(__file__).resolve().parents[1] / "src" / "firsthome" / "engines"
+ENGINES_DIR = Path(__file__).resolve().parents[1] / "src" / "home_compass" / "engines"
 
 # SPEC 2.3 컷오버 — 지역·정책도 주입받는다. 여기서 흔드는 축은 **상수 하나**이므로
 # 이 둘은 고정한다 (`decision_inputs.py`).
@@ -270,7 +270,7 @@ def test_boot_is_refused_when_any_constant_is_missing(missing, tmp_path, seeded_
 
     url = f"sqlite://{db}"
     # 격리 — 이 케이스가 세션 저장소(conftest)를 건드리지 않았음을 URL 로 못 박는다.
-    assert url != os.environ.get("FIRSTHOME_STORE_URL")
+    assert url != os.environ.get("HOME_COMPASS_STORE_URL")
 
     with create_store(url) as store:
         with pytest.raises(RuntimeError) as caught:

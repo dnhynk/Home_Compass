@@ -27,7 +27,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.common import money, pct, safe_int  # noqa: E402
+from home_compass.common import money, pct, safe_int  # noqa: E402
 
 FIXTURE = Path(__file__).resolve().parents[2] / "contracts" / "format_golden.json"
 GOLDEN = json.loads(FIXTURE.read_text(encoding="utf-8"))

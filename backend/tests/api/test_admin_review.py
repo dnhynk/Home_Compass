@@ -22,7 +22,7 @@
 그 결과 이 파일이 **BMP 밖 문자로 경계를 고정한다.** UTF-16 코드유닛으로 자르면 여기서
 빨간불이 난다 — 그것이 이 절이 있는 이유다.
 
-격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로 돌린다.
+격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로 돌린다.
 """
 
 from __future__ import annotations
@@ -35,25 +35,25 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import app
-from firsthome.store import (
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import app
+from home_compass.store import (
     STORE_URL_ENV,
     PolicySource,
     RuleDraft,
     RuleSpanMapping,
     create_store,
 )
-from firsthome.store.seed import seed_all
+from home_compass.store.seed import seed_all
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REGRESSION_PROFILES = REPO_ROOT / "contracts" / "regression_profiles.json"
 
 T0 = datetime(2026, 8, 14, 9, 0, tzinfo=timezone.utc)
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 # --------------------------------------------------------------------------
 # 원문 — **BMP 밖 문자를 일부러 넣는다**

@@ -104,8 +104,8 @@ AUTH_CONSTANT_KEYS = (SESSION_IDLE_TIMEOUT_KEY, SESSION_ABSOLUTE_TIMEOUT_KEY)
 # 3. 쿠키 · CSRF (SPEC 6.2 동일 오리진 · 6.3)
 # --------------------------------------------------------------------------
 
-SESSION_COOKIE_NAME = "firsthome_session"
-CSRF_COOKIE_NAME = "firsthome_csrf"
+SESSION_COOKIE_NAME = "home_compass_session"
+CSRF_COOKIE_NAME = "home_compass_csrf"
 CSRF_HEADER_NAME = "X-CSRF-Token"
 
 #: 세션 쿠키는 `HttpOnly` 다 — **JS 에서 읽지 않는다** (Part 0-E · ASVS).
@@ -422,8 +422,8 @@ def csrf_error(action: str | None = None) -> AuthError:
 #
 # 시민 계정은 만들지 않는다 — D-9 가 [시민은 익명이므로 계정이 없다]고 못박았다.
 
-COUNSELOR_PASSWORD_ENV = "FIRSTHOME_SEED_COUNSELOR_PASSWORD"
-RULE_MANAGER_PASSWORD_ENV = "FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"
+COUNSELOR_PASSWORD_ENV = "HOME_COMPASS_SEED_COUNSELOR_PASSWORD"
+RULE_MANAGER_PASSWORD_ENV = "HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"
 
 
 @dataclass(frozen=True)
@@ -454,7 +454,7 @@ def _announce(lines: list[str]) -> None:
     """**stderr 로 낸다.**
 
     stdout 이 아닌 이유가 있다. `scripts/gen_contracts.py --stdout` 은 계약 파일 **바이트**를
-    stdout 으로 흘리는데, 그 스크립트가 `firsthome.main` 을 import 하는 것이 곧 기동이다.
+    stdout 으로 흘리는데, 그 스크립트가 `home_compass.main` 을 import 하는 것이 곧 기동이다.
     여기서 stdout 에 한 줄이라도 찍으면 생성물 앞에 그 줄이 붙어 계약이 깨진다.
     """
     for line in lines:

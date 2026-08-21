@@ -4,9 +4,9 @@
 **시세 수집(SPEC Part 3)은 `ingest.market` 하위 패키지**에 따로 있다 — 두 배치는 출처도
 실패 양상도 다르고, 섞으면 「어느 수집이 실패했는가」가 한 진입점 뒤로 숨는다.
 
-    python -m firsthome.ingest            # 임시 DB 에 적재하고 조회 결과를 출력
-    python -m firsthome.ingest --db ./var/collect.db
-    python -m firsthome.ingest.market     # 시세 수집 배치 (SPEC Part 3)
+    python -m home_compass.ingest            # 임시 DB 에 적재하고 조회 결과를 출력
+    python -m home_compass.ingest --db ./var/collect.db
+    python -m home_compass.ingest.market     # 시세 수집 배치 (SPEC Part 3)
 
 이 패키지가 지고 있는 것 —
   - 대상은 **현행 `policies.json` 전수**다. 못 찾은 것은 `[출처 미특정]` 으로 남기고

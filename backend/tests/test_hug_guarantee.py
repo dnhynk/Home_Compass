@@ -28,13 +28,13 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.engines import (  # noqa: E402
+from home_compass.engines import (  # noqa: E402
     analyze,
     guarantee_deposit_cap_for,
     required_constant_keys,
 )
-from firsthome.engines.risk import scan_deposit_risk  # noqa: E402
-from firsthome.engines.tco import evaluate_scenario, guarantee_rate_pct_for  # noqa: E402
+from home_compass.engines.risk import scan_deposit_risk  # noqa: E402
+from home_compass.engines.tco import evaluate_scenario, guarantee_rate_pct_for  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed, load_registry  # noqa: E402
 

@@ -13,14 +13,14 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.main import app  # noqa: E402
-from firsthome.engines import (  # noqa: E402
+from home_compass.main import app  # noqa: E402
+from home_compass.engines import (  # noqa: E402
     analyze,
     find_region,
     guarantee_deposit_cap_for,
 )
-from firsthome.engines.affordability import assess_affordability  # noqa: E402
-from firsthome.llm.agent import (  # noqa: E402
+from home_compass.engines.affordability import assess_affordability  # noqa: E402
+from home_compass.llm.agent import (  # noqa: E402
     TOOL_NAMES,
     chat,
     execute_tool,
@@ -29,16 +29,16 @@ from firsthome.llm.agent import (  # noqa: E402
     to_openai_tools,
     tool_specs,
 )
-from firsthome.config import (  # noqa: E402
+from home_compass.config import (  # noqa: E402
     clean_env_value,
     find_env_file,
     load_env_file,
     parse_env_text,
     resolve_provider,
 )
-from firsthome.engines.eligibility import evaluate_policies  # noqa: E402
-from firsthome.engines.risk import scan_deposit_risk  # noqa: E402
-from firsthome.engines.tco import build_scenarios  # noqa: E402
+from home_compass.engines.eligibility import evaluate_policies  # noqa: E402
+from home_compass.engines.risk import scan_deposit_risk  # noqa: E402
+from home_compass.engines.tco import build_scenarios  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed  # noqa: E402
 

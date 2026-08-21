@@ -1,11 +1,11 @@
-"""실기동 스모크 - `python -m firsthome.store`.
+"""실기동 스모크 - `python -m home_compass.store`.
 
 저장소에는 HTTP 가 없으므로 SPEC 9.3 #3("실제로 기동해서 손으로 호출")의 대응물은
 이 스크립트다. 저장·조회·**수정 거부**를 실제로 실행하고 결과를 그대로 찍는다.
 
-    python -m firsthome.store                      # 임시 DB 에 실행 후 정리
-    python -m firsthome.store --db ./var/smoke.db  # 파일을 남긴다
-    FIRSTHOME_STORE_URL=sqlite://./var/x.db python -m firsthome.store --from-env
+    python -m home_compass.store                      # 임시 DB 에 실행 후 정리
+    python -m home_compass.store --db ./var/smoke.db  # 파일을 남긴다
+    HOME_COMPASS_STORE_URL=sqlite://./var/x.db python -m home_compass.store --from-env
 
 성공하면 0, 하나라도 어긋나면 1로 끝난다.
 """
@@ -230,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     force_utf8_stdout()
     parser = argparse.ArgumentParser(description="store 실기동 스모크")
     parser.add_argument("--db", help="SQLite 파일 경로. 없으면 임시 파일에 실행한다")
-    parser.add_argument("--from-env", action="store_true", help="FIRSTHOME_STORE_URL 을 쓴다")
+    parser.add_argument("--from-env", action="store_true", help="HOME_COMPASS_STORE_URL 을 쓴다")
     args = parser.parse_args(argv)
 
     if args.from_env:

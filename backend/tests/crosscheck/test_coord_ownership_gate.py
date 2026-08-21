@@ -58,7 +58,7 @@ def test_owner_is_identified_and_no_violation(coord, worker, files):
 
 def test_worker_touching_contracts_is_flagged(coord):
     """SPEC 8.2 #5 — 계약 변경은 코디네이터만."""
-    pr = _pr(coord, ["backend/src/firsthome/engines/risk.py",
+    pr = _pr(coord, ["backend/src/home_compass/engines/risk.py",
                      "contracts/model_constants.json"])
     v = pr.violations()
     assert v, "계약 파일 변경이 통과되었다"
@@ -66,7 +66,7 @@ def test_worker_touching_contracts_is_flagged(coord):
 
 
 def test_worker_touching_crosscheck_is_flagged(coord):
-    pr = _pr(coord, ["backend/src/firsthome/store/base.py",
+    pr = _pr(coord, ["backend/src/home_compass/store/base.py",
                      "backend/tests/crosscheck/test_scripts_encoding.py"])
     assert any("코디네이터 전용" in line for line in pr.violations())
 
@@ -79,15 +79,15 @@ def test_worker_touching_spec_is_flagged(coord):
 
 def test_store_worker_editing_engines_is_flagged(coord):
     """두 워커가 동시에 도는 동안 서로의 경로를 건드리는 것이 최대 위험이다."""
-    pr = _pr(coord, ["backend/src/firsthome/store/sqlite.py",
-                     "backend/src/firsthome/engines/tco.py"])
+    pr = _pr(coord, ["backend/src/home_compass/store/sqlite.py",
+                     "backend/src/home_compass/engines/tco.py"])
     assert pr.owner_guess is None
     assert any("소유 경로 밖" in line for line in pr.violations())
 
 
 def test_research_worker_writing_code_is_flagged(coord):
     pr = _pr(coord, ["docs/engineering/diligence/FINDINGS.md",
-                     "backend/src/firsthome/engines/affordability.py"])
+                     "backend/src/home_compass/engines/affordability.py"])
     assert any("소유 경로 밖" in line for line in pr.violations())
 
 

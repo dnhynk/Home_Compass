@@ -233,7 +233,7 @@ def test_the_role_annotation_slot_exists(doc):
 
 def test_the_role_vocabulary_matches_the_store(doc):
     """어휘가 두 곳에서 갈리면 4단계에 그대로 사고가 된다."""
-    from firsthome.store.models import ROLES
+    from home_compass.store.models import ROLES
 
     assert set(doc["x-role-annotations"]["roles"]) == set(ROLES) - {"citizen"}
 

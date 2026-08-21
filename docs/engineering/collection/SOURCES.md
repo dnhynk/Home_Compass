@@ -7,7 +7,7 @@
 - 취득 수단: **Orca 내장 브라우저** (`orca goto` · `eval`). Playwright 등 별도 도구는 설치하지 않았다.
   3차의 ⑥⑧ 재취득만 `curl`(첨부 PDF) 을 썼다 — 9절
 - 범위: SPEC 4.1 **#1 수집까지**. 추출(#2)·span 매핑(#3)은 하지 않았다
-- 정본은 코드다 — `backend/src/firsthome/ingest/sources.py`. 이 문서는 그 서술판이며,
+- 정본은 코드다 — `backend/src/home_compass/ingest/sources.py`. 이 문서는 그 서술판이며,
   코드포인트 수·이용조건·적재 여부·**출처표시**는 `backend/tests/ingest/` 가 실제 파일·저장소와 대조한다
 
 > **공고문은 갱신된다.** 아래 URL 은 조회일 기준이며, 다음 사람이 같은 길로 다시 오도록
@@ -745,8 +745,8 @@ attribution = {기관} 「{저작물명}」 ({공고번호} 또는 문서종류)
 export PYTHONPATH=backend/src
 python -m pytest backend/tests/ingest -q      # 47 passed  (2차 27 -> 3차 47)
 python -m pytest backend/tests -q             # 729 passed (2차 708 -> 3차 729)
-python -m firsthome.ingest                    # 임시 DB 에 적재하고 조회 결과를 찍는다
-python -m firsthome.ingest --db ./var/collect.db
+python -m home_compass.ingest                    # 임시 DB 에 적재하고 조회 결과를 찍는다
+python -m home_compass.ingest --db ./var/collect.db
 ```
 
 ⑥⑧ 의 원본 PDF 재취득·재추출(3차에서 실제로 한 것):

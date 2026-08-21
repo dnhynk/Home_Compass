@@ -18,8 +18,8 @@ import copy
 import threading
 from datetime import datetime
 
-from firsthome.store.errors import DraftAlreadyDecidedError, RecordNotFoundError, StoreError
-from firsthome.store.interfaces import (
+from home_compass.store.errors import DraftAlreadyDecidedError, RecordNotFoundError, StoreError
+from home_compass.store.interfaces import (
     AnomalyReportRepository,
     ApprovalRecordRepository,
     AuditLog,
@@ -31,7 +31,7 @@ from firsthome.store.interfaces import (
     Store,
     UserRepository,
 )
-from firsthome.store.models import (
+from home_compass.store.models import (
     AnomalyReport,
     ApprovalRecord,
     AuditEvent,
@@ -43,7 +43,7 @@ from firsthome.store.models import (
     RuleVersion,
     User,
 )
-from firsthome.store.validation import (
+from home_compass.store.validation import (
     normalize_text,
     require_aware,
     validate_approval,

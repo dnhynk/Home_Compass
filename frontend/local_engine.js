@@ -2,7 +2,7 @@
    Home_Compass — 로컬 판정 경로 (SPEC D-11 · 6.2 오프라인 정의)
 
    ── 이 파일이 무엇인가 ──────────────────────────────────────────────────────
-   `backend/src/firsthome/engines/` 네 엔진의 **충실한 JS 이식**이다. 손으로 고른
+   `backend/src/home_compass/engines/` 네 엔진의 **충실한 JS 이식**이다. 손으로 고른
    숫자가 한 개도 없다 — 상수·정책 규칙·지역 시세는 전부 `frontend/generated/`
    생성물에서 온다 (계약 결정 #34).
 
@@ -19,7 +19,7 @@
    ── 무엇이 "같다"를 붙들고 있는가 ────────────────────────────────────────────
    주장이 아니라 파수병이다. `backend/tests/test_frontend_local_engine_equivalence.py`
    가 node 로 이 파일을 실행해 `contracts/regression_profiles.json` x 저장소 지역 전수를
-   돌리고, 파이썬 `firsthome.engines.analyze()` 의 결과와 **숫자·상태 필드를 바이트
+   돌리고, 파이썬 `home_compass.engines.analyze()` 의 결과와 **숫자·상태 필드를 바이트
    비교**한다 (SPEC 5.3 의 numeric/text 분리 그대로). 어긋나면 CI 가 빨간불이다.
 
    ── 대응 관계 ────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@
 (function (global) {
   'use strict';
 
-  var FMT = global.FirstHomeFormat;
+  var FMT = global.HomeCompassFormat;
 
   /* ══════════════════════════════════════════════════════════
      0. 생성물 — 없으면 이 경로는 **동작하지 않는다** (D-11)
@@ -44,10 +44,10 @@
      `|| {}` 를 쓰지 않는다. 그 한 줄이 D-11 을 무효로 만든다 (계약 결정 #34).
      ══════════════════════════════════════════════════════════ */
   var ARTIFACTS = [
-    { global: 'FIRSTHOME_MODEL_CONSTANTS', file: 'generated/model_constants.js', label: '모델 상수' },
-    { global: 'FIRSTHOME_POLICY_RULES', file: 'generated/policy_rules.js', label: '승인된 정책 규칙' },
-    { global: 'FIRSTHOME_REGIONS', file: 'generated/regions.js', label: '지역 시세' },
-    { global: 'FIRSTHOME_CONTRACT_CONSTANTS', file: 'generated/contract_constants.js', label: '계약 상수' }
+    { global: 'HOME_COMPASS_MODEL_CONSTANTS', file: 'generated/model_constants.js', label: '모델 상수' },
+    { global: 'HOME_COMPASS_POLICY_RULES', file: 'generated/policy_rules.js', label: '승인된 정책 규칙' },
+    { global: 'HOME_COMPASS_REGIONS', file: 'generated/regions.js', label: '지역 시세' },
+    { global: 'HOME_COMPASS_CONTRACT_CONSTANTS', file: 'generated/contract_constants.js', label: '계약 상수' }
   ];
 
   /** 로컬 판정 경로가 성립하는가. 성립하지 않으면 **무엇이 없는지**를 함께 돌려준다. */
@@ -73,7 +73,7 @@
 
   /** 모델 상수 하나. 없으면 던진다 — 파이썬 `constants[key]` 의 `KeyError` 자리다. */
   function K(key) {
-    var entries = requireArtifact('FIRSTHOME_MODEL_CONSTANTS').entries;
+    var entries = requireArtifact('HOME_COMPASS_MODEL_CONSTANTS').entries;
     if (!Object.prototype.hasOwnProperty.call(entries, key)) {
       throw new Error('모델 상수가 생성물에 없습니다: ' + key + ' (SPEC 5.1.1 fail-closed)');
     }
@@ -81,10 +81,10 @@
   }
 
   function constantProvenance(key) {
-    return requireArtifact('FIRSTHOME_MODEL_CONSTANTS').entries[key].provenance;
+    return requireArtifact('HOME_COMPASS_MODEL_CONSTANTS').entries[key].provenance;
   }
 
-  /* `meta.disclaimer` 는 `firsthome/common.py` 의 `DISCLAIMER` 다. 판정 숫자를 바꾸는
+  /* `meta.disclaimer` 는 `home_compass/common.py` 의 `DISCLAIMER` 다. 판정 숫자를 바꾸는
      값이 아니라 화면 문구이므로 `ModelConstant` 대상이 아니고(SPEC 5.1.2 비대상),
      생성물에도 독립 항목으로는 실리지 않는다. 대신 **문자열이 같은지를 테스트가
      직접 붙든다** (`test_frontend_local_engine_equivalence.py`). */
@@ -122,7 +122,7 @@
    * 나오지 않는다 (계약 결정 #34).
    */
   function activeRuleVersions(nowMs) {
-    return requireArtifact('FIRSTHOME_POLICY_RULES').ruleVersions.filter(function (v) {
+    return requireArtifact('HOME_COMPASS_POLICY_RULES').ruleVersions.filter(function (v) {
       var rv = v.ruleVersion;
       return (rv.effective_from === null || Date.parse(rv.effective_from) <= nowMs)
           && (rv.effective_to === null || nowMs < Date.parse(rv.effective_to));
@@ -135,7 +135,7 @@
 
   /** 생성물의 지역 레코드 전부. `payload` 가 엔진 입력이고 계보는 그 옆에 있다. */
   function regionRecords() {
-    return requireArtifact('FIRSTHOME_REGIONS').regions;
+    return requireArtifact('HOME_COMPASS_REGIONS').regions;
   }
 
   /** 파이썬 `engines.find_region`. */
@@ -1127,7 +1127,7 @@
       summary: buildSummary(region, affordability, scenarios, evaluated, risk),
       meta: {
         generatedAt: utcStamp(nowMs),
-        engineVersion: requireArtifact('FIRSTHOME_MODEL_CONSTANTS').$generated.engineVersion,
+        engineVersion: requireArtifact('HOME_COMPASS_MODEL_CONSTANTS').$generated.engineVersion,
         region: { code: region.code || '', name: region.name || '' },
         disclaimer: DISCLAIMER
       }
@@ -1170,7 +1170,7 @@
        못박았고 그 값은 아직 없다. 없는 판정을 조용히 넘기면 화면은 그것을 「신선하다」로
        읽는다 — 그것이 D-11 이 금지한 침묵 폴백이다.
 
-     ★ 여기는 `backend/src/firsthome/main.py` 의 `build_lineage` · `grade_facts` 와
+     ★ 여기는 `backend/src/home_compass/main.py` 의 `build_lineage` · `grade_facts` 와
        **같은 규칙**이다. 두 경로가 SPEC 2.4 를 각자 읽으면 반드시 어긋나고, 그것이
        계약 결정 #37 이 지목한 지배적 실패 양상이다. 같음을 붙드는 것은 주장이 아니라
        `backend/tests/test_frontend_local_engine_equivalence.py` 다 — 그 파수병이
@@ -1214,7 +1214,7 @@
 
     /* (1) 지역 시세 — 사실 단위(필드별) 계보. 레코드 요약으로 접지 않는다. */
     if (regionRecord) {
-      var factFields = requireArtifact('FIRSTHOME_REGIONS').$factFields;
+      var factFields = requireArtifact('HOME_COMPASS_REGIONS').$factFields;
       factFields.forEach(function (field) {
         var prov = regionRecord.fieldProvenance[field];
         items.push({
@@ -1242,7 +1242,7 @@
     });
 
     /* (3) 모델 상수 — 엔진이 실제로 조회한 키만. */
-    var entries = requireArtifact('FIRSTHOME_MODEL_CONSTANTS').entries;
+    var entries = requireArtifact('HOME_COMPASS_MODEL_CONSTANTS').entries;
     Object.keys(entries).sort().forEach(function (key) {
       var engine = key.split('.')[0];
       if (!Object.prototype.hasOwnProperty.call(ENGINE_TARGETS, engine)) return;
@@ -1327,7 +1327,7 @@
     return best;
   }
 
-  global.FirstHomeLocalEngine = {
+  global.HomeCompassLocalEngine = {
     status: status,
     analyze: analyze,
     regions: regionRecords,

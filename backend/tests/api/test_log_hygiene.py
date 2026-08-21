@@ -95,17 +95,17 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import LOG_FIELDS, app
-from firsthome.store import create_store
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import LOG_FIELDS, app
+from home_compass.store import create_store
+from home_compass.store.seed import seed_all
 
 SRC = Path(__file__).resolve().parents[2] / "src"
 T0 = datetime(2026, 8, 15, 9, 0, tzinfo=timezone.utc)
 BOOT_TIMEOUT_S = 60
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
 
 # --------------------------------------------------------------------------
 # 대역 — 이 값들이 로그 어딘가에 있으면 실패다
@@ -183,7 +183,7 @@ class TestTheLoggersCannotCarryARequestBody:
 
     def test_an_unknown_field_is_refused_rather_than_dropped(self, tmp_path, monkeypatch):
         """★ 조용히 버리면 [적었다고 믿는데 안 적힌] 상태가 된다. 터지는 편이 낫다."""
-        monkeypatch.setenv("FIRSTHOME_LOG_FILE", str(tmp_path / "x.jsonl"))
+        monkeypatch.setenv("HOME_COMPASS_LOG_FILE", str(tmp_path / "x.jsonl"))
         with pytest.raises(ValueError) as err:
             main_module._emit_log({"at": "2026-01-01T00:00:00+00:00", "body": "샜다"})
         assert "허용되지 않은" in str(err.value)
@@ -214,14 +214,14 @@ def store_url(tmp_path, monkeypatch) -> str:
     with create_store(url) as store:
         seed_all(store, at=T0)
         ensure_seed_accounts(store, now=T0, announce=lambda lines: None)
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", url)
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", url)
     return url
 
 
 @pytest.fixture
 def log_path(tmp_path, monkeypatch) -> Path:
     path = tmp_path / "observability.jsonl"
-    monkeypatch.setenv("FIRSTHOME_LOG_FILE", str(path))
+    monkeypatch.setenv("HOME_COMPASS_LOG_FILE", str(path))
     return path
 
 
@@ -304,8 +304,8 @@ class _Server:
         self._console_handle = console_file.open("w+b")
         env = {
             **os.environ,
-            "FIRSTHOME_STORE_URL": store_url,
-            "FIRSTHOME_LOG_FILE": str(log_file),
+            "HOME_COMPASS_STORE_URL": store_url,
+            "HOME_COMPASS_LOG_FILE": str(log_file),
             "PYTHONPATH": str(SRC),
             "PYTHONIOENCODING": "utf-8",
             # 키 없이 돈다 (SPEC 9.2.1). 개발 머신의 .env 가 이 테스트를 프로바이더
@@ -314,7 +314,7 @@ class _Server:
             "ANTHROPIC_API_KEY": "",
         }
         self.process = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "firsthome.main:app",
+            [sys.executable, "-m", "uvicorn", "home_compass.main:app",
              "--host", "127.0.0.1", "--port", str(self.port), "--log-level", "info"],
             cwd=str(SRC), env=env,
             stdout=self._console_handle, stderr=subprocess.STDOUT,

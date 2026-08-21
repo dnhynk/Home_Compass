@@ -16,8 +16,8 @@ from pathlib import Path
 import pytest
 from conftest import T0
 
-from firsthome.store.models import REGION_FACT_FIELDS
-from firsthome.store.seed import (
+from home_compass.store.models import REGION_FACT_FIELDS
+from home_compass.store.seed import (
     SEED_DATA_DIR,
     seed_all,
     seed_model_constants,
@@ -27,7 +27,7 @@ from firsthome.store.seed import (
 
 REPO = Path(__file__).resolve().parents[3]
 REGISTRY = json.loads((REPO / "contracts" / "model_constants.json").read_text(encoding="utf-8"))
-DATA = REPO / "backend" / "src" / "firsthome" / "data"
+DATA = REPO / "backend" / "src" / "home_compass" / "data"
 #: 굳힌 시드의 한 항목은 `payload`(엔진 입력) + `provenance`(레코드 요약) +
 #: `fieldProvenance`(사실 단위) 셋이다 — 계약 결정 #40 이 계보를 필드별로 갈랐고,
 #: 값과 계보를 파일 안에서 떼어 놓으면 그 둘이 조용히 어긋난다. 생성물
@@ -368,7 +368,7 @@ def test_seeding_twice_changes_nothing(store):
 
 
 def test_seeding_requires_an_aware_timestamp(store):
-    from firsthome.store.errors import StoreError
+    from home_compass.store.errors import StoreError
 
     with pytest.raises(StoreError):
         seed_all(store, at=T0.replace(tzinfo=None))

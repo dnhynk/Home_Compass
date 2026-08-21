@@ -28,8 +28,8 @@
 
 | 준비물 | 네트워크 | 왜 |
 |---|---|---|
-| 지역 시세 실측값 | **필요** | 계약 결정 #40 — 미리 받아 시드로 굳혔다. 굳힌 결과는 `backend/src/firsthome/data/regions.json` 에 **커밋돼 있다** |
-| 정책 원문 (`policy_source` 7건) | 불필요 | `data/policy_sources/` 에 있다. `python -m firsthome.ingest --db <DB>` 로 적재 |
+| 지역 시세 실측값 | **필요** | 계약 결정 #40 — 미리 받아 시드로 굳혔다. 굳힌 결과는 `backend/src/home_compass/data/regions.json` 에 **커밋돼 있다** |
+| 정책 원문 (`policy_source` 7건) | 불필요 | `data/policy_sources/` 에 있다. `python -m home_compass.ingest --db <DB>` 로 적재 |
 | **추출 초안 (`rule_draft`)** | **필요** | ★ 아래 |
 | 시드 계정 | 불필요 | 기동 시 환경변수로 주입된다 (SPEC 6.3) |
 
@@ -57,7 +57,7 @@
 
 > ## ✅ 발견 ① 은 닫혔다 (2026-08-16 · 계약 결정 #42 · PR #94)
 >
-> 초안을 **계보와 함께 다시 뽑아** `backend/src/firsthome/data/rule_drafts.json` 으로 굳혔고
+> 초안을 **계보와 함께 다시 뽑아** `backend/src/home_compass/data/rule_drafts.json` 으로 굳혔고
 > (`gpt-5.4-mini-2026-03-17` · 2026-08-16T01:17 KST · `max_attempts=2`),
 > `scripts/seed_store.py` 가 `demo_queue=True` 로 그것을 싣는다.
 > **이제 클론 + `dev.bat` 만으로 큐가 선다** — 네트워크도 `.env` 도 쓰지 않는다.
@@ -383,7 +383,7 @@ S3 과 짝이므로 둘을 떼면 어느 쪽도 뜻이 서지 않는다.
 
 ## 3-2. 매회 상태를 어떻게 초기화했고, 됐다는 것을 어떻게 확인했나
 
-**방법** `firsthome.db` 를 **지우고** `rehearsal-baseline.db` 를 복사한다. 그리고 서버
+**방법** `home_compass.db` 를 **지우고** `rehearsal-baseline.db` 를 복사한다. 그리고 서버
 프로세스를 **매회 새로 띄운다** — 세션 원장이 프로세스 메모리이므로 프로세스를 바꾸지
 않으면 앞 회차의 로그인이 남는다.
 
@@ -416,7 +416,7 @@ rule_draft(pending) == 5
 - `[1/4] pip install` 은 **네트워크가 끊긴 상태에서 5초 만에 종료코드 0** 이다. 요구사항이
   전부 설치돼 있으면 pip 이 색인을 보러 가지 않는다. **`pause` 로 무대가 멈추는 일은 없다.**
 - `--workers 1` 이 박혀 있다 (세션 원장이 프로세스 메모리이므로 필수).
-- 리허설의 서버는 `dev.bat` 과 **같은 명령**(`uvicorn firsthome.main:app --workers 1`,
+- 리허설의 서버는 `dev.bat` 과 **같은 명령**(`uvicorn home_compass.main:app --workers 1`,
   `cwd=backend/src`)으로 띄웠다. 3회 모두 `/api/health` 가 `status: ok · llm: offline` 을 냈다.
 
 ## 3-5. 증거
@@ -525,7 +525,7 @@ HTTPS 도 실패하는 `t+54s` 에 **`ping 8.8.8.8` 이 성공했다.**
 
 ## 3-B-3. 매회 상태를 어떻게 초기화했고, 됐다는 것을 어떻게 확인했나
 
-**방법** `backend/var/firsthome.db` 를 **지우고** `python scripts/seed_store.py` 를 돌린다
+**방법** `backend/var/home_compass.db` 를 **지우고** `python scripts/seed_store.py` 를 돌린다
 (= `dev.bat` [3/4] 과 같은 경로). 그리고 서버 프로세스를 **매회 새로 띄운다** — 세션 원장이
 프로세스 메모리이므로 프로세스를 바꾸지 않으면 앞 회차의 로그인이 남는다.
 
@@ -549,7 +549,7 @@ anomaly_report     == 0
 그리고 3회 모두 S1 의 결과가 같았다(`등급 C` · `지불능력 안전`), 즉 **판정의 출발점이 같았다.**
 
 서버는 `dev.bat` [4/4] 와 **같은 명령**으로 띄웠다 —
-`python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1` (`cwd=backend/src`).
+`python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1` (`cwd=backend/src`).
 **3회 모두 `/api/health` 가 `status: ok · llm: offline`** 을 냈다.
 
 ## 3-B-4. 각 장면에서 무엇을 눌렀고 무엇이 나왔나 (**3회 동일 · 불일치 0건**)

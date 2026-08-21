@@ -99,7 +99,7 @@ _SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".venv", "venv",
               "node_modules", ".mypy_cache", ".ruff_cache", "dist", "build"}
 
 #: 뿌리를 맞게 잡았는지 확인하는 표식. 이 셋이 다 있어야 저장소 뿌리다.
-_ROOT_MARKERS = ("backend/src/firsthome/main.py", "scripts/dev.bat", "contracts")
+_ROOT_MARKERS = ("backend/src/home_compass/main.py", "scripts/dev.bat", "contracts")
 
 
 def _repo_root() -> Path:

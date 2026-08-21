@@ -1,7 +1,7 @@
 """컷오버 — 판정이 파일이 아니라 저장소를 본다 (SPEC 2.3 · 1.2, 소유자: `api`).
 
 컷오버 전 `engines/__init__.py` 는 `load_regions` · `load_policies` 를
-`lru_cache(maxsize=1)` 로 감싸 `backend/src/firsthome/data/*.json` 을 프로세스당 한 번만
+`lru_cache(maxsize=1)` 로 감싸 `backend/src/home_compass/data/*.json` 을 프로세스당 한 번만
 읽었다. SPEC 2.3 이 그 상태를 이름까지 적어 금지한다:
 
     배치가 갱신해도, 규칙관리자가 승인해도 재기동 전까지 판정에 반영되지 않는다.
@@ -14,7 +14,7 @@
 같은 프로세스, 같은 `app` 객체에 두 번 친다. 재기동을 끼워 넣는 순간 이 파일은 아무것도
 증명하지 못한다. 기동 경로 자체의 검증은 실기동 스모크(`crosscheck/test_boot_smoke.py`)가 진다.
 
-격리: 모든 케이스가 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로
+격리: 모든 케이스가 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로
 돌린다. `conftest.py` 의 세션 저장소는 읽기 전용이며 여기서 건드리지 않는다.
 """
 
@@ -30,15 +30,15 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome.main import (
+from home_compass.main import (
     REGIONS_EMPTY_MESSAGE,
     app,
     boot_require_regions,
     read_active_policies,
     require_regions,
 )
-from firsthome.store import STORE_URL_ENV, ApprovalRecord, RuleDraft, RuleVersion, User, create_store
-from firsthome.store.seed import seed_all
+from home_compass.store import STORE_URL_ENV, ApprovalRecord, RuleDraft, RuleVersion, User, create_store
+from home_compass.store.seed import seed_all
 
 T0 = datetime(2026, 8, 13, tzinfo=timezone.utc)
 
@@ -336,7 +336,7 @@ def test_the_engines_package_holds_no_memoisation_and_no_file_reader():
     줄 단위로 훑으면 이 사고를 서술한 주석·docstring 이 스스로 걸린다 — 실제로 처음
     작성했을 때 그렇게 걸렸고, 그런 검사는 결함이 아니라 설명을 금지하게 된다.
     """
-    engines_dir = Path(__file__).resolve().parents[2] / "src" / "firsthome" / "engines"
+    engines_dir = Path(__file__).resolve().parents[2] / "src" / "home_compass" / "engines"
     offenders = []
     for path in sorted(engines_dir.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -396,7 +396,7 @@ def _policy_payload(policy_id: str, name: str) -> dict:
 
 def _seed_like_provenance(store_url: str):
     """시드가 쓰는 것과 같은 계보. 값을 지어내지 않으므로 `unverified` 다."""
-    from firsthome.store import Provenance
+    from home_compass.store import Provenance
 
     return Provenance(
         source_kind="statute",
@@ -425,7 +425,7 @@ def _seed_version(version_id: str, policy_id: str, store_url: str, *, effective_
 
 
 def _policy_source():
-    from firsthome.store import PolicySource
+    from home_compass.store import PolicySource
 
     return PolicySource(
         id="src-leak-probe",

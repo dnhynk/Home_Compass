@@ -1,6 +1,6 @@
 """SPEC 7.1 「배치 실행 결과」 · 7.2 배치 성공률 — **실행 단위 기록**.
 
-7단계 착수 시점의 관측이 이 파일의 이유다. 실기동(`python -m firsthome.ingest.market
+7단계 착수 시점의 관측이 이 파일의 이유다. 실기동(`python -m home_compass.ingest.market
 --demo`)이 배치를 3회 돌리는데(최초 · 멱등 재실행 · 일부러 실패) 감사기록을
 `(action, at)` 으로 묶으면 이렇게 나왔다 —
 
@@ -30,13 +30,13 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from market_fixtures import FakeFetch, jeonse_items, monthly_items, trade_raw_item
 
-from firsthome.ingest.market.pipeline import (
+from home_compass.ingest.market.pipeline import (
     ACTION_INGEST,
     ACTION_RUN,
     INGEST_ACTOR,
     collect_market,
 )
-from firsthome.store.seed import seed_regions
+from home_compass.store.seed import seed_regions
 
 KST = timezone(timedelta(hours=9))
 RUN_AT = datetime(2026, 8, 14, 9, 0, 0, tzinfo=KST)
@@ -206,12 +206,12 @@ def test_the_idempotency_contract_is_on_region_values_not_on_audit_rows(seeded):
 # **내용은 싣지 않는다** (SPEC 7.1 — 프로바이더로 나가는 내용은 로컬에 남기지 않는다).
 # 남는 것은 얼마나 걸렸는가 하나뿐이며, 아래 마지막 테스트가 그 경계를 지킨다.
 
-from firsthome.ingest.extraction import (  # noqa: E402
+from home_compass.ingest.extraction import (  # noqa: E402
     EXTRACTION_ACTION,
     MAX_ATTEMPTS_KEY,
     extract_one,
 )
-from firsthome.store.models import PolicySource  # noqa: E402
+from home_compass.store.models import PolicySource  # noqa: E402
 
 from extraction_fixtures import (  # noqa: E402
     FIXTURE_POLICY_ID,
@@ -238,7 +238,7 @@ def extract_source(store) -> PolicySource:
 
 
 def _calling(envelope, latency_s: float):
-    from firsthome.llm.extraction import ExtractionCall
+    from home_compass.llm.extraction import ExtractionCall
 
     def call(**_kwargs):
         return ExtractionCall(envelope=envelope, model="fake-model",

@@ -15,7 +15,7 @@
 
 **import 할 수 없다.** 그쪽은 `scripts/` 가 `sys.path` 에 있을 때만 잡히는 최상위
 모듈이고(`from _console import force_utf8_stdout`), 이 패키지는 `backend/src` 아래
-`firsthome.*` 로 산다. 두 뿌리는 서로를 모른다. 그래서 **규약은 같고 구현은 둘**이며,
+`home_compass.*` 로 산다. 두 뿌리는 서로를 모른다. 그래서 **규약은 같고 구현은 둘**이며,
 그 사실을 여기 적어 둔다 — 한쪽만 고치면 다른 쪽이 조용히 남는다.
 
 ## 왜 필요한가
@@ -24,8 +24,8 @@
 **파이프·리다이렉트로 넘어가는 순간** 로케일 인코딩으로 되돌아간다. 윈도우 한국어
 환경에서 그 값은 `cp949` 이고, 이 패키지의 진입점은 전부 한국어를 출력한다.
 
-    python -m firsthome.ingest              # 콘솔 → 정상
-    python -m firsthome.ingest > run.txt    # 리다이렉트 → UnicodeEncodeError, 종료코드 1
+    python -m home_compass.ingest              # 콘솔 → 정상
+    python -m home_compass.ingest > run.txt    # 리다이렉트 → UnicodeEncodeError, 종료코드 1
 
 즉 **사람이 손으로 돌릴 때는 멀쩡하고, 출력을 갈무리하는 순간에만 죽는다.** 배치의
 판정을 로그로 남기는 경로가 정확히 그것이다.

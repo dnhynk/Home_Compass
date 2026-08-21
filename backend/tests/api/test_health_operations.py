@@ -42,13 +42,13 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import ensure_seed_accounts
-from firsthome.main import app
-from firsthome.store import create_store
-from firsthome.store.errors import ProvenanceError
-from firsthome.store.models import AuditEvent
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import ensure_seed_accounts
+from home_compass.main import app
+from home_compass.store import create_store
+from home_compass.store.errors import ProvenanceError
+from home_compass.store.models import AuditEvent
+from home_compass.store.seed import seed_all
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OPENAPI = REPO_ROOT / "contracts" / "openapi.json"
@@ -57,7 +57,7 @@ T0 = datetime(2026, 8, 15, 9, 0, tzinfo=timezone.utc)
 HEALTH = "/api/health"
 STATUS = "/api/admin/status"
 
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 #: 관측 기준시점은 **숫자 오프셋**이어야 한다 (`contracts/provenance.schema.json` — `Z` 금지).
 #: `main._parse_at` 도 tz 없는 값을 버리므로, 오프셋 없는 문자열은 신선도에 오르지 못한다.
@@ -80,7 +80,7 @@ def store_url(store_path, monkeypatch) -> str:
     with create_store(url) as store:
         seed_all(store, at=T0)
         ensure_seed_accounts(store, now=T0, announce=lambda lines: None)
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", url)
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", url)
     return url
 
 

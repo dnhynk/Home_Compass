@@ -71,6 +71,6 @@ cd src
 rem ★ 워커를 1개로 명시한다. 세션 원장이 api 프로세스 메모리에 있으므로(SPEC 2.2 에
 rem   Session 엔티티가 없고 D-8 이 로컬 단일 호스트를 못박았다) 워커가 둘 이상이면
 rem   로그인이 요청마다 다른 프로세스로 흩어져 조용히 깨진다. 기본값에 기대지 않는다.
-python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1
+python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1
 
 endlocal

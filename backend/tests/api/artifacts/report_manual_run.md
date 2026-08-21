@@ -96,7 +96,7 @@ RuleVersion   : 9건
 ## 재현
 
 ```
-FIRSTHOME_SEED_COUNSELOR_PASSWORD=... FIRSTHOME_SEED_RULE_MANAGER_PASSWORD=... FIRSTHOME_STORE_URL=sqlite://./var/manual.db python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1
+HOME_COMPASS_SEED_COUNSELOR_PASSWORD=... HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD=... HOME_COMPASS_STORE_URL=sqlite://./var/manual.db python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
 그 뒤 상담원으로 로그인해 `POST /api/reports`, 규칙관리자로 로그인해

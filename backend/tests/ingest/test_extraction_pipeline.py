@@ -14,17 +14,17 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from firsthome.ingest.extraction import (
+from home_compass.ingest.extraction import (
     EXTRACTION_ACTION,
     EXTRACTION_ACTOR,
     MAX_ATTEMPTS_KEY,
     extract_all,
     extract_one,
 )
-from firsthome.ingest.extraction_verify import RejectionCode
-from firsthome.ingest.loader import load_policy_sources
-from firsthome.llm.extraction import ExtractionCall, ExtractionCallFailed, ExtractionUnavailable
-from firsthome.store.models import PolicySource
+from home_compass.ingest.extraction_verify import RejectionCode
+from home_compass.ingest.loader import load_policy_sources
+from home_compass.llm.extraction import ExtractionCall, ExtractionCallFailed, ExtractionUnavailable
+from home_compass.store.models import PolicySource
 
 from extraction_fixtures import (  # noqa: E402
     FIXTURE_POLICY_ID,
@@ -422,7 +422,7 @@ def test_success_is_reported_split_by_attempt(store, source):
     합치면 모델이 검증을 얼마나 자주 통과 못 하는지가 숨는다. 보고자가 손으로 나누면
     다음 사람이 합치므로, 코드가 나눠서 낸다.
     """
-    from firsthome.ingest.extraction import success_breakdown
+    from home_compass.ingest.extraction import success_breakdown
 
     flaky = ExtractionCallFailed("일시적 장애")
     flaky._times = 1
@@ -461,7 +461,7 @@ def test_a_span_the_store_rejects_does_not_leave_a_pending_draft(store, source):
     닿았을 때 초안이 `pending` 으로 남으면 **근거가 절반만 붙은 초안이 사람 검토 큐에
     올라간다.** 검토자는 근거가 갖춰졌다고 가정하므로 그것이 곧 거수기다.
     """
-    from firsthome.store.errors import StoreError
+    from home_compass.store.errors import StoreError
 
     class HalfWritingDrafts:
         def __init__(self, inner):

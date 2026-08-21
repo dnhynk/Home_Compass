@@ -7,7 +7,7 @@
 
 - 재는 것: **클라이언트가 겪는 벽시계 시간**. 루프백 HTTP 왕복을 포함한다.
   서버 내부 함수 시간이 아니다 — 프론트 타임아웃과 비교되는 값이 그것이기 때문이다.
-- 서버: `python -m uvicorn firsthome.main:app` 실기동 (TestClient 아님)
+- 서버: `python -m uvicorn home_compass.main:app` 실기동 (TestClient 아님)
 - 저장소: 시드된 임시 SQLite. 모델 상수 67키가 기동 시 전수 검증된 상태
 - 프로바이더: `offline` (API 키 없음). `/api/analyze` 는 원칙 1 에 따라 LLM 을 부르지 않으므로
   이 설정이 analyze 분포에 영향을 주지 않는다. `/api/chat` 은 템플릿 경로를 잰 값이다

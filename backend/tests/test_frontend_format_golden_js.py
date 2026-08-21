@@ -36,7 +36,7 @@ def _js_format_all():
     return run_js(
         """
         var golden = JSON.parse(GOLDEN_JSON);
-        var F = globalThis.FirstHomeFormat;
+        var F = globalThis.HomeCompassFormat;
         return {
           money: golden.money.cases.map(function (c) { return F.money(c['in']); }),
           pct: golden.pct.cases.map(function (c) { return F.pct(c['in'], c.digits); })
@@ -85,7 +85,7 @@ def test_node_actually_ran_the_javascript():
     """
     version = node_version()
     assert version.startswith("v"), version
-    echoed = run_js("return typeof globalThis.FirstHomeFormat.money;", include_generated=False)
+    echoed = run_js("return typeof globalThis.HomeCompassFormat.money;", include_generated=False)
     assert echoed == "function"
 
 
@@ -98,7 +98,7 @@ def test_the_javascript_refuses_to_format_a_missing_number():
     """
     threw = run_js(
         """
-        try { globalThis.FirstHomeFormat.pct(undefined); return null; }
+        try { globalThis.HomeCompassFormat.pct(undefined); return null; }
         catch (e) { return String(e.message); }
         """,
         include_generated=False,

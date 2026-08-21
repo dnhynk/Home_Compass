@@ -62,8 +62,8 @@ def engine_registry_keys() -> set[str]:
 
 @pytest.fixture(scope="module")
 def seeded_db(tmp_path_factory) -> Path:
-    from firsthome.store import create_store
-    from firsthome.store.seed import seed_all
+    from home_compass.store import create_store
+    from home_compass.store.seed import seed_all
 
     path = tmp_path_factory.mktemp("key-sources") / "seeded.db"
     with create_store(f"sqlite://{path}") as store:
@@ -72,7 +72,7 @@ def seeded_db(tmp_path_factory) -> Path:
 
 
 def _mapping(db: Path) -> dict:
-    from firsthome.store import create_store
+    from home_compass.store import create_store
 
     with create_store(f"sqlite://{db}") as store:
         return store.model_constants.as_mapping()
@@ -81,7 +81,7 @@ def _mapping(db: Path) -> dict:
 # --- 셋이 일치하는가 --------------------------------------------------------
 
 def test_all_three_key_sources_agree(registry_keys, engine_registry_keys, seeded_db):
-    from firsthome.engines import required_constant_keys
+    from home_compass.engines import required_constant_keys
 
     required = set(required_constant_keys())
     stored = set(_mapping(seeded_db))
@@ -112,8 +112,8 @@ def test_boot_is_refused_when_the_store_lacks_a_key_the_contract_declares(seeded
 
     이것이 실제로 일어나는 방향이다. 기동이 거부되어야 한다 (SPEC 5.1.1 fail-closed).
     """
-    from firsthome.main import load_model_constants
-    from firsthome.store import create_store
+    from home_compass.main import load_model_constants
+    from home_compass.store import create_store
 
     db = tmp_path / "short.db"
     shutil.copy(seeded_db, db)
@@ -137,9 +137,9 @@ def test_boot_still_starts_when_the_store_has_a_key_nobody_needs(seeded_db, tmp_
     잉여는 계약↔엔진 검사(`test_engine_constants.test_required_keys_match_the_registry`)와
     위 `test_all_three_key_sources_agree` 가 잡는다 — 기동이 아니라 테스트의 일이다.
     """
-    from firsthome.main import load_model_constants
-    from firsthome.store import create_store
-    from firsthome.store.models import ModelConstant, Provenance
+    from home_compass.main import load_model_constants
+    from home_compass.store import create_store
+    from home_compass.store.models import ModelConstant, Provenance
 
     db = tmp_path / "extra.db"
     shutil.copy(seeded_db, db)
@@ -167,8 +167,8 @@ def test_the_boot_path_opens_no_file_under_contracts(seeded_db, monkeypatch):
     """
     import builtins
 
-    from firsthome.main import boot_model_constants
-    from firsthome.store import STORE_URL_ENV
+    from home_compass.main import boot_model_constants
+    from home_compass.store import STORE_URL_ENV
 
     contracts_dir = (REPO_ROOT / "contracts").resolve()
     opened: list[str] = []
@@ -205,7 +205,7 @@ def test_the_boot_path_opens_no_file_under_contracts(seeded_db, monkeypatch):
     mapping = boot_model_constants()
 
     assert set(mapping) >= set(__import__(
-        "firsthome.engines", fromlist=["x"]).required_constant_keys())
+        "home_compass.engines", fromlist=["x"]).required_constant_keys())
     assert not opened, (
         "기동이 contracts/ 의 파일을 읽었다. 상수의 정본은 저장소다 (SPEC 1.2): "
         + str(sorted(set(opened))))
@@ -227,7 +227,7 @@ def test_the_contract_file_is_still_what_the_seed_reads(registry_keys, seeded_db
     컷오버 후 "계약 파일은 이제 아무도 안 읽는다"고 오해하면 다음 사람이 지운다.
     빌드 시점 소비자가 누구인지를 테스트가 남긴다.
     """
-    from firsthome.store.seed import load_registry
+    from home_compass.store.seed import load_registry
 
     assert {entry["key"] for entry in load_registry()["entries"]} == registry_keys
     assert set(_mapping(seeded_db)) == registry_keys
@@ -246,7 +246,7 @@ def test_every_policy_id_in_a_priority_order_actually_exists(seeded_db):
     비는 게 아니라 **다음 상품이 올라온다.** 화면에는 여전히 추천이 뜨고, 그 추천이
     설계된 순서가 아니라는 사실만 사라진다.
     """
-    from firsthome.store import create_store
+    from home_compass.store import create_store
 
     with create_store(f"sqlite://{seeded_db}") as store:
         constants = store.model_constants.as_mapping()

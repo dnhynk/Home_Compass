@@ -26,7 +26,7 @@ GENERATED_DIR = FRONTEND_DIR / "generated"
 CONTRACTS_DIR = REPO_ROOT / "contracts"
 
 #: 브라우저가 `<script src>` 로 읽는 순서 그대로. 생성물이 먼저다 —
-#: `local_engine.js` 가 `window.FIRSTHOME_*` 를 조회하기 때문이다.
+#: `local_engine.js` 가 `window.HOME_COMPASS_*` 를 조회하기 때문이다.
 GENERATED_FILES = (
     "contract_constants.js",
     "model_constants.js",
@@ -35,7 +35,7 @@ GENERATED_FILES = (
 )
 FRONTEND_FILES = ("format.js", "local_engine.js")
 #: 화면 코드까지 올릴 때. `app.js` 는 `typeof document !== 'undefined'` 로 부팅을 가드하므로
-#: node 컨텍스트에서는 `FirstHomeCompass` 만 붙고 `init()` 은 돌지 않는다.
+#: node 컨텍스트에서는 `HomeCompass` 만 붙고 `init()` 은 돌지 않는다.
 SCREEN_FILE = "app.js"
 
 
@@ -73,7 +73,7 @@ def run_js(
 
     `body` 는 표현식이 아니라 **문장들**이며 마지막에 `return` 한다 (함수 몸통에 들어간다).
     브라우저처럼 `window` 와 `globalThis` 가 같은 객체를 가리키게 해 둔다 —
-    생성물은 `window.FIRSTHOME_*` 에, 프론트 모듈은 `globalThis` 에 붙기 때문이다.
+    생성물은 `window.HOME_COMPASS_*` 에, 프론트 모듈은 `globalThis` 에 붙기 때문이다.
     """
     files = []
     if include_generated:

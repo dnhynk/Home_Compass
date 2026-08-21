@@ -41,12 +41,12 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import app
-from firsthome.store import PolicySource, RuleDraft, create_store
-from firsthome.store.models import REGION_FACT_FIELDS, AnomalyReport, AuditEvent
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import app
+from home_compass.store import PolicySource, RuleDraft, create_store
+from home_compass.store.models import REGION_FACT_FIELDS, AnomalyReport, AuditEvent
+from home_compass.store.seed import seed_all
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ADMIN_DIR = REPO_ROOT / "admin"
@@ -54,8 +54,8 @@ ADMIN_DIR = REPO_ROOT / "admin"
 T0 = datetime(2026, 8, 15, 9, 0, tzinfo=timezone.utc)
 STATUS = "/api/admin/status"
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 
 # --------------------------------------------------------------------------
@@ -72,14 +72,14 @@ def store_url(tmp_path, monkeypatch) -> str:
             PolicySource(id="src-status", text="제1조 신청 연령은 만 19세 이상.",
                          source_ref=None, fetched_at=T0)
         )
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", url)
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", url)
     return url
 
 
 @pytest.fixture
 def log_path(tmp_path, monkeypatch) -> Path:
     path = tmp_path / "observability.jsonl"
-    monkeypatch.setenv("FIRSTHOME_LOG_FILE", str(path))
+    monkeypatch.setenv("HOME_COMPASS_LOG_FILE", str(path))
     return path
 
 

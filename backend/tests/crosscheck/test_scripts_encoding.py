@@ -25,10 +25,10 @@ PY_SCRIPTS = sorted(p for p in SCRIPTS.glob("*.py") if p.name != _GUARD_MODULE)
 
 # --- backend 진입점 (2026-08-16 신설) --------------------------------------
 #
-# ★ **이 검사는 `scripts/` 만 훑고 있었다.** 그래서 `backend/src/firsthome/` 아래의
+# ★ **이 검사는 `scripts/` 만 훑고 있었다.** 그래서 `backend/src/home_compass/` 아래의
 #   진입점들이 같은 결함을 그대로 갖고 있어도 CI 가 몰랐다. 실제로 넷 중 셋이 걸려 있었고
 #   (#118 이 `ingest/` 셋을 닫았다) 넷째는 **파수병을 넓히면서 비로소 드러났다** —
-#   `python -m firsthome.store` 가 좁은 코덱에서 **첫 print 에** 죽었다.
+#   `python -m home_compass.store` 가 좁은 코덱에서 **첫 print 에** 죽었다.
 #
 # ★ 결함의 정체는 「윈도우 콘솔」이 아니라 **출력을 갈무리하는 순간**이다. stdout 이 진짜
 #   콘솔이면 파이썬이 WriteConsoleW 로 유니코드를 그대로 쓰지만, 파이프·리다이렉트로
@@ -36,9 +36,9 @@ PY_SCRIPTS = sorted(p for p in SCRIPTS.glob("*.py") if p.name != _GUARD_MODULE)
 #   멀쩡하고 로그로 남기는 순간에만 죽는다** — 그래서 아무도 못 봤다.
 #
 # ★ 구현이 둘인 것은 어쩔 수 없다. `scripts/_console.py` 는 `scripts/` 가 sys.path 에
-#   있을 때만 잡히는 최상위 모듈이고 backend 쪽은 `firsthome.*` 패키지다. 두 뿌리가
+#   있을 때만 잡히는 최상위 모듈이고 backend 쪽은 `home_compass.*` 패키지다. 두 뿌리가
 #   서로를 모른다. **그래서 이 검사가 둘을 같이 본다** — 규약이 하나라는 것을 검사가 진다.
-BACKEND_SRC = Path(__file__).resolve().parents[3] / "backend" / "src" / "firsthome"
+BACKEND_SRC = Path(__file__).resolve().parents[3] / "backend" / "src" / "home_compass"
 
 #: 진입점의 정의 — `python -m <pkg>` 로 도는 것과 `*_cli.py`.
 #: 가드 구현 자신(`_console.py`)은 뺀다.
@@ -166,7 +166,7 @@ def test_backend_entrypoint_calls_the_stdout_guard(path: Path):
     assert "force_utf8_stdout()" in source, (
         f"{path} 가 한국어를 출력하는데 force_utf8_stdout() 을 부르지 않는다. "
         "출력을 파이프·파일로 넘기는 순간 cp949 에서 UnicodeEncodeError 로 죽는다. "
-        "backend 쪽 구현은 firsthome/ingest/_console.py 다 (scripts/_console.py 와 "
+        "backend 쪽 구현은 home_compass/ingest/_console.py 다 (scripts/_console.py 와 "
         "같은 규약 · 두 뿌리가 서로를 모르므로 구현이 둘이다)."
     )
 

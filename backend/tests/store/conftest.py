@@ -15,8 +15,8 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from firsthome.store import create_store, register_backend  # noqa: E402
-from firsthome.store.models import (  # noqa: E402
+from home_compass.store import create_store, register_backend  # noqa: E402
+from home_compass.store.models import (  # noqa: E402
     AnomalyReport,
     ApprovalRecord,
     AuditEvent,

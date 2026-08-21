@@ -59,7 +59,7 @@ REPO = "dnhynk/Home_Compass"
 #   배정을 쓰는 사람이 매번 같은 것을 빠뜨린다. 실제로 그렇게 됐다.
 #   **새 배정을 쓸 때 여기서 베껴 간다.**
 OWNERSHIP: dict[str, list[str]] = {
-    "engines": ["backend/src/firsthome/engines/", "backend/src/firsthome/common.py",
+    "engines": ["backend/src/home_compass/engines/", "backend/src/home_compass/common.py",
                 # 최상위 테스트 중 **엔진 거동을 재는 것**. 디렉터리가 없어 파일로 적는다 —
                 # `backend/tests/` 를 통째로 주면 #57 이 재현된다(`W-engines` 가
                 # `W-harness` 의 PR 을 삼켰다).
@@ -71,15 +71,15 @@ OWNERSHIP: dict[str, list[str]] = {
                 "backend/tests/test_sensitivity.py",
                 "backend/tests/test_golden_snapshot.py",
                 "backend/tests/test_format_golden.py"],
-    "api": ["backend/src/firsthome/main.py", "backend/src/firsthome/config.py",
+    "api": ["backend/src/home_compass/main.py", "backend/src/home_compass/config.py",
             # 인증은 api 의 책임이다 (SPEC 1.1). main.py 에 400줄을 더 얹지 않으려고
             # 파일로 나눈 것이며 새 컴포넌트가 아니다. 모듈·패키지 두 형태를 다 잡는다.
-            "backend/src/firsthome/auth.py", "backend/src/firsthome/auth/",
+            "backend/src/home_compass/auth.py", "backend/src/home_compass/auth/",
             "backend/tests/api/"],
-    "store": ["backend/src/firsthome/store/", "backend/src/firsthome/data/",
+    "store": ["backend/src/home_compass/store/", "backend/src/home_compass/data/",
               "backend/tests/store/"],
-    "ingest": ["backend/src/firsthome/ingest/", "backend/tests/ingest/"],
-    "llm": ["backend/src/firsthome/llm/", "backend/tests/llm/"],
+    "ingest": ["backend/src/home_compass/ingest/", "backend/tests/ingest/"],
+    "llm": ["backend/src/home_compass/llm/", "backend/tests/llm/"],
     "web": ["frontend/",
             # 생성물이 손으로 쓴 사본으로 되돌아가지 않는지 재는 것들. 대상은 `frontend/` 다.
             "backend/tests/test_frontend_format_golden_js.py",
@@ -90,7 +90,7 @@ OWNERSHIP: dict[str, list[str]] = {
                     ".github/", ".githooks/", ".gitattributes",
                     "backend/tests/crosscheck/",
                     # ★ **컴포넌트 간 공용 유틸.** SPEC 9.4 의 컴포넌트 표에 이 부류의 행이
-                    #   **없다.** `firsthome/_console.py` 는 `ingest` 와 `store` 가 함께
+                    #   **없다.** `home_compass/_console.py` 는 `ingest` 와 `store` 가 함께
                     #   쓰고(진입점의 출력 인코딩 가드) 어느 쪽 것도 아니다 — `store` 가
                     #   `ingest` 를 import 할 수 없어서 뿌리로 올린 파일이다(#122).
                     #   주인을 안 적으면 **다음 회수 때 무주공산이 되고**, 그것이 방금
@@ -98,7 +98,7 @@ OWNERSHIP: dict[str, list[str]] = {
                     #   같은 논리로 코디네이터가 진다.
                     #   ★ 다만 이것은 **SPEC 을 늘린 것이 아니라 빈칸을 코디네이터 판단으로
                     #     메운 것**이다. 같은 부류가 또 생기면 SPEC 9.4 에 행을 만든다.
-                    "backend/src/firsthome/_console.py",
+                    "backend/src/home_compass/_console.py",
                     # ★ **발표 자료는 생성기 + 생성물이다** (2026-08-16 · 항구 배정).
                     #   `build_ppt.py` 는 `scripts/gen_contracts.py` 와 같은 부류의 생성기이고
                     #   `.pptx` 는 SPEC 9.4 의 [모든 생성물] 행이다. 지금까지 **어느 표에도
@@ -165,7 +165,7 @@ WORKER_PATHS: dict[str, list[str]] = {
     #
     # `W-store3`(#114) · `W-pipe`(#121) · `W-small`(#113·#115·#118) 셋 다 과업이 닫혔다.
     # 코디네이터가 임시로 들었던 셋(`store/__main__.py` · `_console.py` 둘)도 #122 가
-    # 머지되어 뺐다. `firsthome/_console.py` 만 위 `OWNERSHIP["coordinator"]` 로
+    # 머지되어 뺐다. `home_compass/_console.py` 만 위 `OWNERSHIP["coordinator"]` 로
     # **항구 배정**했다 — 회수하면 무주공산이 되는 자리라 그렇게 두지 않았다.
     #
     # ★ **배정이 Coordinator 하나뿐인 것이 정상 상태다.** 워커가 없으면 표도 비어 있어야

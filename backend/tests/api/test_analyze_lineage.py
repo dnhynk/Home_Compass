@@ -17,7 +17,7 @@ import pytest
 from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 
-from firsthome.main import app
+from home_compass.main import app
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -190,7 +190,7 @@ def test_not_evaluating_freshness_can_never_produce_an_optimistic_grade():
     사실이 **전부 `verified`** 인 가상 입력으로 산정기를 직접 부른다. 실기동에서는 시드가
     `unverified` 를 갖고 있어 이 분기를 지나갈 수 없고, 지나가지 않는 분기는 조용히 틀린다.
     """
-    from firsthome.main import grade_facts
+    from home_compass.main import grade_facts
 
     clean = [{
         "fact": "가상 사실",
@@ -210,7 +210,7 @@ def test_not_evaluating_freshness_can_never_produce_an_optimistic_grade():
 
 def test_the_marker_turns_itself_off_when_a_threshold_is_registered():
     """임계가 등재되면 표기가 **자동으로** 꺼진다 — 어딘가의 리터럴을 사람이 지우지 않는다."""
-    from firsthome.main import grade_facts
+    from home_compass.main import grade_facts
 
     clean = [{
         "fact": "가상 사실",
@@ -236,7 +236,7 @@ def test_no_freshness_threshold_constant_is_registered_yet():
     ② `frontend/local_engine.js` 의 같은 자리도 함께 고치고 (두 산정이 갈라지면 안 된다)
     ③ 그 다음에 이 테스트를 걷는다.
     """
-    from firsthome.main import MODEL_CONSTANTS, freshness_threshold_keys
+    from home_compass.main import MODEL_CONSTANTS, freshness_threshold_keys
 
     assert freshness_threshold_keys(MODEL_CONSTANTS) == [], (
         "신선도 임계로 보이는 상수가 등재됐다. 미판정 표기가 자동으로 꺼졌을 것이다 — "

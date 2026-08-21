@@ -15,10 +15,10 @@ from pathlib import Path
 
 import pytest
 
-from firsthome.engines import required_constant_keys
-from firsthome.main import boot_model_constants, load_model_constants
-from firsthome.store import STORE_URL_ENV, create_store, store_from_env
-from firsthome.store.seed import seed_all
+from home_compass.engines import required_constant_keys
+from home_compass.main import boot_model_constants, load_model_constants
+from home_compass.store import STORE_URL_ENV, create_store, store_from_env
+from home_compass.store.seed import seed_all
 
 
 @pytest.fixture(scope="module")

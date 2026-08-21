@@ -23,8 +23,8 @@ import dataclasses
 
 import pytest
 
-from firsthome.ingest import load_policy_sources
-from firsthome.ingest import sources as manifest
+from home_compass.ingest import load_policy_sources
+from home_compass.ingest import sources as manifest
 
 
 def _loadable() -> list[manifest.CollectedSource]:

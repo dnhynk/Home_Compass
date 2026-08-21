@@ -1488,18 +1488,18 @@ LLM 호출은 파이프라인의 한 단계일 뿐이라는 Part 0-B의 주장�
 
 | 소유자 | 경로 |
 |---|---|
-| `engines` | `backend/src/firsthome/engines/` · `backend/src/firsthome/common.py` |
-| `api` | `backend/src/firsthome/main.py` · `config.py` |
-| `store` | `backend/src/firsthome/store/` |
-| `ingest` | `backend/src/firsthome/ingest/` |
-| `llm` | `backend/src/firsthome/llm/` |
+| `engines` | `backend/src/home_compass/engines/` · `backend/src/home_compass/common.py` |
+| `api` | `backend/src/home_compass/main.py` · `config.py` |
+| `store` | `backend/src/home_compass/store/` |
+| `ingest` | `backend/src/home_compass/ingest/` |
+| `llm` | `backend/src/home_compass/llm/` |
 | `web` | `frontend/` (생성물 디렉터리 제외) |
 | `admin` | `admin/` (소스 + 커밋된 빌드 산출물) |
 | **코디네이터 전용** | `contracts/` · 모든 생성물 · `scripts/` · `docs/engineering/SPEC.md` |
 
 - **테스트는 대상 코드의 소유자가 함께 소유**한다. 단 **교차 테스트**(계약 · 아키텍처 ·
   스모크 · 생성물 diff · 포맷 골든)는 코디네이터 소유다. 이것들이 깨지는 것이 곧 경계 위반 신호다.
-- `backend/src/firsthome/data/` 의 시드 데이터는 0단계에 `store` 로 이관된다. 이관 후 소유자는 `store`.
+- `backend/src/home_compass/data/` 의 시드 데이터는 0단계에 `store` 로 이관된다. 이관 후 소유자는 `store`.
 - 두 소유자가 걸리는 변경은 **코디네이터가 순서를 정해 직렬로** 낸다. 동시에 열지 않는다.
 
 ---

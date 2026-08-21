@@ -25,7 +25,7 @@ from pathlib import Path
 
 import pytest
 
-SRC = Path(__file__).resolve().parents[2] / "src" / "firsthome"
+SRC = Path(__file__).resolve().parents[2] / "src" / "home_compass"
 
 #: SPEC 1.2 의 의존 방향. 값은 "이 패키지가 import 하면 안 되는 형제 패키지".
 FORBIDDEN: dict[str, tuple[str, ...]] = {
@@ -56,9 +56,9 @@ PACKAGES = [
 
 
 def _imported_siblings(package: str) -> dict[str, list[str]]:
-    """`firsthome.<sibling>` 형태로 끌어오는 것을 전부 찾는다.
+    """`home_compass.<sibling>` 형태로 끌어오는 것을 전부 찾는다.
 
-    절대 import(`from firsthome.llm import x`)와 상대 import(`from ..llm import x`)를
+    절대 import(`from home_compass.llm import x`)와 상대 import(`from ..llm import x`)를
     모두 잡는다. 상대 import 만 검사하면 절대 경로로 우회할 수 있고, 그 반대도 같다.
     """
     hits: dict[str, list[str]] = {}
@@ -79,7 +79,7 @@ def _imported_siblings(package: str) -> dict[str, list[str]]:
                     targets.append(node.module.split(".")[0])
                 elif node.level == 0 and node.module:
                     parts = node.module.split(".")
-                    if parts[:1] == ["firsthome"] and len(parts) > 1:
+                    if parts[:1] == ["home_compass"] and len(parts) > 1:
                         targets.append(parts[1])
                 elif node.level >= 2:
                     if node.module:
@@ -93,7 +93,7 @@ def _imported_siblings(package: str) -> dict[str, list[str]]:
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     parts = alias.name.split(".")
-                    if parts[:1] == ["firsthome"] and len(parts) > 1:
+                    if parts[:1] == ["home_compass"] and len(parts) > 1:
                         targets.append(parts[1])
             for target in targets:
                 hits.setdefault(target, []).append(

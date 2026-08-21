@@ -28,8 +28,8 @@ from __future__ import annotations
 import pytest
 from conftest import T0, make_draft, make_policy_source, make_report, make_rule_version
 
-from firsthome.store.errors import RecordNotFoundError, StoreError
-from firsthome.store.models import (
+from home_compass.store.errors import RecordNotFoundError, StoreError
+from home_compass.store.models import (
     POLICY_REPORT_FIELDS,
     REGION_FACT_FIELDS,
     REPORT_STATUSES,

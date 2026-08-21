@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pytest
 
-from firsthome.ingest.extraction_verify import (
+from home_compass.ingest.extraction_verify import (
     EVIDENCE_POINTERS,
     count_occurrences,
     ExtractionRejected,
@@ -201,7 +201,7 @@ def test_the_live_nbsp_incident_stays_rejected():
     이 테스트는 그 사건을 픽스처가 아니라 **실제 적재 원문**으로 붙든다. 누가 검증기에
     `.replace(chr(0xa0), ' ')` 한 줄을 넣으면 여기가 빨간불이 된다.
     """
-    from firsthome.ingest.sources import SOURCES
+    from home_compass.ingest.sources import SOURCES
 
     source = next(s for s in SOURCES if s.policy_id == "housing_dream_savings")
     text = source.read_text()
@@ -435,7 +435,7 @@ def test_the_verifier_module_does_not_import_the_llm_layer():
     import ast
     from pathlib import Path
 
-    import firsthome.ingest.extraction_verify as module
+    import home_compass.ingest.extraction_verify as module
 
     tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))
     imported: list[str] = []

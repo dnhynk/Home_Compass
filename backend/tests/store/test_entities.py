@@ -20,8 +20,8 @@ from conftest import (
     make_user,
 )
 
-from firsthome.store.errors import RecordNotFoundError, SpanOutOfRangeError, StoreError
-from firsthome.store.models import RuleSpanMapping
+from home_compass.store.errors import RecordNotFoundError, SpanOutOfRangeError, StoreError
+from home_compass.store.models import RuleSpanMapping
 
 
 # --------------------------------------------------------------------------
@@ -371,7 +371,7 @@ def test_duplicate_usernames_are_rejected(store):
 
 def test_the_store_ships_no_seeded_account(store):
     """SPEC 6.3 — 시드 계정 비밀번호는 커밋하지 않는다. 저장소는 계정을 만들지 않는다."""
-    from firsthome.store.seed import seed_all
+    from home_compass.store.seed import seed_all
 
     seed_all(store)
     assert store.users.list() == []

@@ -61,8 +61,8 @@ def _free_port() -> int:
 
 
 def _seed(db: Path) -> str:
-    from firsthome.store import create_store
-    from firsthome.store.seed import seed_all
+    from home_compass.store import create_store
+    from home_compass.store.seed import seed_all
 
     url = f"sqlite://{db}"
     with create_store(url) as store:
@@ -162,7 +162,7 @@ def render(result: dict, meta: dict) -> str:
 
 - 재는 것: **클라이언트가 겪는 벽시계 시간**. 루프백 HTTP 왕복을 포함한다.
   서버 내부 함수 시간이 아니다 — 프론트 타임아웃과 비교되는 값이 그것이기 때문이다.
-- 서버: `python -m uvicorn firsthome.main:app` 실기동 (TestClient 아님)
+- 서버: `python -m uvicorn home_compass.main:app` 실기동 (TestClient 아님)
 - 저장소: 시드된 임시 SQLite. 모델 상수 {meta['constants']}키가 기동 시 전수 검증된 상태
 - 프로바이더: `offline` (API 키 없음). `/api/analyze` 는 원칙 1 에 따라 LLM 을 부르지 않으므로
   이 설정이 analyze 분포에 영향을 주지 않는다. `/api/chat` 은 템플릿 경로를 잰 값이다
@@ -232,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
         store_url = _seed(Path(tmp) / "latency.db")
         port = _free_port()
         base = f"http://127.0.0.1:{port}"
-        env = {**os.environ, "FIRSTHOME_STORE_URL": store_url, "PYTHONPATH": str(SRC),
+        env = {**os.environ, "HOME_COMPASS_STORE_URL": store_url, "PYTHONPATH": str(SRC),
                "PYTHONIOENCODING": "utf-8", "OPENAI_API_KEY": "", "ANTHROPIC_API_KEY": ""}
         # ★ 서버 출력을 **파일로** 받는다. `subprocess.PIPE` 로 받아놓고 측정하는 동안
         #   읽지 않으면, 500 이 한 번이라도 나는 순간 트레이스백(약 8KB)이 OS 파이프
@@ -244,7 +244,7 @@ def main(argv: list[str] | None = None) -> int:
         #   물렸을 뿐이다. 같은 수정이 `backend/tests/api/test_log_hygiene.py` 에도 있다.
         console = open(Path(tmp) / "server-console.log", "w+b")
         server = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "firsthome.main:app",
+            [sys.executable, "-m", "uvicorn", "home_compass.main:app",
              "--host", "127.0.0.1", "--port", str(port), "--log-level", "error"],
             cwd=str(SRC), env=env, stdout=console, stderr=subprocess.STDOUT)
         try:
@@ -261,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"측정 시작 — 프로필 {len(PROFILES)}종 x {args.samples}회")
             result = measure(base, args.samples, args.warmup)
 
-            from firsthome.store import create_store
+            from home_compass.store import create_store
             with create_store(store_url) as store:
                 meta = {
                     "constants": len(store.model_constants.list()),

@@ -13,7 +13,7 @@ import unicodedata
 
 import pytest
 
-from firsthome.ingest import sources as manifest
+from home_compass.ingest import sources as manifest
 
 
 def _policies_json() -> list[dict]:

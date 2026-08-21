@@ -47,7 +47,7 @@ def rendered() -> str:
     저장소는 이 테스트가 시드한 임시본을 쓴다. 개발자 DB 상태가 계약 파일 비교에
     새어들면, 같은 커밋인데 사람마다 다른 결과가 나오는 테스트가 된다.
     """
-    from firsthome.main import render_openapi_document
+    from home_compass.main import render_openapi_document
 
     return render_openapi_document()
 
@@ -130,8 +130,8 @@ def test_the_contract_does_not_depend_on_the_stores_data(rendered: str):
     계약은 모양이지 값이 아니다. 시세 한 건이 바뀌었다고 계약 파일이 바뀌면 재생성
     diff 는 계약 변경이 아니라 데이터 변경을 잡게 되고, 그러면 아무도 보지 않는다.
     """
-    from firsthome.store import create_store
-    from firsthome.store.seed import seed_all
+    from home_compass.store import create_store
+    from home_compass.store.seed import seed_all
 
     with tempfile.TemporaryDirectory() as tmp:
         url = f"sqlite://{Path(tmp) / 'other.db'}"
@@ -144,7 +144,7 @@ def test_the_contract_does_not_depend_on_the_stores_data(rendered: str):
             )
             assert store.model_constants.as_mapping()["affordability.buffer_ratio"] == 0.99
 
-    from firsthome.main import render_openapi_document
+    from home_compass.main import render_openapi_document
 
     assert render_openapi_document() == rendered
 

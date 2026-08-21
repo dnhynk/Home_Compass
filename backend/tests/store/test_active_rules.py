@@ -14,7 +14,7 @@ from datetime import timedelta
 import pytest
 from conftest import KST, T0, make_draft, make_policy_source, make_rule_version
 
-from firsthome.store.models import RuleDraft, RuleVersion
+from home_compass.store.models import RuleDraft, RuleVersion
 
 
 # --------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def test_active_query_compares_instants_not_strings(store):
 
 
 def test_active_requires_an_aware_timestamp(store):
-    from firsthome.store.errors import StoreError
+    from home_compass.store.errors import StoreError
 
     with pytest.raises(StoreError):
         store.rule_versions.active(T0.replace(tzinfo=None))
@@ -121,7 +121,7 @@ def test_active_returns_only_rule_versions_even_when_both_tables_are_full(store)
 
 def test_rule_version_rejects_a_non_approved_status(store):
     """RuleVersion 은 '승인된 규칙' 이다 (SPEC 2.2). 다른 상태는 아예 들어갈 수 없다."""
-    from firsthome.store.errors import StoreError
+    from home_compass.store.errors import StoreError
 
     with pytest.raises(StoreError):
         store.rule_versions.add(make_rule_version("rv-x", status="pending"))

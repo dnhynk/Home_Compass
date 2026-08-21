@@ -15,9 +15,9 @@ from datetime import datetime, timedelta
 import pytest
 from conftest import T0
 
-from firsthome.store.errors import StoreError
-from firsthome.store.provenance import validate_provenance_dict
-from firsthome.store.seed import (
+from home_compass.store.errors import StoreError
+from home_compass.store.provenance import validate_provenance_dict
+from home_compass.store.seed import (
     DEMO_QUEUE_ACTION,
     REPO_ROOT,
     load_demo_queue,
@@ -190,7 +190,7 @@ def test_a_changed_source_text_stops_the_seed_instead_of_shifting_the_spans(stor
     조용히 넘어가면 span 이 가리키는 자리가 다른 글자가 되고, 화면은 그것을 근거라고
     보여 준다. 계보가 거짓이 되는 자리는 언제나 「조용히 넘어간 자리」다.
     """
-    import firsthome.store.seed as seed_module
+    import home_compass.store.seed as seed_module
 
     tampered = json.loads(json.dumps(FIXTURE))
     tampered["policySources"][0]["sha256Nfc"] = "0" * 64

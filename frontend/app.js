@@ -21,16 +21,16 @@
     ? location.origin
     : 'http://127.0.0.1:8000';
 
-  var FMT = window.FirstHomeFormat;
-  var LOCAL = window.FirstHomeLocalEngine;
+  var FMT = window.HomeCompassFormat;
+  var LOCAL = window.HomeCompassLocalEngine;
 
   /* 타임아웃은 계약에서 유도한다. 프론트가 숫자를 다시 쓰지 않는다 (SPEC 8.3 #3 · #4).
      경로별 예산을 하나로 합치지 않는다 — 합치면 chat 기준으로 잡혀 analyze 가 75초를
      기다리거나, analyze 기준으로 잡혀 chat 이 다시 잘린다. 후자가 예선 사고다. */
   function timeoutFor(path) {
-    var contract = window.FIRSTHOME_CONTRACT_CONSTANTS;
+    var contract = window.HOME_COMPASS_CONTRACT_CONSTANTS;
     if (!contract) {
-      throw new Error('생성물 FIRSTHOME_CONTRACT_CONSTANTS 이 없어 타임아웃을 정할 수 없습니다.');
+      throw new Error('생성물 HOME_COMPASS_CONTRACT_CONSTANTS 이 없어 타임아웃을 정할 수 없습니다.');
     }
     var bc = contract.boundaryConditions;
     return bc.profiles[bc.clientDispatch.byPath[path] || bc.clientDispatch.default].clientTimeoutMs;
@@ -1496,7 +1496,7 @@
   /* ══════════════════════════════════════════════════════════
      8. BOOT / TEST HOOK
      ══════════════════════════════════════════════════════════ */
-  /* 판정 엔진은 여기서 나가지 않는다 — `window.FirstHomeLocalEngine` 이 정본이다.
+  /* 판정 엔진은 여기서 나가지 않는다 — `window.HomeCompassLocalEngine` 이 정본이다.
      예전 이 목록은 `engineAffordability` · `POLICY_CATALOG` · `MOCK_REGIONS` 를
      내보내고 있었고, 그 존재 자체가 두 번째 판정 경로의 표면이었다. */
   var TESTABLE = {
@@ -1511,7 +1511,7 @@
     localStatus: localStatus, timeoutFor: timeoutFor,
     STATE: STATE, TCO_KEYS: TCO_KEYS, ALLOC_KEYS: ALLOC_KEYS
   };
-  if (typeof globalThis !== 'undefined') globalThis.FirstHomeCompass = TESTABLE;
+  if (typeof globalThis !== 'undefined') globalThis.HomeCompass = TESTABLE;
 
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

@@ -4,7 +4,7 @@ Thin HTTP layer over the deterministic engines. It does three things and
 nothing else: validate input, call `engines.analyze()` / `engines.agent.chat()`,
 and serve the vanilla frontend as static files.
 
-Run:  python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000
+Run:  python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000
       (from backend/src)
 """
 
@@ -71,7 +71,7 @@ from .store import (
     Store,
     store_from_env,
 )
-# 계약 디렉터리의 위치는 `store` 가 이미 정했다 (환경변수 `FIRSTHOME_CONTRACTS_DIR`).
+# 계약 디렉터리의 위치는 `store` 가 이미 정했다 (환경변수 `HOME_COMPASS_CONTRACTS_DIR`).
 # 두 번 정의하면 한쪽만 갈아끼울 때 조용히 갈라진다 — `ingest.extraction_verify` 가
 # 같은 이유로 같은 것을 쓴다. `api -> store` 는 허용된 방향이다 (SPEC 1.2).
 from .store.provenance import contracts_dir
@@ -85,7 +85,7 @@ from .store.models import (
 )
 
 FRONTEND_DIR = Path(
-    os.environ.get("FIRSTHOME_FRONTEND_DIR")
+    os.environ.get("HOME_COMPASS_FRONTEND_DIR")
     or Path(__file__).resolve().parents[3] / "frontend"
 )
 
@@ -93,7 +93,7 @@ FRONTEND_DIR = Path(
 #: `SameSite` 로 서 있고(6.3), 오리진을 가르는 순간 CORS 와 CSRF 를 새로 설계해야 한다.
 #: `web` 이 `/` 에 서는 것과 같은 방식으로 `admin` 은 `/admin` 에 선다.
 ADMIN_DIR = Path(
-    os.environ.get("FIRSTHOME_ADMIN_DIR")
+    os.environ.get("HOME_COMPASS_ADMIN_DIR")
     or Path(__file__).resolve().parents[3] / "admin"
 )
 
@@ -3749,7 +3749,7 @@ X_SERIALIZATION = {
     "$sortKeysComment": "객체 키만 정렬한다. 배열 순서는 의미가 있으므로(required, enum, parameters) 건드리지 않는다.",
     "ensureAscii": False,
     "$asciiComment": "한국어 설명문을 유니코드 이스케이프로 부풀리지 않는다. 사람이 리뷰하는 파일이다.",
-    "generator": "backend/src/firsthome/main.py: build_openapi_document / render_openapi_document",
+    "generator": "backend/src/home_compass/main.py: build_openapi_document / render_openapi_document",
     "command": "python scripts/gen_contracts.py",
 }
 

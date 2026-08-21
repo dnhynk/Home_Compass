@@ -12,7 +12,7 @@ PR #59 의 「검증하지 않은 것 ②」가 그 구멍을 명시적으로 6�
 
 「같게 짰다」는 답이 아니므로, 여기서는 **양쪽을 실제로 돌려 결과를 비교한다.**
 
-  파이썬 변  `firsthome.engines.analyze()` — 저장소의 상수·지역·활성 규칙을 주입받아
+  파이썬 변  `home_compass.engines.analyze()` — 저장소의 상수·지역·활성 규칙을 주입받아
   JS 변      `frontend/local_engine.js` — `frontend/generated/*.js` 를 읽어
   모집단     `contracts/regression_profiles.json` 프로필 x 저장소 지역 **전수**
   비교 대상  SPEC 5.3 의 numeric 갈래 — 판정 숫자와 상태 필드
@@ -56,14 +56,14 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.common import DISCLAIMER  # noqa: E402
-from firsthome.engines import analyze  # noqa: E402
-from firsthome.main import (  # noqa: E402
+from home_compass.common import DISCLAIMER  # noqa: E402
+from home_compass.engines import analyze  # noqa: E402
+from home_compass.main import (  # noqa: E402
     MODEL_CONSTANT_PROVENANCE,
     MODEL_CONSTANTS,
     build_lineage,
 )
-from firsthome.store import store_from_env  # noqa: E402
+from home_compass.store import store_from_env  # noqa: E402
 
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from js_runner import run_js  # noqa: E402
@@ -178,7 +178,7 @@ def _js_side(mutation: str = "") -> tuple[dict, dict]:
         + """
         var cases = JSON.parse(CASES_JSON);
         var now = Number(FROZEN_NOW_MS);
-        var engine = globalThis.FirstHomeLocalEngine;
+        var engine = globalThis.HomeCompassLocalEngine;
         var out = {};
         cases.forEach(function (c) {
           var key = c[0] + '@' + c[1];
@@ -341,11 +341,11 @@ def test_a_shaken_verification_actually_breaks_the_grade_comparison():
     """
     _numeric, shaken = _js_side(
         mutation="""
-        var e = globalThis.FIRSTHOME_MODEL_CONSTANTS.entries;
+        var e = globalThis.HOME_COMPASS_MODEL_CONSTANTS.entries;
         Object.keys(e).forEach(function (k) {
           if (e[k].provenance.verification === 'unverified') e[k].provenance.verification = 'verified';
         });
-        globalThis.FIRSTHOME_REGIONS.regions.forEach(function (r) {
+        globalThis.HOME_COMPASS_REGIONS.regions.forEach(function (r) {
           Object.keys(r.fieldProvenance).forEach(function (f) {
             if (r.fieldProvenance[f].verification === 'unverified') {
               r.fieldProvenance[f].verification = 'verified';
@@ -378,7 +378,7 @@ def test_a_shaken_constant_actually_breaks_the_comparison():
     """
     shaken, _lineage = _js_side(
         mutation="""
-        globalThis.FIRSTHOME_MODEL_CONSTANTS.entries['affordability.housing_cost_ratio_cap'].value = 0.31;
+        globalThis.HOME_COMPASS_MODEL_CONSTANTS.entries['affordability.housing_cost_ratio_cap'].value = 0.31;
         """
     )
     differing = [key for key in PYTHON_SIDE if _first_difference(PYTHON_SIDE[key], shaken[key])]
@@ -392,9 +392,9 @@ def test_removing_one_artifact_turns_the_local_path_off():
     """생성물이 없으면 로컬 경로는 **동작하지 않는다** (D-11). 기본값으로 돌지 않는다."""
     reported = run_js(
         """
-        delete globalThis.FIRSTHOME_MODEL_CONSTANTS;
-        delete globalThis.window.FIRSTHOME_MODEL_CONSTANTS;
-        var engine = globalThis.FirstHomeLocalEngine;
+        delete globalThis.HOME_COMPASS_MODEL_CONSTANTS;
+        delete globalThis.window.HOME_COMPASS_MODEL_CONSTANTS;
+        var engine = globalThis.HomeCompassLocalEngine;
         var status = engine.status();
         var thrown = null;
         try { engine.analyze({ monthlyNetIncomeKRW: 3000000, regionCode: '11440' }, { now: 0 }); }
@@ -403,7 +403,7 @@ def test_removing_one_artifact_turns_the_local_path_off():
         """
     )
     assert reported["ready"] is False
-    assert any(m["global"] == "FIRSTHOME_MODEL_CONSTANTS" for m in reported["missing"])
+    assert any(m["global"] == "HOME_COMPASS_MODEL_CONSTANTS" for m in reported["missing"])
     assert reported["thrown"] is not None, "생성물이 없는데 판정이 그대로 돌았다"
     assert "생성물" in reported["thrown"]
 
@@ -412,7 +412,7 @@ def test_the_local_path_refuses_to_read_a_clock_by_itself():
     """SPEC 5.3 — 시각은 주입받는다. 기본값을 두면 그 기본값이 곧 시계 읽기다."""
     thrown = run_js(
         """
-        try { globalThis.FirstHomeLocalEngine.analyze({ regionCode: '11440' }); return null; }
+        try { globalThis.HomeCompassLocalEngine.analyze({ regionCode: '11440' }); return null; }
         catch (e) { return String(e.message); }
         """
     )
@@ -427,17 +427,17 @@ def test_the_disclaimer_string_is_the_same_on_both_sides():
     (SPEC 5.1.2 비대상) 생성물에도 독립 항목으로 실리지 않지만, 갈리면 화면과
     백엔드가 다른 고지를 내보내게 된다.
     """
-    js_value = run_js("return globalThis.FirstHomeLocalEngine.DISCLAIMER;")
+    js_value = run_js("return globalThis.HomeCompassLocalEngine.DISCLAIMER;")
     assert js_value == DISCLAIMER
 
 
 def test_the_engine_version_comes_from_the_artifact_not_from_a_literal():
     """`meta.engineVersion` 이 손으로 쓴 문자열이면 판정이 바뀌어도 그대로 남는다."""
-    from firsthome.common import ENGINE_VERSION
+    from home_compass.common import ENGINE_VERSION
 
     js_value = run_js(
         """
-        return globalThis.FirstHomeLocalEngine
+        return globalThis.HomeCompassLocalEngine
           .analyze({ monthlyNetIncomeKRW: 3000000, regionCode: '11440' }, { now: Number(FROZEN_NOW_MS) })
           .meta.engineVersion;
         """,

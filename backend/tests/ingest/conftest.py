@@ -19,7 +19,7 @@ sys.path.insert(
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "store"),
 )
 
-from firsthome.store import create_store, register_backend  # noqa: E402
+from home_compass.store import create_store, register_backend  # noqa: E402
 from memory_backend import MemoryStore  # noqa: E402
 
 KST = timezone(timedelta(hours=9))

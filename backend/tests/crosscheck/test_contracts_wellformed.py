@@ -58,7 +58,7 @@ def test_registry_keys_are_unique(registry):
     assert len(keys) == len(set(keys))
 
 
-ENGINES_DIR = Path(__file__).resolve().parents[2] / "src" / "firsthome" / "engines"
+ENGINES_DIR = Path(__file__).resolve().parents[2] / "src" / "home_compass" / "engines"
 
 # 판정 결과를 바꾸지 않는 구조/열거 상수는 SPEC 5.1.2 의 비대상이다.
 NOT_MODEL_PARAMETERS = {

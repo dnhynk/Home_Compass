@@ -9,7 +9,7 @@
   `httpx` 로 내려받아 `PyMuPDF` 로 뽑은 PDF 텍스트, 그리고
   **국토교통부 실거래가 오픈API 직접 호출**(60건).
   **검색엔진 요약은 어떤 값의 근거로도 채택하지 않았다** — 후보 URL 을 찾는 데만 썼다.
-- **제품 코드는 한 줄도 고치지 않았다.** 분석 스크립트가 `firsthome.ingest.market` 을
+- **제품 코드는 한 줄도 고치지 않았다.** 분석 스크립트가 `home_compass.ingest.market` 을
   import 해서 **읽기만** 한다. `.env` 는 저장소 밖에서 복사해 읽기만 했고 커밋하지 않았다.
 - **이 문서는 조사 결과일 뿐이며 처리 지시가 아니다.** 산식을 바꿀지 되돌릴지는
   사용자의 판단이다 (C3 은 의견이지 결정이 아니다).
@@ -450,7 +450,7 @@ python docs/engineering/diligence/scripts/bias_measure.py \
     --cache var/molit_cache --offline --band 5
 ```
 
-- 스크립트는 **`firsthome.ingest.market` 을 import 해서 읽기만** 한다.
+- 스크립트는 **`home_compass.ingest.market` 을 import 해서 읽기만** 한다.
   정규화·중앙값·산식·수집 창은 전부 제품 함수다. 저장소(SQLite)를 열지 않는다.
 - 모델 상수는 `contracts/model_constants.json` 의 동결값을 읽는다. **기본값을 두지 않았다** —
   기본값이 곧 등재되지 않은 상수다 (파이프라인과 같은 규율).

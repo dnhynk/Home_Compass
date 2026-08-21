@@ -173,7 +173,7 @@ def test_the_mandatory_disclaimer_is_verbatim(builder):
       있어서 못 찾았다. **표현 형태를 검사하면 표현이 바뀔 때 검사가 거짓말한다.**
       값이 필요하면 값을 import 한다.
     """
-    from firsthome.common import DISCLAIMER
+    from home_compass.common import DISCLAIMER
 
     body = "\n".join(builder.deck_text(str(DECK)))
     assert DISCLAIMER in body, (

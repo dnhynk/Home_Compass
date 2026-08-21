@@ -20,7 +20,7 @@ SRC = Path(__file__).resolve().parents[2] / "src"
 def _run(tmp_path, encoding: str) -> subprocess.CompletedProcess:
     env = {**os.environ, "PYTHONIOENCODING": encoding, "PYTHONPATH": str(SRC)}
     return subprocess.run(
-        [sys.executable, "-m", "firsthome.store", "--db", str(tmp_path / "smoke.db")],
+        [sys.executable, "-m", "home_compass.store", "--db", str(tmp_path / "smoke.db")],
         capture_output=True,
         text=True,
         encoding=encoding,

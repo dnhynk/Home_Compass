@@ -43,8 +43,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # --------------------------------------------------------------------------
 #
 # 아래 `REGIONS` · `POLICIES` 는 저장소에서 읽는다 (`decision_inputs.py`). pytest 밖에서는
-# 그 저장소를 시드하는 `conftest.py` 가 돌지 않으므로 `FIRSTHOME_STORE_URL` 이 없는 채로
-# 기본 경로(`backend/var/firsthome.db`)가 열리고, 지역 0건 · 정책 0건이 된다. 그러면 모든
+# 그 저장소를 시드하는 `conftest.py` 가 돌지 않으므로 `HOME_COMPASS_STORE_URL` 이 없는 채로
+# 기본 경로(`backend/var/home_compass.db`)가 열리고, 지역 0건 · 정책 0건이 된다. 그러면 모든
 # 프로필이 [없는 지역]으로 거부되어 사례가 0건이 되고 비율 계산이 0 으로 나눈다 —
 # `test_sensitivity` 의 오류 메시지가 **재생성 방법으로 안내하는 명령**이 그렇게 죽었다.
 #
@@ -54,12 +54,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # 어긋나고, 최악은 빈 저장소로 재생성해 산출물이 통째로 비는 것이다. 같은 모듈을 부르면
 # 그 어긋남이 원천적으로 불가능하다.
 #
-# `conftest` 는 `FIRSTHOME_STORE_URL` 을 **덮어쓴다.** 그것이 맞다 — 재생성은 시드된
+# `conftest` 는 `HOME_COMPASS_STORE_URL` 을 **덮어쓴다.** 그것이 맞다 — 재생성은 시드된
 # 저장소 안에서만 성립하고, 다른 저장소로 만든 표는 위 테스트가 곧바로 거부한다.
 if __name__ == "__main__":
     import conftest  # noqa: F401  (import 자체가 임시 저장소 시드다)
 
-from firsthome.engines import analyze as _analyze  # noqa: E402
+from home_compass.engines import analyze as _analyze  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed, load_registry  # noqa: E402
 from snapshot_util import dumps, load_profiles, split_snapshot  # noqa: E402

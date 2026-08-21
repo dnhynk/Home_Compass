@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import json
 
-from firsthome.common import ENGINE_VERSION
-from firsthome.main import (
+from home_compass.common import ENGINE_VERSION
+from home_compass.main import (
     API_CONTRACT_VERSION,
     app,
     build_openapi_document,

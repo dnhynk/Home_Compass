@@ -25,7 +25,7 @@ from market_fixtures import (
     trade_raw_item,
 )
 
-from firsthome.ingest.market import (
+from home_compass.ingest.market import (
     CONSTANT_KEYS,
     NO_COUNTERPART_FIELDS,
     area_band,
@@ -38,13 +38,13 @@ from firsthome.ingest.market import (
     paired_jeonse_ratio_pct,
     window_months,
 )
-from firsthome.ingest.market.pipeline import (
+from home_compass.ingest.market.pipeline import (
     RENT_DERIVED_FIELDS,
     MarketFieldMappingError,
     detect_outliers,
 )
-from firsthome.store.models import REGION_FACT_FIELDS
-from firsthome.store.seed import seed_regions
+from home_compass.store.models import REGION_FACT_FIELDS
+from home_compass.store.seed import seed_regions
 
 KST = timezone(timedelta(hours=9))
 
@@ -943,7 +943,7 @@ def test_cancelled_trades_are_not_counted():
     걸리지 않는다 — 애초에 우리가 세려는 모집단이 아니다.
     실측: 마포구 3개월 206건 중 8건(3.9%)이 해제 건이었다 (2026-08-14).
     """
-    from firsthome.ingest.market.pipeline import normalize_trades
+    from home_compass.ingest.market.pipeline import normalize_trades
 
     items = [_trade_item(cdeal="O"), _trade_item(cdeal=" "), _trade_item()]
     trades = normalize_trades(items, region_code="11440", max_area_sqm=85)
@@ -956,7 +956,7 @@ def test_missing_cancellation_field_does_not_drop_everything():
     있는데 무시하는 것과 없어서 못 거르는 것은 다르다. 없다고 실패시키면 이 필드를
     주지 않는 응답에서 전건이 죽고, 그 상태는 조용한 0건과 구분되지 않는다.
     """
-    from firsthome.ingest.market.pipeline import normalize_trades
+    from home_compass.ingest.market.pipeline import normalize_trades
 
     trades = normalize_trades([_trade_item()], region_code="11440", max_area_sqm=85)
     assert len(trades) == 1

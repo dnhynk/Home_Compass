@@ -12,7 +12,7 @@
 한다. 함수를 직접 부르면 [화면이 버튼을 숨기는 것으로 대신하지 않는다](SPEC 6.1)를
 증명하지 못한다.
 
-격리: 모든 케이스가 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로
+격리: 모든 케이스가 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로
 돌리고 세션 원장을 비운다. `conftest.py` 의 세션 저장소는 여기서 건드리지 않는다.
 """
 
@@ -28,9 +28,9 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import auth as auth_module
-from firsthome import main as main_module
-from firsthome.auth import (
+from home_compass import auth as auth_module
+from home_compass import main as main_module
+from home_compass.auth import (
     ARGON2_MEMORY_COST_KIB,
     ARGON2_PARALLELISM,
     ARGON2_TIME_COST,
@@ -41,16 +41,16 @@ from firsthome.auth import (
     SESSION_IDLE_TIMEOUT_KEY,
     ensure_seed_accounts,
 )
-from firsthome.main import MODEL_CONSTANTS, app, read_active_policies, read_regions
-from firsthome.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
-from firsthome.store.seed import seed_all
+from home_compass.main import MODEL_CONSTANTS, app, read_active_policies, read_regions
+from home_compass.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
+from home_compass.store.seed import seed_all
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 T0 = datetime(2026, 8, 14, 9, 0, tzinfo=timezone.utc)
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 PROFILE = {
     "age": 28,
@@ -274,10 +274,10 @@ class TestSeedPasswordsAreNotCommitted:
     #: 따옴표 친 리터럴은 어떤 파일에서든 잡고, 따옴표 없는 값은 `.env`·`.bat` 처럼
     #: **그 자체가 값인 파일**에서만 잡는다 (파이썬의 `secrets.token_urlsafe(16)` 은 값이 아니다).
     _QUOTED = re.compile(
-        r"FIRSTHOME_SEED_(?:COUNSELOR|RULE_MANAGER)_PASSWORD[\"'\]]*\s*[=:,]\s*[\"']([^\"']+)[\"']"
+        r"HOME_COMPASS_SEED_(?:COUNSELOR|RULE_MANAGER)_PASSWORD[\"'\]]*\s*[=:,]\s*[\"']([^\"']+)[\"']"
     )
     _BARE = re.compile(
-        r"FIRSTHOME_SEED_(?:COUNSELOR|RULE_MANAGER)_PASSWORD\s*=\s*(\S+)"
+        r"HOME_COMPASS_SEED_(?:COUNSELOR|RULE_MANAGER)_PASSWORD\s*=\s*(\S+)"
     )
     _VALUE_FILE_SUFFIXES = (".env", ".example", ".bat", ".cmd", ".sh", ".yml", ".yaml")
 
@@ -678,7 +678,7 @@ class TestInternalFieldIsAdditive:
           위 집합에 없는 키가 하나라도 늘면 아래 두 번째 단언이 떨군다. 느슨해진 것이
           아니라 [무엇이 얹혔는가]가 명시적이 된 것이다.
         """
-        from firsthome.engines import analyze as engine_analyze
+        from home_compass.engines import analyze as engine_analyze
 
         with create_store(store_url) as store:
             expected = engine_analyze(

@@ -15,7 +15,7 @@ import sqlite3
 import pytest
 from conftest import T0, make_audit_event
 
-from firsthome.store import create_store
+from home_compass.store import create_store
 
 
 # --------------------------------------------------------------------------
@@ -180,7 +180,7 @@ def test_both_triggers_exist_on_the_audit_table(sqlite_url):
 
 def test_audit_rejects_naive_timestamps(store):
     """오프셋 없는 시각은 감사기록의 순서를 조용히 망가뜨린다 (SPEC 2.1)."""
-    from firsthome.store.errors import StoreError
+    from home_compass.store.errors import StoreError
 
     naive = make_audit_event("ae-1", at=T0.replace(tzinfo=None))
     with pytest.raises(StoreError):

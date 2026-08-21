@@ -121,18 +121,18 @@ _SMOKE_REPORT = {
 }
 
 #: 상태변경 요청에 실을 CSRF 헤더 이름. 상수를 앱에서 가져와 이름이 갈리지 않게 한다.
-from firsthome.auth import CSRF_HEADER_NAME  # noqa: E402
+from home_compass.auth import CSRF_HEADER_NAME  # noqa: E402
 
 #: 시드 계정 비밀번호는 **환경변수로 주입된다** (SPEC 6.3). `conftest.py` 가 세션마다
 #: 무작위로 만들어 걸고, `_server_env` 가 `os.environ` 을 그대로 넘기므로 스모크 서버가
 #: 같은 값을 본다. 여기에 값을 적으면 그것이 곧 [커밋된 시드 비밀번호]다.
 _COUNSELOR_LOGIN = {
     "username": "counselor",
-    "password": os.environ.get("FIRSTHOME_SEED_COUNSELOR_PASSWORD", ""),
+    "password": os.environ.get("HOME_COMPASS_SEED_COUNSELOR_PASSWORD", ""),
 }
 _RULE_MANAGER_LOGIN = {
     "username": "rulemanager",
-    "password": os.environ.get("FIRSTHOME_SEED_RULE_MANAGER_PASSWORD", ""),
+    "password": os.environ.get("HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD", ""),
 }
 
 class _Call:
@@ -336,8 +336,8 @@ def _free_port() -> int:
 
 
 def _seed(db_path: Path) -> str:
-    from firsthome.store import PolicySource, RuleDraft, create_store
-    from firsthome.store.seed import seed_all
+    from home_compass.store import PolicySource, RuleDraft, create_store
+    from home_compass.store.seed import seed_all
 
     url = f"sqlite://{db_path}"
     now = datetime.now(timezone.utc)
@@ -358,7 +358,7 @@ def _seed_smoke_operations(store, now: datetime) -> None:
     """
     from dataclasses import replace
 
-    from firsthome.store.models import AuditEvent
+    from home_compass.store.models import AuditEvent
 
     store.audit.append(
         AuditEvent(
@@ -391,7 +391,7 @@ def _seed_smoke_drafts(store, now: datetime) -> None:
     `not_found` 에 `/criteria/assetMaxKRW` 를 넣어 둔 것은 의도적이다 — 원문에 없던 값이
     기존 문턱을 `null` 로 덮지 않는지가 승인 경로의 조용한 실패 지점이다.
     """
-    from firsthome.store import PolicySource, RuleDraft, RuleSpanMapping
+    from home_compass.store import PolicySource, RuleDraft, RuleSpanMapping
 
     text = "청년전용 버팀목전세자금대출 신청 연령은 만 19세 이상 39세 이하입니다."
     store.policy_sources.add(
@@ -461,7 +461,7 @@ def _seed_smoke_drafts(store, now: datetime) -> None:
 def _server_env(store_url: str) -> dict:
     env = {
         **os.environ,
-        "FIRSTHOME_STORE_URL": store_url,
+        "HOME_COMPASS_STORE_URL": store_url,
         "PYTHONPATH": str(SRC),
         "PYTHONIOENCODING": "utf-8",
         # 키 없이 전 기능이 도는지가 요건이다 (SPEC 9.2 #8 · 9.2.1). 개발 머신의 .env 가
@@ -491,7 +491,7 @@ class _Server:
         #   같은 수정이 `backend/tests/api/test_log_hygiene.py` 의 `_Server` 에도 있다.
         self._console = tempfile.TemporaryFile()
         self.process = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "firsthome.main:app",
+            [sys.executable, "-m", "uvicorn", "home_compass.main:app",
              "--host", "127.0.0.1", "--port", str(self.port), "--log-level", "warning"],
             cwd=str(SRC), env=_server_env(store_url),
             stdout=self._console, stderr=subprocess.STDOUT,

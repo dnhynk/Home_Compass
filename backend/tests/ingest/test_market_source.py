@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 from market_fixtures import auth_error_xml, item_xml, response_xml
 
-from firsthome.ingest.market.source import (
+from home_compass.ingest.market.source import (
     API_KEY_ENV,
     MarketAuthError,
     MarketServiceError,
@@ -100,7 +100,7 @@ def test_api_key_comes_from_the_environment_first(monkeypatch):
 def test_missing_api_key_is_none_not_an_exception(monkeypatch, tmp_path):
     """키 부재는 **정상 실패**의 입구다 (SPEC 9.2.1). 여기서 터지면 그 경로를 못 탄다."""
     monkeypatch.setenv(API_KEY_ENV, "")
-    monkeypatch.setattr("firsthome.ingest.market.source.find_env_file", lambda: None)
+    monkeypatch.setattr("home_compass.ingest.market.source.find_env_file", lambda: None)
     assert resolve_api_key() is None
 
 
@@ -111,7 +111,7 @@ def test_api_key_falls_back_to_a_dotenv_file(monkeypatch, tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text(f'{API_KEY_ENV}="<key-from-file>"\n', encoding="utf-8")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
-    monkeypatch.setattr("firsthome.ingest.market.source.find_env_file", lambda: env_file)
+    monkeypatch.setattr("home_compass.ingest.market.source.find_env_file", lambda: env_file)
 
     assert resolve_api_key() == "key-from-file"
 
@@ -128,7 +128,7 @@ def test_encoding_form_key_is_normalised_to_the_decoding_form():
       실제로 걸렸고, 2026-08-14 에 같은 키로 셋을 나란히 호출해서야 원인이 잡혔다 —
       Encoding+params 403 / Decoding+params 200 / Encoding 을 URL 에 직접 200.
     """
-    from firsthome.ingest.market.source import normalise_service_key
+    from home_compass.ingest.market.source import normalise_service_key
 
     decoding = "abcDEF123+/xyz=="
     encoding = "abcDEF123%2B%2Fxyz%3D%3D"
@@ -137,7 +137,7 @@ def test_encoding_form_key_is_normalised_to_the_decoding_form():
 
 def test_decoding_form_key_passes_through_untouched():
     """이미 Decoding 형태면 건드리지 않는다. `+` 는 공백이 아니라 base64 문자다."""
-    from firsthome.ingest.market.source import normalise_service_key
+    from home_compass.ingest.market.source import normalise_service_key
 
     key = "abcDEF123+/xyz=="
     assert normalise_service_key(key) == key
@@ -145,7 +145,7 @@ def test_decoding_form_key_passes_through_untouched():
 
 def test_resolve_api_key_returns_the_normalised_key(monkeypatch):
     """환경변수로 들어온 Encoding 키가 **조회 시점에** 정규화되는가."""
-    from firsthome.ingest.market import source
+    from home_compass.ingest.market import source
 
     monkeypatch.setenv(source.SERVICE_KEY_ENV["rent"], "aa%2Bbb%3D")
     assert source.resolve_api_key("rent") == "aa+bb="

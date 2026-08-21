@@ -140,7 +140,7 @@ def extract_one(
     source = store.policy_sources.get(source_id)
     if source is None:
         raise StoreError(
-            f"원문이 적재되지 않았다: {source_id} — 먼저 `python -m firsthome.ingest` 를 돌려라"
+            f"원문이 적재되지 않았다: {source_id} — 먼저 `python -m home_compass.ingest` 를 돌려라"
         )
 
     # ★ 대상 텍스트는 **저장소에 저장된 NFC 정규화 텍스트**다 (SPEC 4.2.1).

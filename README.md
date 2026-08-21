@@ -19,7 +19,7 @@
 ```text
 frontend/                    시민용 Vanilla JS 화면
 admin/                       규칙 관리자 검토·승인 화면
-backend/src/firsthome/       FastAPI API, 계산 엔진, 인증, 저장소, 수집 파이프라인
+backend/src/home_compass/       FastAPI API, 계산 엔진, 인증, 저장소, 수집 파이프라인
 backend/tests/               단위·통합·계약·교차 검증 테스트
 contracts/                   손으로 쓴 검증 계약과 생성된 OpenAPI 스냅샷
 data/                        정책 원문 입력
@@ -43,7 +43,7 @@ scripts\dev.bat
 python -m pip install -r backend\requirements.txt
 python scripts\seed_store.py
 Set-Location backend\src
-python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1
+python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
 기동 후 사용할 주소:
@@ -53,7 +53,7 @@ python -m uvicorn firsthome.main:app --host 127.0.0.1 --port 8000 --workers 1
 - API 문서: http://127.0.0.1:8000/docs
 - 상태 확인: http://127.0.0.1:8000/api/health
 
-처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `FIRSTHOME_SEED_COUNSELOR_PASSWORD`와 `FIRSTHOME_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 않습니다.
+처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `HOME_COMPASS_SEED_COUNSELOR_PASSWORD`와 `HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 않습니다.
 
 개발 환경에서 두 값을 생략하면 임시 비밀번호가 표준 오류에 한 번 출력됩니다. 공개 배포 설정은 별도 하드닝 작업에서 fail-closed 방식으로 전환할 예정입니다.
 
@@ -76,11 +76,11 @@ Copy-Item .env.example .env
 
 | 변수 | 용도 |
 | --- | --- |
-| `FIRSTHOME_STORE_URL` | 저장소 URL. 기본값은 `backend/var/firsthome.db`를 사용하는 SQLite |
-| `FIRSTHOME_LOG_FILE` | 구조화 JSONL 로그 경로 |
-| `FIRSTHOME_FRONTEND_DIR` | 시민용 정적 파일 디렉터리 |
-| `FIRSTHOME_ADMIN_DIR` | 운영용 정적 파일 디렉터리 |
-| `FIRSTHOME_CONTRACTS_DIR` | JSON Schema·OpenAPI 계약 디렉터리 |
+| `HOME_COMPASS_STORE_URL` | 저장소 URL. 기본값은 `backend/var/home_compass.db`를 사용하는 SQLite |
+| `HOME_COMPASS_LOG_FILE` | 구조화 JSONL 로그 경로 |
+| `HOME_COMPASS_FRONTEND_DIR` | 시민용 정적 파일 디렉터리 |
+| `HOME_COMPASS_ADMIN_DIR` | 운영용 정적 파일 디렉터리 |
+| `HOME_COMPASS_CONTRACTS_DIR` | JSON Schema·OpenAPI 계약 디렉터리 |
 | `MOLIT_API_KEY` | 국토교통부 실거래가 OpenAPI 인증키 |
 
 공개 배포에서는 단일 인스턴스·단일 worker와 영구 볼륨의 SQLite를 전제로 합니다. 호스팅별 설정과 보안 경계는 배포 하드닝 후 이 문서에 확정합니다.
@@ -94,11 +94,11 @@ Copy-Item .env.example .env
 ```powershell
 $env:MOLIT_API_KEY = "<service-key>"
 Push-Location backend\src
-python -m firsthome.ingest.market --from-env
+python -m home_compass.ingest.market --from-env
 Pop-Location
 ```
 
-상세 옵션은 같은 디렉터리에서 `python -m firsthome.ingest.market --help`로 확인할 수 있습니다. 저장소 구성은 [저장소 문서](backend/src/firsthome/store/README.md)를 참고하세요.
+상세 옵션은 같은 디렉터리에서 `python -m home_compass.ingest.market --help`로 확인할 수 있습니다. 저장소 구성은 [저장소 문서](backend/src/home_compass/store/README.md)를 참고하세요.
 
 ## API와 계약
 

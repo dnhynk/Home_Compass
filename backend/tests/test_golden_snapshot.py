@@ -16,7 +16,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.engines import analyze  # noqa: E402
+from home_compass.engines import analyze  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed  # noqa: E402
 from snapshot_util import (  # noqa: E402

@@ -87,9 +87,9 @@ def test_every_normative_constant_appears_at_both_widths():
 
 @pytest.fixture(scope="module")
 def standalone_run():
-    """`FIRSTHOME_STORE_URL` 을 **지우고** 스크립트를 돌린다 (사람이 새 셸에서 치는 상태).
+    """`HOME_COMPASS_STORE_URL` 을 **지우고** 스크립트를 돌린다 (사람이 새 셸에서 치는 상태).
 
-    환경변수를 지우는 이유: 개발자 로컬 DB(`backend/var/firsthome.db`)가 있으면 통과하고
+    환경변수를 지우는 이유: 개발자 로컬 DB(`backend/var/home_compass.db`)가 있으면 통과하고
     없으면 깨지는 검사는 신규 클론과 CI 에서만 빨간불이 된다. `conftest.py` 가 그 DB 에
     기대지 않는 것과 같은 이유다.
 
@@ -104,7 +104,7 @@ def standalone_run():
     # 인코딩(cp949)으로 되돌아가, 이쪽에서 UTF-8 로 읽는 순간 한국어가 깨진다.
     # 검사 대상은 인코딩이 아니라 실행이므로 여기서 고정한다.
     env = {
-        k: v for k, v in os.environ.items() if k != "FIRSTHOME_STORE_URL"
+        k: v for k, v in os.environ.items() if k != "HOME_COMPASS_STORE_URL"
     } | {"PYTHONIOENCODING": "utf-8"}
     # 되돌리기는 **바이트**로, 비교는 **텍스트**로 한다. 윈도우의 텍스트 쓰기는 줄바꿈을
     # CRLF 로 바꾸므로 바이트끼리 비교하면 플랫폼 차이가 내용 차이로 보인다 —
@@ -169,7 +169,7 @@ def test_an_unseeded_store_says_what_is_missing_instead_of_dividing_by_zero(tmp_
     """
     env = {
         **os.environ,
-        "FIRSTHOME_STORE_URL": f"sqlite://{tmp_path / 'empty.db'}",
+        "HOME_COMPASS_STORE_URL": f"sqlite://{tmp_path / 'empty.db'}",
         "PYTHONIOENCODING": "utf-8",  # 위 픽스처와 같은 이유 — stderr 의 한국어를 읽는다
     }
     proc = subprocess.run(

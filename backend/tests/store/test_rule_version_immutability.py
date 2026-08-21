@@ -16,8 +16,8 @@ from datetime import timedelta
 import pytest
 from conftest import T0, make_approval, make_rule_version
 
-from firsthome.store import create_store
-from firsthome.store.errors import StoreError
+from home_compass.store import create_store
+from home_compass.store.errors import StoreError
 
 
 def _raw(url: str) -> sqlite3.Connection:

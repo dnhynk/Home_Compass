@@ -478,10 +478,10 @@ SPEC의 두 요구가 동시에 성립하도록 경계를 고정한 것이다.
 
     | 파일 | 전역 | 원본 |
     |---|---|---|
-    | `frontend/generated/model_constants.js` | `window.FIRSTHOME_MODEL_CONSTANTS` | `store` 의 `ModelConstant` |
-    | `frontend/generated/policy_rules.js` | `window.FIRSTHOME_POLICY_RULES` | `store` 의 승인된 `RuleVersion` |
-    | `frontend/generated/regions.js` | `window.FIRSTHOME_REGIONS` | `store` 의 `Region` |
-    | `frontend/generated/contract_constants.js` | `window.FIRSTHOME_CONTRACT_CONSTANTS` | `contracts/openapi.json` 의 `x-` 확장 |
+    | `frontend/generated/model_constants.js` | `window.HOME_COMPASS_MODEL_CONSTANTS` | `store` 의 `ModelConstant` |
+    | `frontend/generated/policy_rules.js` | `window.HOME_COMPASS_POLICY_RULES` | `store` 의 승인된 `RuleVersion` |
+    | `frontend/generated/regions.js` | `window.HOME_COMPASS_REGIONS` | `store` 의 `Region` |
+    | `frontend/generated/contract_constants.js` | `window.HOME_COMPASS_CONTRACT_CONSTANTS` | `contracts/openapi.json` 의 `x-` 확장 |
 
     - 생성기는 `scripts/gen_contracts.py` **하나**다. `openapi.json` 과 같은 파이프라인이며
       (D-12 가 그렇게 적었다), `--check` · `--stdout NAME` 이 넷 모두에 같은 규약으로 걸린다.
@@ -550,24 +550,24 @@ SPEC의 두 요구가 동시에 성립하도록 경계를 고정한 것이다.
 
     ```js
     // 없으면 undefined 다. `|| {}` 를 쓰지 않는다. 그 한 줄이 D-11 을 무효로 만든다.
-    if (!window.FIRSTHOME_MODEL_CONSTANTS) { /* 로컬 판정 경로를 끄고 화면에 명시한다 */ }
+    if (!window.HOME_COMPASS_MODEL_CONSTANTS) { /* 로컬 판정 경로를 끄고 화면에 명시한다 */ }
 
     // SPEC 2.3 술어를 **자기 시각으로** 적용한다. 생성물은 승인된 규칙 전부를 담는다.
     var now = Date.now();
-    var policies = window.FIRSTHOME_POLICY_RULES.ruleVersions.filter(function (v) {
+    var policies = window.HOME_COMPASS_POLICY_RULES.ruleVersions.filter(function (v) {
       var rv = v.ruleVersion;
       return (rv.effective_from === null || Date.parse(rv.effective_from) <= now)
           && (rv.effective_to   === null || now < Date.parse(rv.effective_to));
     }).map(function (v) { return v.payload; });   // payload = 백엔드 엔진이 받는 그 객체
 
     // 지역은 payload 가 엔진 입력이고, 계보는 옆에 있다. source 한 줄로 접지 않는다.
-    var regions = window.FIRSTHOME_REGIONS.regions;
+    var regions = window.HOME_COMPASS_REGIONS.regions;
     var region  = regions.filter(function (r) { return r.code === code; })[0];
     // region.payload           -> 엔진에 그대로 넘긴다
     // region.fieldProvenance['maintenanceFeeKRW'].verification  -> 'unverified'
 
     // 타임아웃은 계약에서 유도한다. 프론트가 숫자를 다시 쓰지 않는다 (SPEC 8.3 #3).
-    var bc = window.FIRSTHOME_CONTRACT_CONSTANTS.boundaryConditions;
+    var bc = window.HOME_COMPASS_CONTRACT_CONSTANTS.boundaryConditions;
     function timeoutFor(path) {
       return bc.profiles[bc.clientDispatch.byPath[path] || bc.clientDispatch.default].clientTimeoutMs;
     }

@@ -56,13 +56,13 @@ import pytest
 from conftest import make_draft, make_policy_source
 from memory_backend import NO_CLAIM_GATE
 
-from firsthome.store import create_store
-from firsthome.store.errors import (
+from home_compass.store import create_store
+from home_compass.store.errors import (
     DraftAlreadyDecidedError,
     RecordNotFoundError,
     StoreError,
 )
-from firsthome.store.interfaces import Store
+from home_compass.store.interfaces import Store
 
 #: 같은 초안에 동시에 달려드는 시도 수. 2 로는 인터리빙이 운에 좌우된다.
 CLAIMERS = 8

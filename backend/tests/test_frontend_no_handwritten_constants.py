@@ -147,7 +147,7 @@ def test_the_screen_reads_its_timeouts_from_the_contract():
     got = run_js(
         """
         return JSON.parse(PATHS).reduce(function (acc, p) {
-          acc[p] = globalThis.FirstHomeCompass.timeoutFor(p);
+          acc[p] = globalThis.HomeCompass.timeoutFor(p);
           return acc;
         }, {});
         """,
@@ -176,7 +176,7 @@ def test_no_timeout_value_is_written_anywhere_in_the_screen_code():
 def test_the_screen_exports_no_judgement_engine():
     """`app.js` 가 판정 함수를 내보내면 그 표면이 곧 두 번째 판정 경로가 된다.
 
-    예전 `FirstHomeCompass` 는 `engineAffordability` · `enginePolicies` ·
+    예전 `HomeCompass` 는 `engineAffordability` · `enginePolicies` ·
     `POLICY_CATALOG` · `MOCK_REGIONS` · `MOCK_RESPONSE` 를 내보내고 있었다.
     """
     forbidden = [

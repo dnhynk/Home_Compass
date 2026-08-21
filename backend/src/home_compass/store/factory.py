@@ -1,7 +1,7 @@
 """설정 문자열 하나로 백엔드를 고른다 (부록 A).
 
-    FIRSTHOME_STORE_URL=sqlite://./backend/var/firsthome.db
-    FIRSTHOME_STORE_URL=postgresql://user@host/firsthome     ← 드라이버 등록만 하면 된다
+    HOME_COMPASS_STORE_URL=sqlite://./backend/var/home_compass.db
+    HOME_COMPASS_STORE_URL=postgresql://user@host/home_compass     ← 드라이버 등록만 하면 된다
 
 외부 DB 를 붙이는 쪽은 `register_backend(scheme, factory)` 를 부르면 되고, `store/` 안의
 어떤 파일도 고치지 않는다. 호출자는 URL 만 바뀐다 — 이것이 "코드 변경 없이 설정으로 교체".
@@ -20,10 +20,10 @@ from .errors import UnknownBackendError
 from .interfaces import Store
 
 #: 부록 A — 비밀·설정은 환경변수로 주입한다.
-STORE_URL_ENV = "FIRSTHOME_STORE_URL"
+STORE_URL_ENV = "HOME_COMPASS_STORE_URL"
 
 #: 환경변수가 없을 때의 로컬 기본값 (SPEC 1.3 로컬 단일 호스트).
-DEFAULT_STORE_URL = f"sqlite://{Path(__file__).resolve().parents[3] / 'var' / 'firsthome.db'}"
+DEFAULT_STORE_URL = f"sqlite://{Path(__file__).resolve().parents[3] / 'var' / 'home_compass.db'}"
 
 _BACKENDS: dict[str, Callable[[str], Store]] = {}
 
@@ -54,6 +54,6 @@ def create_store(url: str) -> Store:
 
 
 def store_from_env(env: dict[str, str] | None = None) -> Store:
-    """`FIRSTHOME_STORE_URL` 을 읽어 저장소를 연다."""
+    """`HOME_COMPASS_STORE_URL` 을 읽어 저장소를 연다."""
     source = os.environ if env is None else env
     return create_store(source.get(STORE_URL_ENV) or DEFAULT_STORE_URL)

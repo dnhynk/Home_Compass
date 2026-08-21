@@ -1,7 +1,7 @@
 """`ingest.market` — 시세 수집 파이프라인 (SPEC Part 3 · 3.1 · 10.2 3단계).
 
-    python -m firsthome.ingest.market            # 실기동 (키가 있으면 실수집)
-    python -m firsthome.ingest.market --demo     # 키 없이 전 과정을 보인다
+    python -m home_compass.ingest.market            # 실기동 (키가 있으면 실수집)
+    python -m home_compass.ingest.market --demo     # 키 없이 전 과정을 보인다
 
 흐름은 SPEC 3 그대로다 — **fetch -> 정규화 -> 이상치 검사 -> upsert + Provenance.**
 각 단계가 별개 함수인 이유는 완료 기준 넷을 키 없이 증명하기 위해서다 (SPEC 9.2.1).

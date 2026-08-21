@@ -17,7 +17,7 @@ from jsonschema import Draft202012Validator
 from .errors import ProvenanceError
 
 #: 부록 A — 설정은 환경변수로 주입한다. `.env` 는 편의 수단일 뿐 유일 경로가 아니다.
-CONTRACTS_DIR_ENV = "FIRSTHOME_CONTRACTS_DIR"
+CONTRACTS_DIR_ENV = "HOME_COMPASS_CONTRACTS_DIR"
 
 _DEFAULT_CONTRACTS_DIR = Path(__file__).resolve().parents[4] / "contracts"
 

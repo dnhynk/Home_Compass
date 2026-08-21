@@ -1,7 +1,7 @@
 {
   "_disclaimer": "국토교통부 실거래가 오픈API 실수집 결과를 굳힌 것이다 (계약 결정 #40). 8필드가 한 덩어리가 아니다 — 5필드는 실측(verified)이고, 실거래가 원자료에 대응물이 없는 3필드(maintenanceFeeKRW · marketRisk · guaranteeAvailable)는 예시값 그대로 unverified 다 (SPEC 3.1). 그래서 dataGrade 는 여전히 C 다.",
   "_fetchedAt": "fetched_at 은 **실제 수집 시각**이며 시연일이 아니다. 시연일과 벌어지는 것이 정상이고, 계보가 그것을 그대로 드러내는 것이 이 제품의 설계다 (결정 #40). 시연일로 고쳐 적지 않는다.",
-  "_regeneration": "다시 굳히려면 네트워크가 있는 상태에서 python -m firsthome.ingest.market 을 돌려 나온 값을 여기에 옮긴다. 절차와 그때 함께 재생성해야 하는 것들은 docs/engineering/REHEARSAL.md 1부에 있다.",
+  "_regeneration": "다시 굳히려면 네트워크가 있는 상태에서 python -m home_compass.ingest.market 을 돌려 나온 값을 여기에 옮긴다. 절차와 그때 함께 재생성해야 하는 것들은 docs/engineering/REHEARSAL.md 1부에 있다.",
   "regions": [
     {
       "payload": {

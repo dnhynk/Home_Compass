@@ -40,16 +40,16 @@ from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import AUDIT_DENIED, AUDIT_LOGIN, AUDIT_LOGOUT, CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import AUDIT_RULE_DECISION, app
-from firsthome.store import PolicySource, RuleDraft, create_store
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import AUDIT_DENIED, AUDIT_LOGIN, AUDIT_LOGOUT, CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import AUDIT_RULE_DECISION, app
+from home_compass.store import PolicySource, RuleDraft, create_store
+from home_compass.store.seed import seed_all
 
 T0 = datetime(2026, 8, 15, 9, 0, tzinfo=timezone.utc)
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 APPROVE_DRAFT = "audit-draft-approve"
 REJECT_DRAFT = "audit-draft-reject"
@@ -97,14 +97,14 @@ def store_url(tmp_path, monkeypatch) -> str:
                           payload={"policy_id": f"policy-{draft_id}", "criteria": {}},
                           created_at=T0)
             )
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", url)
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", url)
     return url
 
 
 @pytest.fixture
 def log_file(tmp_path, monkeypatch):
     path = tmp_path / "observability.jsonl"
-    monkeypatch.setenv("FIRSTHOME_LOG_FILE", str(path))
+    monkeypatch.setenv("HOME_COMPASS_LOG_FILE", str(path))
     return path
 
 
@@ -270,7 +270,7 @@ class TestTheBatchRunRecordReachesTheScreen:
 
     def test_the_screen_counts_the_run_records(self, client, store_url):
         """성공 2 · 실패 1 을 심고 화면이 66.7% 를 내는지 본다."""
-        from firsthome.store.models import AuditEvent
+        from home_compass.store.models import AuditEvent
 
         with create_store(store_url) as store:
             for index, outcome in enumerate(("success", "success", "failed"), start=1):
@@ -299,8 +299,8 @@ class TestTheBatchRunRecordReachesTheScreen:
         읽는 쪽이 없는 action 을 물으면 빈 목록이 오고 그것은 [배치가 안 돌았다] 와
         구분되지 않는다. 두 벌을 잇는 것은 이 테스트뿐이므로 여기서 붙든다.
         """
-        from firsthome.ingest.extraction import EXTRACTION_ACTION
-        from firsthome.ingest.market.pipeline import ACTION_RUN
+        from home_compass.ingest.extraction import EXTRACTION_ACTION
+        from home_compass.ingest.market.pipeline import ACTION_RUN
 
         assert main_module.MARKET_RUN_ACTION == ACTION_RUN
         assert main_module.EXTRACTION_ACTION == EXTRACTION_ACTION

@@ -30,7 +30,7 @@ from pathlib import Path
 import pytest
 from js_runner import run_js
 
-from firsthome.store.models import POLICY_REPORT_FIELDS, REGION_FACT_FIELDS
+from home_compass.store.models import POLICY_REPORT_FIELDS, REGION_FACT_FIELDS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ADMIN_DIR = REPO_ROOT / "admin"
@@ -63,7 +63,7 @@ def call(body: str, *, authenticated: bool) -> object:
          "role": "counselor" if authenticated else None, "csrfToken": "t"}
     )
     return run_js(
-        f"var C = globalThis.FirstHomeCompass;\n"
+        f"var C = globalThis.HomeCompass;\n"
         f"C.STATE.session = {session};\n"
         f"{body}",
         include_screen=True,

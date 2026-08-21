@@ -16,9 +16,9 @@ from pathlib import Path
 import pytest
 from conftest import OUR_CHOICE, make_constant, make_region, make_rule_version
 
-from firsthome.store.errors import ProvenanceError
-from firsthome.store.models import Provenance
-from firsthome.store.provenance import provenance_schema, validate_provenance_dict
+from home_compass.store.errors import ProvenanceError
+from home_compass.store.models import Provenance
+from home_compass.store.provenance import provenance_schema, validate_provenance_dict
 
 CONTRACTS = Path(__file__).resolve().parents[3] / "contracts"
 

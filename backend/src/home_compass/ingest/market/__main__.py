@@ -1,12 +1,12 @@
-"""실기동 — `python -m firsthome.ingest.market`.
+"""실기동 — `python -m home_compass.ingest.market`.
 
 SPEC 9.3 #3 의 **배치 작업** 대응물이다: 배치를 실제로 실행하고 저장소 변화 전후를 찍는다.
 SPEC 1.3 이 요구하는 「배치를 눈앞에서 돌린다」의 진입점이며 `scripts/ingest.bat` 이 이것을 부른다.
 
-    python -m firsthome.ingest.market --demo        # 키 없이 전 과정 (합성 거래)
-    python -m firsthome.ingest.market               # 실수집 (키 필요)
-    python -m firsthome.ingest.market --db ./var/market.db
-    python -m firsthome.ingest.market --from-env    # FIRSTHOME_STORE_URL 을 쓴다
+    python -m home_compass.ingest.market --demo        # 키 없이 전 과정 (합성 거래)
+    python -m home_compass.ingest.market               # 실수집 (키 필요)
+    python -m home_compass.ingest.market --db ./var/market.db
+    python -m home_compass.ingest.market --from-env    # HOME_COMPASS_STORE_URL 을 쓴다
 
 **`--demo` 의 거래는 합성이다.** 화면과 계보에 그렇게 적힌다 — 시연용 숫자가 실데이터인
 척하는 경로를 만들지 않는 것이 이 파일의 규율이다 (SPEC 3.1).

@@ -9,18 +9,18 @@
    손으로 고치면 backend/tests/crosscheck/test_generated_frontend_diff.py 의
    바이트 비교가 깨진다. 되돌리려면 위 재생성 명령을 돌린다.
 
-   이 파일이 없거나 로드에 실패하면 window.FIRSTHOME_CONTRACT_CONSTANTS 은 undefined 다.
+   이 파일이 없거나 로드에 실패하면 window.HOME_COMPASS_CONTRACT_CONSTANTS 은 undefined 다.
    소비자는 그 자리에서 로컬 판정 경로를 끄고 화면에 명시한다 — 기본값으로 메우는
    침묵 폴백을 금지한다 (SPEC D-11 · 6.2 오프라인 동작 정의 #3).
    ============================================================ */
-window.FIRSTHOME_CONTRACT_CONSTANTS = {
+window.HOME_COMPASS_CONTRACT_CONSTANTS = {
   "$generated": {
     "artifact": "web-contract-constants",
     "command": "python scripts/gen_contracts.py",
     "doNotEdit": true,
     "engineVersion": "3.0.0",
-    "global": "FIRSTHOME_CONTRACT_CONSTANTS",
-    "noSilentFallback": "이 파일이 없으면 window.FIRSTHOME_CONTRACT_CONSTANTS 은 undefined 다. 기본값·빈 값으로 대체하지 않는다. 판정 경로를 끄고 화면에 명시한다 (SPEC D-11).",
+    "global": "HOME_COMPASS_CONTRACT_CONSTANTS",
+    "noSilentFallback": "이 파일이 없으면 window.HOME_COMPASS_CONTRACT_CONSTANTS 은 undefined 다. 기본값·빈 값으로 대체하지 않는다. 판정 경로를 끄고 화면에 명시한다 (SPEC D-11).",
     "shapeDocumentedIn": "contracts/README.md 결정 #34",
     "source": "contracts/openapi.json 의 x- 확장 (SPEC 8.3 #3 · #4)",
     "sourcePointers": {

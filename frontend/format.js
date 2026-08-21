@@ -8,7 +8,7 @@
        입력 -> 기대 문자열을 두고 **양쪽 테스트가 같은 파일을 읽는다.**
      · 엔진·화면 어디서도 픽스처를 우회한 자체 포맷을 만들지 않는다.
 
-   이 파일이 그 JS 변이다. 파이썬 변은 `backend/src/firsthome/common.py` 의
+   이 파일이 그 JS 변이다. 파이썬 변은 `backend/src/home_compass/common.py` 의
    `money()` · `pct()` 이고, 적합성은 두 테스트가 각각 붙든다 —
    `backend/tests/test_format_golden.py`(파이썬) ·
    `backend/tests/test_frontend_format_golden_js.py`(여기, node 로 실행).
@@ -163,7 +163,7 @@
     return money(value).replace(/원$/, '');
   }
 
-  global.FirstHomeFormat = {
+  global.HomeCompassFormat = {
     money: money,
     moneyNoUnit: moneyNoUnit,
     won: won,

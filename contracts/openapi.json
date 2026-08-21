@@ -3943,7 +3943,7 @@
     "command": "python scripts/gen_contracts.py",
     "encoding": "UTF-8, BOM 없음",
     "ensureAscii": false,
-    "generator": "backend/src/firsthome/main.py: build_openapi_document / render_openapi_document",
+    "generator": "backend/src/home_compass/main.py: build_openapi_document / render_openapi_document",
     "indent": 2,
     "newline": "LF (\\n). 파일 끝에 개행 1개.",
     "sortKeys": true

@@ -41,7 +41,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from firsthome.engines import analyze  # noqa: E402
+from home_compass.engines import analyze  # noqa: E402
 import snapshot_util  # noqa: E402
 from decision_inputs import FROZEN_NOW, store_policies, store_regions  # noqa: E402
 from seed_constants import frozen_seed  # noqa: E402
@@ -71,7 +71,7 @@ PROFILE = {
 #: 이 파일이 못 잡는다.
 OTHER_NOW = FROZEN_NOW + timedelta(days=400, hours=13, minutes=41, seconds=7)
 
-ENGINES_DIR = Path(__file__).resolve().parents[1] / "src" / "firsthome" / "engines"
+ENGINES_DIR = Path(__file__).resolve().parents[1] / "src" / "home_compass" / "engines"
 
 #: 시계를 읽는 호출. 판정 경로에 있으면 그 자리가 곧 SPEC 5.3 위반이다.
 _CLOCK_ATTRS = {"now", "utcnow", "today", "fromtimestamp", "time", "monotonic", "perf_counter"}

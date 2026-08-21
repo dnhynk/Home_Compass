@@ -46,7 +46,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from jsonschema import Draft202012Validator
 
-# 계약 디렉터리의 위치는 `store` 가 이미 정했다 (환경변수 `FIRSTHOME_CONTRACTS_DIR`).
+# 계약 디렉터리의 위치는 `store` 가 이미 정했다 (환경변수 `HOME_COMPASS_CONTRACTS_DIR`).
 # 두 번 정의하면 한쪽만 갈아끼울 때 조용히 갈라진다. `ingest -> store` 는 허용된 방향이다.
 from ..store.provenance import contracts_dir
 

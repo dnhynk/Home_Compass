@@ -133,7 +133,7 @@ def load_env_file(path: Path | None = None, override: bool = False) -> dict:
 # 거짓이 되는 것을 이 저장소는 이미 한 번 겪었다 (`.gitignore` 의 QA 산출물 항목).
 
 #: 파일 로그 경로의 환경변수. 없으면 아래 기본값.
-LOG_FILE_ENV = "FIRSTHOME_LOG_FILE"
+LOG_FILE_ENV = "HOME_COMPASS_LOG_FILE"
 
 #: `backend/` 기준 상대 경로.
 DEFAULT_LOG_FILE = "var/observability.jsonl"

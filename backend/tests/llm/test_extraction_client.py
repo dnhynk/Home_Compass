@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from firsthome.llm.extraction import (
+from home_compass.llm.extraction import (
     EXTRACTION_SYSTEM_PROMPT,
     ExtractionCallFailed,
     ExtractionUnavailable,
@@ -56,7 +56,7 @@ def test_importing_the_module_needs_no_key_and_no_sdk():
     """
     import ast
 
-    import firsthome.llm.extraction as module
+    import home_compass.llm.extraction as module
 
     tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))
     top_level = [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))]
@@ -76,7 +76,7 @@ def test_the_client_does_not_import_store_or_ingest():
     """
     import ast
 
-    import firsthome.llm.extraction as module
+    import home_compass.llm.extraction as module
 
     tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))
     hits: list[str] = []

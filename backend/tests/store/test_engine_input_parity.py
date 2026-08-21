@@ -43,10 +43,10 @@ import pytest
 from conftest import T0
 from seed_constants import frozen_seed
 
-from firsthome.engines import guarantee_deposit_cap_for
-from firsthome.engines.eligibility import evaluate_policies
-from firsthome.engines.risk import scan_deposit_risk
-from firsthome.store.seed import (
+from home_compass.engines import guarantee_deposit_cap_for
+from home_compass.engines.eligibility import evaluate_policies
+from home_compass.engines.risk import scan_deposit_risk
+from home_compass.store.seed import (
     SEED_DATA_DIR,
     seed_model_constants,
     seed_policies,

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "firsthome-compass"
+name = "home-compass"
 version = "1.0.0"
 description = "Home_Compass — 청년 주거 금융 의사결정 엔진"
 requires-python = ">=3.11"
@@ -22,7 +22,7 @@ dev = ["pytest>=8.0", "httpx>=0.27"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-firsthome = ["data/*.json"]
+home_compass = ["data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

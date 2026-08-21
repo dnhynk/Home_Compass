@@ -1,6 +1,6 @@
 # 시세 필드 도출 산식 (SPEC 3.1)
 
-작성 2026-08-14 · W-market (SPEC 3단계) · 코드 정본은 `backend/src/firsthome/ingest/market/pipeline.py`
+작성 2026-08-14 · W-market (SPEC 3단계) · 코드 정본은 `backend/src/home_compass/ingest/market/pipeline.py`
 
 SPEC 3.1 이 **「산식을 문서로 남긴다」** 를 명시적으로 요구한다. 이 문서가 그것이다.
 각 항목에 **무엇을 썼는지 · 어떤 선택이 우리 것인지 · 준거가 무엇인지**를 함께 적는다.

@@ -42,8 +42,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.main import app
+from home_compass import main as main_module
+from home_compass.main import app
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ADMIN_DIR = REPO_ROOT / "admin"
@@ -331,7 +331,7 @@ def label_table_drift(source: str, server_codes: set[str]) -> dict[str, list[str
 class TestTheFailureVocabularyOnScreenMatchesTheServer:
     @staticmethod
     def _server_codes() -> set[str]:
-        from firsthome.ingest.extraction_verify import ALL_CODES
+        from home_compass.ingest.extraction_verify import ALL_CODES
 
         return set(ALL_CODES)
 

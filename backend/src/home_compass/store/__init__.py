@@ -1,10 +1,10 @@
 """`store` — 저장소 계층. SQLite 기본, 교체 가능 (SPEC 1.1 · 부록 A).
 
-    from firsthome.store import store_from_env
+    from home_compass.store import store_from_env
     with store_from_env() as store:
         rules = store.rule_versions.active(datetime.now(timezone.utc))
 
-호출자는 어떤 백엔드가 붙었는지 모른다. 백엔드는 `FIRSTHOME_STORE_URL` 하나가 정한다.
+호출자는 어떤 백엔드가 붙었는지 모른다. 백엔드는 `HOME_COMPASS_STORE_URL` 하나가 정한다.
 
 이 패키지가 지고 있는 보장 셋 —
   - `AuditEvent` append-only (SPEC 7.1). 인터페이스에 수정·삭제가 **없고**, SQLite 는

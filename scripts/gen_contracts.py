@@ -18,7 +18,7 @@ SPEC 1.2 의 생성 방향은 단방향이고 세 줄이다. **이 스크립트�
 게이트를 둘로 나누면 한쪽만 도는 경로가 생긴다 — CI 단계도, `--check` 도, 사람이 외우는
 명령도 둘이 된다. 파일이 아니라 **레지스트리**(`ARTIFACTS`)를 늘리는 형태로 얹는다.
 
-**저장소를 요구한다.** `firsthome.main` 을 import 하는 것이 곧 기동이고, 기동은 모델
+**저장소를 요구한다.** `home_compass.main` 을 import 하는 것이 곧 기동이고, 기동은 모델
 상수 전수 존재를 저장소에서 검증한다 (SPEC 5.1.1). 개발자 DB 상태가 생성물에 새어들지
 않도록 여기서는 **임시 저장소를 시드해서 쓴다** — 같은 커밋이면 누가 어디서 돌려도 같은
 바이트가 나와야 한다.
@@ -52,9 +52,9 @@ SHAPE_DOC = "contracts/README.md 결정 #34"
 
 
 def _prepare_isolated_store(tmp_dir: str) -> None:
-    """`firsthome.main` import 전에 시드된 임시 저장소를 환경변수로 건다."""
-    from firsthome.store import STORE_URL_ENV, create_store
-    from firsthome.store.seed import seed_all
+    """`home_compass.main` import 전에 시드된 임시 저장소를 환경변수로 건다."""
+    from home_compass.store import STORE_URL_ENV, create_store
+    from home_compass.store.seed import seed_all
 
     url = f"sqlite://{Path(tmp_dir) / 'contracts-gen.db'}"
     with create_store(url) as store:
@@ -117,7 +117,7 @@ def _generated_block(*, artifact: str, global_name: str, source: str, extra: dic
     SPEC 8.4 가 이 값을 「판정 출력이 달라지면 올린다」로 규정하므로, **판정 숫자를 바꾸지
     않는 변경은 잡지 못한다.** 그 한계까지가 이 토큰이 약속하는 전부다.
     """
-    from firsthome.common import ENGINE_VERSION
+    from home_compass.common import ENGINE_VERSION
 
     block = {
         "artifact": artifact,
@@ -151,7 +151,7 @@ def render_model_constants(store) -> str:
     키 표기는 저장소·레지스트리의 snake_case 를 **그대로** 옮긴다. 여기서 표기를 다시
     정하면 그 매핑 자체가 두 번째 계약이 되고, 어긋나도 아무도 모른다.
     """
-    from firsthome.store.seed import load_registry
+    from home_compass.store.seed import load_registry
 
     constants = sorted(store.model_constants.list(), key=lambda c: c.key)
     if not constants:
@@ -162,7 +162,7 @@ def render_model_constants(store) -> str:
     payload = {
         "$generated": _generated_block(
             artifact="web-model-constants",
-            global_name="FIRSTHOME_MODEL_CONSTANTS",
+            global_name="HOME_COMPASS_MODEL_CONSTANTS",
             source="store 의 ModelConstant (SPEC 1.2 · D-11)",
             extra={"registryVersion": load_registry()["registryVersion"]},
         ),
@@ -189,7 +189,7 @@ def render_model_constants(store) -> str:
         },
     }
     return _js_module(
-        global_name="FIRSTHOME_MODEL_CONSTANTS",
+        global_name="HOME_COMPASS_MODEL_CONSTANTS",
         source="store 의 ModelConstant (SPEC D-11 · 5.1.4)",
         payload=payload,
     )
@@ -244,13 +244,13 @@ def render_policy_rules(store) -> str:
     payload = {
         "$generated": _generated_block(
             artifact="web-policy-rules",
-            global_name="FIRSTHOME_POLICY_RULES",
+            global_name="HOME_COMPASS_POLICY_RULES",
             source="store 의 승인된 RuleVersion (SPEC 1.2 · D-11 · 2.3)",
         ),
         "$activePredicate": ACTIVE_PREDICATE,
         "$noRuleFunctions": (
             "요건은 데이터다. 이 파일은 판정 함수를 담지 않는다 — 해석기는 소비자가 쓰고, "
-            "그 해석은 backend/src/firsthome/engines/eligibility.py 와 같아야 한다 (SPEC D-11)."
+            "그 해석은 backend/src/home_compass/engines/eligibility.py 와 같아야 한다 (SPEC D-11)."
         ),
         "criteriaFields": _criteria_fields(),
         "ruleVersions": [
@@ -272,7 +272,7 @@ def render_policy_rules(store) -> str:
         ],
     }
     return _js_module(
-        global_name="FIRSTHOME_POLICY_RULES",
+        global_name="HOME_COMPASS_POLICY_RULES",
         source="store 의 승인된 RuleVersion (SPEC D-11 · 2.3)",
         payload=payload,
     )
@@ -305,7 +305,7 @@ def render_regions(store) -> str:
     실거래가에 대응물이 없는 3필드(`maintenanceFeeKRW` · `marketRisk` ·
     `guaranteeAvailable`)가 바로 그 구분을 요구하는 자리다.
     """
-    from firsthome.store.models import REGION_FACT_FIELDS
+    from home_compass.store.models import REGION_FACT_FIELDS
 
     regions = store.regions.list()
     if not regions:
@@ -316,7 +316,7 @@ def render_regions(store) -> str:
     payload = {
         "$generated": _generated_block(
             artifact="web-regions",
-            global_name="FIRSTHOME_REGIONS",
+            global_name="HOME_COMPASS_REGIONS",
             source="store 의 Region (SPEC 1.2 · D-11 · D-5)",
         ),
         "$factFields": sorted(REGION_FACT_FIELDS),
@@ -357,7 +357,7 @@ def render_regions(store) -> str:
         ],
     }
     return _js_module(
-        global_name="FIRSTHOME_REGIONS",
+        global_name="HOME_COMPASS_REGIONS",
         source="store 의 Region (SPEC D-11 · D-5 · 6.2 오프라인 정의 #2)",
         payload=payload,
     )
@@ -380,12 +380,12 @@ def render_contract_constants(document: dict) -> str:
     없이 읽히지 않는다. 그 대응은 `$generated.sourcePointers` 에 RFC 6901 로 적는다.
     """
     return _js_module(
-        global_name="FIRSTHOME_CONTRACT_CONSTANTS",
+        global_name="HOME_COMPASS_CONTRACT_CONSTANTS",
         source="contracts/openapi.json 의 x- 확장 (SPEC D-12 · 8.3 #3 · #4)",
         payload={
             "$generated": _generated_block(
                 artifact="web-contract-constants",
-                global_name="FIRSTHOME_CONTRACT_CONSTANTS",
+                global_name="HOME_COMPASS_CONTRACT_CONSTANTS",
                 source="contracts/openapi.json 의 x- 확장 (SPEC 8.3 #3 · #4)",
                 extra={
                     "sourcePointers": {
@@ -415,7 +415,7 @@ def render_contract_constants(document: dict) -> str:
 
 
 def artifact_paths() -> dict[str, Path]:
-    from firsthome.main import OPENAPI_PATH
+    from home_compass.main import OPENAPI_PATH
 
     return {
         "openapi": OPENAPI_PATH,
@@ -438,7 +438,7 @@ ARTIFACTS = (
 
 def render_all(store) -> dict[str, str]:
     """생성물 전부를 문자열로. 파일에 쓰지 않는다 — 쓰는 것은 호출자의 결정이다."""
-    from firsthome.main import build_openapi_document, render_openapi_document
+    from home_compass.main import build_openapi_document, render_openapi_document
 
     document = build_openapi_document()
     return {
@@ -472,10 +472,10 @@ def main(argv: list[str] | None = None) -> int:
                              f"이름: {' · '.join(ARTIFACTS)}")
     args = parser.parse_args(argv)
 
-    tmp_dir = tempfile.mkdtemp(prefix="firsthome-gen-")
+    tmp_dir = tempfile.mkdtemp(prefix="home_compass-gen-")
     try:
         _prepare_isolated_store(tmp_dir)
-        from firsthome.store import store_from_env
+        from home_compass.store import store_from_env
 
         with store_from_env() as store:
             rendered = render_all(store)

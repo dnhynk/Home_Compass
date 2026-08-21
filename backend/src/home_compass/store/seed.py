@@ -4,7 +4,7 @@
 
   `contracts/model_constants.json`  계약이다. `seedRule` 절을 **그대로** 따른다.
                                     값도 계보도 여기 적힌 것을 옮겨 적을 뿐 판단하지 않는다.
-  `firsthome/data/*.json`           SPEC 9.4 에 따라 0단계에 `store` 소유로 넘어온 시드다.
+  `home_compass/data/*.json`           SPEC 9.4 에 따라 0단계에 `store` 소유로 넘어온 시드다.
                                     파일은 제자리에 두고 소유권만 옮긴다 — `engines` 의
                                     읽기 경로 제거는 Wave 2 컷오버다.
 

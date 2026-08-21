@@ -81,7 +81,7 @@
 
 ### 우리 지표가 무엇인지 먼저 고정한다
 
-`backend/src/firsthome/engines/affordability.py:98`
+`backend/src/home_compass/engines/affordability.py:98`
 
 ```python
 debt_ratio = ratio(debt, net_income)
@@ -184,7 +184,7 @@ debt_ratio = ratio(debt, net_income)
 
 ### 우리가 무엇을 하는지 먼저 고정한다
 
-`backend/src/firsthome/ingest/market/pipeline.py:446` `_cell_key(...)` —
+`backend/src/home_compass/ingest/market/pipeline.py:446` `_cell_key(...)` —
 셀 = **법정동(`umdNm`) + 단지명(`aptNm`) + 전용면적을 `band_sqm` 폭으로 반올림한 값**.
 그 셀 안에서 전세·매매(또는 월세)의 중앙값을 각각 내고 **비의 중앙값**을 만든다(`:481`~`:494`).
 즉 이 상수는 **「두 계약을 같은 물건으로 볼 것인가」를 면적 축에서 정하는 허용오차**다.

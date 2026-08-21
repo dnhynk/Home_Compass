@@ -20,7 +20,7 @@
 그 위에 **오류 응답이 입력값을 되비추지 않는지**를 함께 잰다 — 검증 실패 응답이 값을
 인용하는 순간 사유 본문이 로그·스크린샷·버그리포트로 새어 나간다.
 
-격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로 돌린다.
+격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로 돌린다.
 """
 
 from __future__ import annotations
@@ -31,17 +31,17 @@ from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import AUDIT_REPORT_CREATED, Policy, app
-from firsthome.store import PolicySource, RuleDraft, create_store
-from firsthome.store.models import POLICY_REPORT_FIELDS, REGION_FACT_FIELDS
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import AUDIT_REPORT_CREATED, Policy, app
+from home_compass.store import PolicySource, RuleDraft, create_store
+from home_compass.store.models import POLICY_REPORT_FIELDS, REGION_FACT_FIELDS
+from home_compass.store.seed import seed_all
 
 T0 = datetime(2026, 8, 15, 9, 0, tzinfo=timezone.utc)
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 REPORTS = "/api/reports"
 ADMIN_REPORTS = "/api/admin/reports"
@@ -79,7 +79,7 @@ def store_url(tmp_path, monkeypatch) -> str:
             PolicySource(id="src-report", text="제1조 신청 연령은 만 19세 이상.",
                          source_ref=None, fetched_at=T0)
         )
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", url)
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", url)
     return url
 
 

@@ -307,7 +307,7 @@ def analyze(
     layer can turn it into a 400 with the contract's error envelope.
 
     지역·정책은 **호출자가 매번 주입한다.** 예전에는 이 모듈이
-    `backend/src/firsthome/data/*.json` 을 `lru_cache(maxsize=1)` 로 읽었고, 그래서
+    `backend/src/home_compass/data/*.json` 을 `lru_cache(maxsize=1)` 로 읽었고, 그래서
     배치가 갱신해도 규칙관리자가 승인해도 재기동 전까지 판정에 반영되지 않았다 —
     SPEC 2.3 이 정면으로 금지하는 상태다. 캐시를 살리려면 저장소 갱신에 연동된 무효화가
     있어야 하고, 없으므로 캐시를 두지 않는다. 지금 이 함수에는 I/O 가 한 줄도 없다.

@@ -6,24 +6,24 @@ SQLite 기본, 교체 가능 (SPEC 1.1 · 부록 A). 소유자: `store` (SPEC 9.
 
 ```python
 from datetime import datetime, timezone
-from firsthome.store import store_from_env
+from home_compass.store import store_from_env
 
 with store_from_env() as store:
     rules = store.rule_versions.active(datetime.now(timezone.utc))
 ```
 
-`FIRSTHOME_STORE_URL` 이 백엔드를 정한다. 없으면 `backend/var/firsthome.db` 다.
+`HOME_COMPASS_STORE_URL` 이 백엔드를 정한다. 없으면 `backend/var/home_compass.db` 다.
 
 ```
-FIRSTHOME_STORE_URL=sqlite://./backend/var/firsthome.db
-FIRSTHOME_STORE_URL=sqlite://:memory:
+HOME_COMPASS_STORE_URL=sqlite://./backend/var/home_compass.db
+HOME_COMPASS_STORE_URL=sqlite://:memory:
 ```
 
 실기동 확인:
 
 ```
-python -m firsthome.store                      # 임시 DB 에 저장·조회·수정거부를 실행
-python -m firsthome.store --db ./var/smoke.db
+python -m home_compass.store                      # 임시 DB 에 저장·조회·수정거부를 실행
+python -m home_compass.store --db ./var/smoke.db
 ```
 
 ## 부록 A — 외부 DB 로 바꾸려면
@@ -32,7 +32,7 @@ python -m firsthome.store --db ./var/smoke.db
 
 1. `Store` 와 8개 리포지터리 ABC(`interfaces.py`)를 구현한다
 2. 기동 시 `register_backend("postgresql", MyStore.open)` 을 부르고
-   `FIRSTHOME_STORE_URL=postgresql://...` 로 기동한다
+   `HOME_COMPASS_STORE_URL=postgresql://...` 로 기동한다
 
 이 주장이 실제로 성립하는지는 `backend/tests/store/` 가 매번 검증한다. 계약 테스트 전부가
 **두 백엔드**(SQLite + `memory_backend.py` 의 딕셔너리 구현)에서 돌고, 하나라도 어긋나면
@@ -97,8 +97,8 @@ RFC 3339** 로 적는다. 오프셋이 섞이면 문자열 비교가 시각 비�
 | 출처 | 대상 | 규칙 |
 |---|---|---|
 | `contracts/model_constants.json` | `ModelConstant` | `seedRule` 을 그대로 따른다. (d)=`our_choice`, (a)(b)(c)=`unverified`. `pending_diligence` 의 준거 후보는 계보에 **적지 않는다** |
-| `firsthome/data/regions.json` | `Region` | 전 필드 `unverified` (SPEC 3.1) |
-| `firsthome/data/policies.json` | `RuleVersion` | `origin='seed'`, `approved_by=NULL`, `effective_from/to=NULL`, `actor='system:seed'` 감사기록 |
+| `home_compass/data/regions.json` | `Region` | 전 필드 `unverified` (SPEC 3.1) |
+| `home_compass/data/policies.json` | `RuleVersion` | `origin='seed'`, `approved_by=NULL`, `effective_from/to=NULL`, `actor='system:seed'` 감사기록 |
 
 `data/*.json` 은 SPEC 9.4 에 따라 0단계에 `store` 소유로 넘어왔다. **파일은 제자리에 있다** —
 `engines` 의 읽기 경로 제거는 Wave 2 컷오버이며 `api` 가 상수·데이터를 주입하는 시점에 일어난다.

@@ -14,7 +14,7 @@
 D5 (서로 다른 초안이 같은 정책을 가리키는 경우)는 별도 절에서 다룬다. 그것은 저장소가
 막지 못하는 자리이고(PR #58 「검증하지 않은 것」), 일괄 승인이 그 자리를 훨씬 자주 밟는다.
 
-격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `FIRSTHOME_STORE_URL` 을 그쪽으로 돌린다.
+격리: 케이스마다 자기 `tmp_path` 저장소를 만들어 `HOME_COMPASS_STORE_URL` 을 그쪽으로 돌린다.
 `conftest.py` 의 세션 저장소는 여기서 건드리지 않는다.
 """
 
@@ -27,16 +27,16 @@ from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from firsthome import main as main_module
-from firsthome.auth import CSRF_HEADER_NAME, ensure_seed_accounts
-from firsthome.main import app
-from firsthome.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
-from firsthome.store.seed import seed_all
+from home_compass import main as main_module
+from home_compass.auth import CSRF_HEADER_NAME, ensure_seed_accounts
+from home_compass.main import app
+from home_compass.store import STORE_URL_ENV, PolicySource, RuleDraft, create_store
+from home_compass.store.seed import seed_all
 
 T0 = datetime(2026, 8, 14, 9, 0, tzinfo=timezone.utc)
 
-COUNSELOR_PW = os.environ["FIRSTHOME_SEED_COUNSELOR_PASSWORD"]
-RULE_MANAGER_PW = os.environ["FIRSTHOME_SEED_RULE_MANAGER_PASSWORD"]
+COUNSELOR_PW = os.environ["HOME_COMPASS_SEED_COUNSELOR_PASSWORD"]
+RULE_MANAGER_PW = os.environ["HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD"]
 
 BATCH_PATH = "/api/admin/drafts/batch-approve"
 

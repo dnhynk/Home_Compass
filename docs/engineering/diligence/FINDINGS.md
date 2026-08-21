@@ -255,7 +255,7 @@ SPEC Part 0-C 는 「청년 RIR 이 일반 임차가구 기준과 저소득층 �
 
 과업 지시대로 **제도가 실재하는지부터** 확인했다.
 
-**코드에서의 실제 쓰임** (`backend/src/firsthome/engines/tco.py:82`):
+**코드에서의 실제 쓰임** (`backend/src/home_compass/engines/tco.py:82`):
 
 ```python
 use_insurance = insurance_enabled and deposit >= GUARANTEE_MIN_DEPOSIT

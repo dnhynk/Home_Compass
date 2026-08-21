@@ -19,10 +19,10 @@ from pathlib import Path
 import pytest
 from conftest import T0, make_constant, make_region, make_rule_version
 
-import firsthome.store
-from firsthome.store import create_store
+import home_compass.store
+from home_compass.store import create_store
 
-STORE_DIR = Path(firsthome.store.__file__).resolve().parent
+STORE_DIR = Path(home_compass.store.__file__).resolve().parent
 
 
 # --------------------------------------------------------------------------

@@ -52,7 +52,7 @@ _ROOT = Path(__file__).resolve().parents[4]
 _DEFAULT_TEXT_DIR = _ROOT / "data" / "policy_sources"
 
 #: 부록 A 와 같은 이유로 경로도 환경변수로 갈아끼울 수 있게 둔다.
-TEXT_DIR_ENV = "FIRSTHOME_POLICY_SOURCES_DIR"
+TEXT_DIR_ENV = "HOME_COMPASS_POLICY_SOURCES_DIR"
 
 POLICIES_JSON = Path(__file__).resolve().parents[1] / "data" / "policies.json"
 

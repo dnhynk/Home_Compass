@@ -11,7 +11,7 @@
 조용히 낡을 수 있다.
 
 그래서 여기서 둘을 실제로 돌려 대조한다. 시드가 만든 표와 적재가 만든 표가 한 글자라도
-다르면 이 파일이 터진다. **테스트는 `src/firsthome` 밖이므로 `ingest` 를 부를 수 있다** —
+다르면 이 파일이 터진다. **테스트는 `src/home_compass` 밖이므로 `ingest` 를 부를 수 있다** —
 금지는 제품 코드의 의존 방향에 걸린 것이지 검사에 걸린 것이 아니다.
 """
 
@@ -21,10 +21,10 @@ import dataclasses
 
 from conftest import T0
 
-from firsthome.ingest.loader import load_policy_sources
-from firsthome.ingest.sources import loadable_sources
-from firsthome.store import create_store
-from firsthome.store.seed import load_demo_queue, seed_policy_sources
+from home_compass.ingest.loader import load_policy_sources
+from home_compass.ingest.sources import loadable_sources
+from home_compass.store import create_store
+from home_compass.store.seed import load_demo_queue, seed_policy_sources
 
 
 def _rows(store) -> dict:

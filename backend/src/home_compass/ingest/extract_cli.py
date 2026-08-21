@@ -1,10 +1,10 @@
-"""실기동 — `python -m firsthome.ingest.extract_cli`.
+"""실기동 — `python -m home_compass.ingest.extract_cli`.
 
 SPEC 9.3 #3 의 **배치 작업** 대응물이다: 배치를 실제로 실행하고 **저장소 변화 전후**를 찍는다.
 
-    python -m firsthome.ingest.extract_cli --offline-only     # 키 없이 후반부만 (9.2.1)
-    python -m firsthome.ingest.extract_cli --db ./var/x.db    # 실제 LLM 호출까지
-    python -m firsthome.ingest.extract_cli --from-env --model gpt-5.4-mini
+    python -m home_compass.ingest.extract_cli --offline-only     # 키 없이 후반부만 (9.2.1)
+    python -m home_compass.ingest.extract_cli --db ./var/x.db    # 실제 LLM 호출까지
+    python -m home_compass.ingest.extract_cli --from-env --model gpt-5.4-mini
 
 두 모드가 **같은 코드 경로**를 쓴다는 것이 요점이다. `--offline-only` 는 LLM 호출 단계만
 건너뛰고, 스키마 검증 · span 검증 · 위조 거부 · `not_found` 처리는 전부 실제로 돈다.

@@ -16,9 +16,9 @@ import os
 import pytest
 from conftest import make_audit_event, make_region
 
-from firsthome.store import create_store, register_backend, store_from_env
-from firsthome.store.errors import UnknownBackendError
-from firsthome.store.interfaces import Store
+from home_compass.store import create_store, register_backend, store_from_env
+from home_compass.store.errors import UnknownBackendError
+from home_compass.store.interfaces import Store
 
 
 def test_the_caller_changes_only_the_url(tmp_path):
@@ -67,7 +67,7 @@ def test_every_abstract_method_is_implemented(store):
 
 def test_unknown_scheme_fails_loudly_and_names_what_is_available():
     with pytest.raises(UnknownBackendError) as err:
-        create_store("postgresql://localhost/firsthome")
+        create_store("postgresql://localhost/home_compass")
     assert "postgresql" in str(err.value)
     assert "sqlite" in str(err.value), "무엇을 쓸 수 있는지 알려주지 않으면 설정 오류를 못 고친다"
 
@@ -92,7 +92,7 @@ def test_a_new_backend_needs_no_change_to_the_store_package(tmp_path):
 
 def test_the_store_url_comes_from_the_environment(tmp_path, monkeypatch):
     """부록 A — 설정은 환경변수로 주입한다. `.env` 는 편의 수단일 뿐 유일 경로가 아니다."""
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", f"sqlite://{tmp_path / 'env.db'}")
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", f"sqlite://{tmp_path / 'env.db'}")
     with store_from_env() as store:
         store.regions.upsert(make_region("11440"))
     assert (tmp_path / "env.db").exists()
@@ -100,14 +100,14 @@ def test_the_store_url_comes_from_the_environment(tmp_path, monkeypatch):
 
 def test_the_environment_can_select_a_completely_different_backend(monkeypatch):
     register_backend("memory", __import__("memory_backend").MemoryStore.open)
-    monkeypatch.setenv("FIRSTHOME_STORE_URL", "memory://from-env")
+    monkeypatch.setenv("HOME_COMPASS_STORE_URL", "memory://from-env")
     with store_from_env() as store:
         assert type(store).__name__ == "MemoryStore"
 
 
 def test_store_package_holds_no_sqlite_specific_call_in_its_public_surface():
     """공개 표면이 sqlite3 를 흘리면 교체가 '코드 변경 없이' 가 되지 않는다."""
-    import firsthome.store as pkg
+    import home_compass.store as pkg
 
     for name in pkg.__all__:
         obj = getattr(pkg, name)

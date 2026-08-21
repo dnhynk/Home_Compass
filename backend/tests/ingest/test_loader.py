@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import unicodedata
 
-from firsthome.ingest import load_policy_sources
-from firsthome.ingest import sources as manifest
+from home_compass.ingest import load_policy_sources
+from home_compass.ingest import sources as manifest
 
 
 def test_sources_without_a_confirmed_licence_are_not_stored(store, run_at):

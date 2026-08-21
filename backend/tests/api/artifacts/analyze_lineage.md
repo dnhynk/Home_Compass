@@ -1,6 +1,6 @@
 # `/api/analyze` 계보 · 등급 실기동 전문 (D-13)
 
-`uvicorn firsthome.main:app --host 127.0.0.1 --port 8137 --workers 1` 로 실기동한 서버를
+`uvicorn home_compass.main:app --host 127.0.0.1 --port 8137 --workers 1` 로 실기동한 서버를
 **익명으로** 한 번 친 결과다. SPEC 9.3 #3 의 첨부물이며, 손으로 옮겨 적지 않고 응답을 그대로 낸다.
 
 생성 경로 — `scripts/seed_store.py` 로 시드한 저장소 (`model_constants` 82 · `regions` 10 · `rule_versions` 8).

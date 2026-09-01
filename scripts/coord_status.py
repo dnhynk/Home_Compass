@@ -189,6 +189,14 @@ WORKER_PATHS: dict[str, list[str]] = {
     # `W-web-ui`(#7) · `W-admin-ui`(#8) · `W-deploy-safety`(#10) · `W-eligibility-fix`(#12).
     # 넷 다 머지됐다. **배정이 Coordinator 하나뿐인 것이 정상 상태다** — 다음 워커를
     # 띄우는 사람이 등재 PR 을 먼저 낸다.
+    #
+    # --- 판정 사유 가독성 (run_b70307c8c66d) — **과업이 닫히면 지운다** -------------
+    #
+    # 화면이 충족 사유와 미충족 사유에 같은 표식을 쓴다. 이 제품이 기획서에서 내세우는
+    # 「왜 그렇게 판정했는지 항상 보여준다」를 화면에서 직접 깎는 자리다. 사유 문구는
+    # `engines` 가 만들고 표식은 `frontend` 가 그리므로 둘을 함께 준다.
+    # `contracts/` 는 주지 않는다 — 계약을 바꿔야 한다면 근거를 갖고 요청하게 한다.
+    "W-verdict-readability": OWNERSHIP["web"] + OWNERSHIP["engines"],
 }
 
 # 코디네이터만 바꿀 수 있는 것 (SPEC 8.2 #5). 워커 PR 에 이게 있으면 즉시 반려.

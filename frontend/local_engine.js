@@ -252,9 +252,9 @@
     }
 
     rationale.push({
-      safe: '소득 대비 주거비 여력이 안정적인 구간(safe)입니다.',
-      caution: '주거비 여력이 빠듯해 주의가 필요한 구간(caution)입니다.',
-      risk: '현재 소득·부채 구조로는 주거비 부담이 위험한 구간(risk)입니다.'
+      safe: '소득 대비 주거비 여력이 안정적인 구간입니다.',
+      caution: '주거비 여력이 빠듯해 주의가 필요한 구간입니다.',
+      risk: '현재 소득·부채 구조로는 주거비 부담이 위험한 구간입니다.'
     }[band]);
 
     if (assets > 0) {
@@ -436,6 +436,10 @@
       category: policy.category || '',
       status: status,
       reasons: reasons,
+      /* 파이썬 `engines.eligibility.evaluate_policy` 와 같은 모양 — `reasons` 의
+         부분집합이며 화면이 충족/미충족을 가르는 근거다. 두 벌이 갈리면 시민이
+         온라인과 오프라인에서 다른 근거를 본다 (SPEC D-11). */
+      failures: failures,
       maxAmountKRW: safeInt(policy.maxAmountKRW),
       rateRangePct: (policy.rateRangePct || [0.0, 0.0]).slice(),
       source: policy.source || '',
@@ -1029,11 +1033,11 @@
     var note;
     if (best.verdict === 'stretch') {
       note = ' 다만 이 안은 권장 상한 ' + money(recommended) + '을 ' + money(over) + ' 초과하는' +
-             ' 다소 무리한 선택(stretch)으로, 감당 가능 상한 ' + money(maxCost) + ' 이내이긴 하나' +
+             ' 다소 무리한 선택으로, 감당 가능 상한 ' + money(maxCost) + ' 이내이긴 하나' +
              ' 저축 여력이 줄어드는 점을 감안하셔야 합니다.';
     } else {
       note = ' 다만 이 안은 감당 가능 상한 ' + money(maxCost) + '을 초과해' +
-             ' 현재 소득 기준으로는 권장하지 않습니다(unaffordable).';
+             ' 현재 소득 기준으로는 권장하지 않습니다.';
     }
 
     var within = scenarios.filter(function (s) { return s.verdict === 'affordable'; });
@@ -1046,6 +1050,22 @@
               ' 인근의 시세가 낮은 지역을 함께 검토하시길 권합니다.';
     }
     return note;
+  }
+
+  /* 한글 음절 블록의 처음과 끝. **코드포인트를 숫자로 적지 않는다** — 이 파일의
+     리터럴 검사(SPEC 5.1.2)가 판정 상수와 구분하지 못한다. */
+  var HANGUL_FIRST = '가', HANGUL_LAST = '힣';
+  /* 받침 없는 음절의 NFD 분해 길이. 받침이 붙으면 하나 늘어난다. */
+  var NO_FINAL = HANGUL_FIRST.normalize('NFD').length;
+
+  /** 파이썬 `engines._subject_josa`. 같은 판정 규칙이다. */
+  function subjectJosa(word) {
+    for (var i = word.length - 1; i >= 0; i--) {
+      var ch = word.charAt(i);
+      if (ch < HANGUL_FIRST || ch > HANGUL_LAST) continue;
+      return ch.normalize('NFD').length > NO_FINAL ? '이' : '가';
+    }
+    return '이';
   }
 
   /** 파이썬 `engines._build_summary`. */
@@ -1062,7 +1082,8 @@
     var body = '';
     if (scenarios.length) {
       var best = scenarios[0];
-      body = ' 비교한 ' + scenarios.length + "개 대안 중 '" + best.label + "'이(가) 적합도 " +
+      body = ' 비교한 ' + scenarios.length + "개 대안 중 '" + best.label + "'" +
+             subjectJosa(best.label) + ' 적합도 ' +
              best.fitScore + '점으로 가장 잘 맞으며, 5년 총비용 ' + money(best.tco5yKRW) + ', ' +
              '월 환산 ' + money(best.monthlyEquivalentCostKRW) + '입니다.';
       body += verdictCaveat(best, recommended, affordability, scenarios);

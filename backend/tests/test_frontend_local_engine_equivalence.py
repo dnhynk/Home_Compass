@@ -15,7 +15,8 @@ PR #59 의 「검증하지 않은 것 ②」가 그 구멍을 명시적으로 6�
   파이썬 변  `home_compass.engines.analyze()` — 저장소의 상수·지역·활성 규칙을 주입받아
   JS 변      `frontend/local_engine.js` — `frontend/generated/*.js` 를 읽어
   모집단     `contracts/regression_profiles.json` 프로필 x 저장소 지역 **전수**
-  비교 대상  SPEC 5.3 의 numeric 갈래 — 판정 숫자와 상태 필드 **+ `policies[].reasons`**
+  비교 대상  SPEC 5.3 의 numeric 갈래 — 판정 숫자와 상태 필드 **+ `policies[].reasons`
+             · `policies[].failures`**
   제외       `rationale` · `summary` · `note` · `disclaimer`
              (SPEC 5.3 — 문자열은 계약이 아니다. 코디네이터 결정 2026-08-15 조건 4)
 
@@ -171,8 +172,18 @@ def _reasons_of(response: dict) -> dict:
     두 경로의 정렬은 `status` -> `-maxAmountKRW` 로 같지만, 순서로 짝을 맞추면 정렬이
     갈렸을 때 「3번 정책의 사유가 다르다」는 엉뚱한 자리를 가리킨다. 어느 제도의 사유가
     갈렸는지가 그대로 나오는 편이 낫다.
+
+    `failures` 도 함께 뽑는다. 시민 화면이 충족/미충족을 가르는 근거가 그것이고,
+    두 경로가 다른 `failures` 를 내면 같은 프로필이 온라인에서는 [연소득 때문에
+    떨어졌다], 오프라인에서는 [아무 줄도 붉지 않다] 로 보인다 — `reasons` 를 여기
+    올린 것과 같은 논거다. `status` 는 갈리지 않으므로 숫자 비교는 이것을 못 잡는다.
+    키가 없으면 `KeyError` 로 깨지게 둔다 — 필드가 조용히 사라지는 것이 이 파수병이
+    막아야 할 사고 그 자체다.
     """
-    return {p["id"]: p["reasons"] for p in response["policies"]}
+    return {
+        p["id"]: {"reasons": p["reasons"], "failures": p["failures"]}
+        for p in response["policies"]
+    }
 
 
 def _lineage_of(response: dict) -> dict:

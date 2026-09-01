@@ -372,6 +372,33 @@ def test_e2_region_scoped_policy_is_ineligible_outside_its_region():
     assert any("지역" in reason for reason in seoul_only["reasons"])
 
 
+def test_e2_failures_name_the_reasons_that_decided_the_verdict():
+    """시민 화면이 충족/미충족을 가르는 근거는 `failures` 다 (SPEC 6.1).
+
+    화면이 사유 문자열의 "미충족" 을 매칭하지 않으려면 세 가지가 성립해야 한다 —
+    ① 부적격이면 비어 있지 않고, ② 그 반대(적격·조건부)면 비어 있고,
+    ③ 담긴 문자열이 `reasons` 의 원소와 **글자 단위로** 같아야 한다.
+    ③ 이 깨지면 화면은 아무 줄도 붉히지 못하면서 조용히 통과한다 — 그것이
+    이 필드를 도입한 이유를 무효로 만드는 유일한 실패 양상이다.
+    """
+    result = evaluate_policies(BASE_PROFILE, POLICIES, "서울 마포구", constants=CONSTANTS)
+    seen = {"eligible": 0, "conditional": 0, "ineligible": 0}
+    for policy in result["policies"]:
+        seen[policy["status"]] += 1
+        failures = policy["failures"]
+        assert all(f in policy["reasons"] for f in failures), (
+            f"{policy['id']}: `failures` 가 `reasons` 에 없는 문자열을 들고 있다 — "
+            f"화면이 대조로 가를 수 없다: {failures} / {policy['reasons']}"
+        )
+        if policy["status"] == "ineligible":
+            assert failures, f"{policy['id']}: 부적격인데 떨어뜨린 사유가 비어 있다"
+        else:
+            assert not failures, f"{policy['id']}: {policy['status']} 인데 미충족 사유가 있다"
+    assert seen["ineligible"] and (seen["eligible"] or seen["conditional"]), (
+        f"세 상태가 한쪽으로 쏠려 양변을 다 재지 못했다: {seen}"
+    )
+
+
 def test_e2_every_policy_is_well_formed():
     result = evaluate_policies(BASE_PROFILE, POLICIES, "서울 마포구", constants=CONSTANTS)
     assert len(result["policies"]) >= 8
@@ -792,11 +819,17 @@ def test_http_analyze_matches_the_contract_shape():
         "category",
         "status",
         "reasons",
+        # 판정을 결정한 사유. `reasons` 의 부분집합이며, 시민 화면이 충족/미충족을
+        # 가르는 근거다 — 문자열을 파싱하지 않기 위해 필드로 실린다.
+        "failures",
         "maxAmountKRW",
         "rateRangePct",
         "source",
         "disclaimer",
     }
+    assert set(policy["failures"]) <= set(policy["reasons"]), (
+        "`failures` 는 `reasons` 의 부분집합이어야 한다 — 화면이 원문 대조로 가른다"
+    )
 
     assert set(body["risk"]) >= {"score", "band", "factors"}
     assert body["risk"]["band"] in ("low", "medium", "high")

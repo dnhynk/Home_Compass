@@ -817,8 +817,25 @@ strong { font-weight: 650; }
   width: 9px; height: 5px; border-left: 1.7px solid var(--ink-4);
   border-bottom: 1.7px solid var(--ink-4); transform: rotate(-45deg);
 }
-.policy[data-status="eligible"] .policy-reasons li::before { border-color: var(--good); }
-.policy[data-status="conditional"] .policy-reasons li::before { border-color: var(--caution); }
+.policy[data-status="eligible"] .policy-reasons li:not([data-met="false"])::before { border-color: var(--good); }
+.policy[data-status="conditional"] .policy-reasons li:not([data-met="false"])::before { border-color: var(--caution); }
+/* 미충족 사유 — 이 줄들이 판정을 결정했다. 넷을 **함께** 가른다.
+     표식  체크(꺾은선) -> 가위표. 색각 이상에서도 모양만으로 갈린다.
+     색    --critical (표식) · --critical-ink (본문). --surface 대비 7.96:1 (계산값).
+     굵기  600 — 저대비·소형 화면에서 색이 죽어도 남는 신호.
+     문구  본문이 이미 "…미충족" 이고, 낭독용 접두어가 그것을 문장 앞으로 올린다.
+   색 하나만 바꾸면 「왜 떨어졌는지 항상 보여 준다」가 색각·저대비 환경에서 성립하지
+   않는다. 위 두 줄에 `:not()` 을 건 것은 적격·조건부 카드의 색 규칙(특이도 0,3,2)이
+   아래 규칙(0,2,2)을 이기기 때문이다 — 오늘은 미충족이 부적격 카드에만 나오지만,
+   그 사실에 표시를 의존시키지 않는다. */
+.policy-reasons li[data-met="false"] { color: var(--critical-ink); font-weight: 600; }
+.policy-reasons li[data-met="false"]::before,
+.policy-reasons li[data-met="false"]::after {
+  content: ""; position: absolute; left: 1px; top: .62em;
+  width: 10px; height: 0; border-left: 0;
+  border-bottom: 1.7px solid var(--critical); transform: rotate(45deg);
+}
+.policy-reasons li[data-met="false"]::after { transform: rotate(-45deg); }
 .policy-src { margin-top: 9px; font-size: 11px; color: var(--ink-4); line-height: 1.5; }
 .policy-src b { font-weight: 650; color: var(--ink-3); }
 .policy-side { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }

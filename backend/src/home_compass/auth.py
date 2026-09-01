@@ -107,17 +107,38 @@ AUTH_CONSTANT_KEYS = (SESSION_IDLE_TIMEOUT_KEY, SESSION_ABSOLUTE_TIMEOUT_KEY)
 SESSION_COOKIE_NAME = "home_compass_session"
 CSRF_COOKIE_NAME = "home_compass_csrf"
 CSRF_HEADER_NAME = "X-CSRF-Token"
+COOKIE_SECURE_ENV = "HOME_COMPASS_COOKIE_SECURE"
 
 #: 세션 쿠키는 `HttpOnly` 다 — **JS 에서 읽지 않는다** (Part 0-E · ASVS).
 #: CSRF 쿠키는 반대로 JS 가 읽어야 헤더에 실을 수 있으므로 `HttpOnly` 가 아니다.
 #: 그 둘이 다른 이유가 곧 double-submit 의 작동 원리다 — 공격자 오리진은 쿠키를
 #: **딸려 보낼 수는 있어도 읽을 수는 없으므로** 헤더를 맞출 수 없다.
 #:
-#: `secure=True` 를 걸지 않는 이유는 D-8 이다. 시연은 `http://127.0.0.1` 로 돌고
-#: `Secure` 쿠키는 그 위에서 전송되지 않아 로그인 자체가 불가능해진다. HTTPS 는
-#: 부록 A 의 [배포 시 추가로 필요한 것] 목록에 이미 들어 있다.
+#: 로컬 시연은 HTTP, 공개 배포는 HTTPS다. 한쪽 값을 상수로 고정하면 다른 쪽의 로그인이
+#: 반드시 깨지므로 환경변수로 경계를 고른다. 공개 배포 매니페스트는 true를 강제한다.
 COOKIE_SAMESITE = "strict"
 COOKIE_PATH = "/"
+
+_TRUE_VALUES = frozenset({"1", "true", "yes", "on"})
+_FALSE_VALUES = frozenset({"", "0", "false", "no", "off"})
+
+
+def cookie_secure(env: Mapping[str, str] | None = None) -> bool:
+    """Return whether auth cookies must carry the ``Secure`` attribute.
+
+    The default stays false so ``http://127.0.0.1`` rehearsal works. Production
+    startup validates that this setting is true before serving traffic.
+    """
+    source = os.environ if env is None else env
+    raw = (source.get(COOKIE_SECURE_ENV) or "").strip().lower()
+    if raw in _TRUE_VALUES:
+        return True
+    if raw in _FALSE_VALUES:
+        return False
+    raise ValueError(
+        f"{COOKIE_SECURE_ENV} must be one of "
+        f"{sorted(_TRUE_VALUES | (_FALSE_VALUES - {''}))}; got {raw!r}"
+    )
 
 
 def new_csrf_token() -> str:

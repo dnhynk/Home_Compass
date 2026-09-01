@@ -337,6 +337,14 @@ class TestLogin:
         assert "httponly" not in _set_cookie(response, CSRF_COOKIE_NAME).lower()
         assert "httponly" in _set_cookie(response, SESSION_COOKIE_NAME).lower()
 
+    def test_https_deployment_marks_both_auth_cookies_secure(self, client, monkeypatch):
+        """Public deployment opts in explicitly; local HTTP remains the default."""
+        monkeypatch.setenv("HOME_COMPASS_COOKIE_SECURE", "true")
+        response = login(client, "counselor", COUNSELOR_PW)
+        assert response.status_code == 200
+        assert "secure" in _set_cookie(response, SESSION_COOKIE_NAME).lower()
+        assert "secure" in _set_cookie(response, CSRF_COOKIE_NAME).lower()
+
     def test_the_session_id_is_not_the_username(self, client):
         """추측 가능한 세션 식별자는 세션이 아니다."""
         login(client, "counselor", COUNSELOR_PW)

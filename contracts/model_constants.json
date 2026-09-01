@@ -1298,7 +1298,7 @@
       "value_type": "years",
       "frozen_current_value": 1,
       "spec_action": "연령 상한 임박 caveat. caveat 이 붙으면 status 가 eligible -> conditional 로 바뀌므로 판정 변경값이다.",
-      "code_ref": "engines/eligibility.py:52 — age_max - age <= 1",
+      "code_ref": "engines/eligibility.py:88 — age_max - age <= 1 (상한이 실재할 때만)",
       "seed_provenance": {
         "source_kind": "normative",
         "source_name": null,
@@ -1316,7 +1316,7 @@
       "value_type": "years",
       "frozen_current_value": 200,
       "spec_action": "'상한 없음'을 뜻하는 파수병 값. 정책 데이터 스키마 산물이다.",
-      "code_ref": "engines/eligibility.py:48 — age_max < 200",
+      "code_ref": "engines/eligibility.py:71 — age_max < 200 (상한에만 적용된다)",
       "seed_provenance": {
         "source_kind": "normative",
         "source_name": null,
@@ -1335,7 +1335,7 @@
       "value_type": "krw",
       "frozen_current_value": 1000000000,
       "spec_action": "'상한 없음'을 뜻하는 파수병 값. 정책 데이터 스키마 산물이다.",
-      "code_ref": "engines/eligibility.py:63 income_cap · :78 asset_cap (같은 값을 두 곳이 공유)",
+      "code_ref": "engines/eligibility.py:95 income_cap · :110 asset_cap (같은 값을 두 곳이 공유)",
       "seed_provenance": {
         "source_kind": "normative",
         "source_name": null,

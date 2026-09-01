@@ -160,6 +160,19 @@ WORKER_PATHS: dict[str, list[str]] = {
         "docs/engineering/COORDINATION.md", "docs/engineering/HANDOFF.md",
         "docs/engineering/REHEARSAL.md",
         "README.md", "frontend/generated/", ".gitattributes", ".gitignore",
+        # --- 임시 등재 (제출 배포 파동 · run_b70307c8c66d) — **끝나면 뺀다** ------
+        # 공개 배포 경로는 한 컴포넌트 안에 없다. 쿠키 Secure 경계는 `api`(auth·main),
+        # 컨테이너 정의는 무주공산, 축 겹침 수정은 `web` 이다. 배포는 이 셋이 **함께**
+        # 맞아야 성립하므로 컴포넌트별로 쪼개면 어느 PR 도 단독으로 검증되지 않는다.
+        # 그래서 코디네이터가 한 번에 들고 간다 — 이 세션이 네 번 하고 네 번 뺀 그 패턴이다.
+        #
+        # ★ **회수 시점: 배포 URL 이 확정되고 T1 이 닫힌 직후.** 남겨 두면 미래의 admin·web
+        #   워커 PR 이 이 경로들과 겹칠 때 `owner_guess` 가 선언 순서로 Coordinator 를
+        #   돌려주고, Coordinator 는 `CONTRACT_DELEGATED` 에 있으므로 `violations()` 가
+        #   **계약 변경을 못 잡는다.** SPEC 8.2 #5 게이트가 조용히 열린다.
+        "Dockerfile", ".dockerignore", "render.yaml", ".env.example",
+        "backend/src/home_compass/auth.py", "backend/src/home_compass/main.py",
+        "backend/tests/api/test_auth.py", "frontend/styles.css",
     ],
     # --- 백로그 마감 파동 (2026-08-16) — **전부 회수했다** -------------------
     #

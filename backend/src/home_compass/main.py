@@ -44,6 +44,7 @@ from .auth import (
     SessionStore,
     allows,
     burn_absent_user_time,
+    cookie_secure,
     csrf_error,
     csrf_matches,
     ensure_seed_accounts,
@@ -1426,22 +1427,24 @@ def _set_session_cookies(response: JSONResponse, session: Session) -> JSONRespon
     가장 흔한 어긋남이다. 브라우저 세션 쿠키로 두면 창을 닫을 때 정리되고, 그 밖의
     만료 판정은 전부 서버가 한다.
     """
+    secure = cookie_secure()
     response.set_cookie(
         SESSION_COOKIE_NAME, session.id,
-        httponly=True, samesite=COOKIE_SAMESITE, path=COOKIE_PATH,
+        httponly=True, secure=secure, samesite=COOKIE_SAMESITE, path=COOKIE_PATH,
     )
     # ★ 이쪽만 `httponly=False` 다. JS 가 읽어 헤더에 실어야 double-submit 이 성립한다.
     #   세션 쿠키는 끝까지 JS 에서 읽지 않는다 (Part 0-E · ASVS).
     response.set_cookie(
         CSRF_COOKIE_NAME, session.csrf_token,
-        httponly=False, samesite=COOKIE_SAMESITE, path=COOKIE_PATH,
+        httponly=False, secure=secure, samesite=COOKIE_SAMESITE, path=COOKIE_PATH,
     )
     return response
 
 
 def _clear_session_cookies(response: JSONResponse) -> JSONResponse:
-    response.delete_cookie(SESSION_COOKIE_NAME, path=COOKIE_PATH)
-    response.delete_cookie(CSRF_COOKIE_NAME, path=COOKIE_PATH)
+    secure = cookie_secure()
+    response.delete_cookie(SESSION_COOKIE_NAME, path=COOKIE_PATH, secure=secure)
+    response.delete_cookie(CSRF_COOKIE_NAME, path=COOKIE_PATH, secure=secure)
     return response
 
 

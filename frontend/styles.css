@@ -539,13 +539,14 @@ strong { font-weight: 650; }
 }
 .schwabe-name {
   font-size: 12px; color: var(--ink-2); min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  line-height: 1.35; overflow: hidden; white-space: normal;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
 }
 .schwabe-bar { min-width: 0; }
 .schwabe-val { font-size: 13px; font-weight: 700; letter-spacing: -.02em; text-align: right; }
 .schwabe-na { font-size: 11.5px; color: var(--ink-4); }
 .schwabe-axis {
-  position: relative; height: 30px; margin-top: 2px;
+  position: relative; height: 42px; margin-top: 2px;
   border-top: 1px solid var(--line-soft);
 }
 .schwabe-axis > span {
@@ -561,7 +562,7 @@ strong { font-weight: 650; }
 }
 .schwabe-mark b { display: block; font-size: 10px; font-weight: 650; color: var(--ink-3); }
 .schwabe-mark-rec b { color: var(--good-ink); }
-.schwabe-mark-max b { color: var(--caution-ink); }
+.schwabe-mark-max b { color: var(--caution-ink); transform: translateY(12px); }
 .schwabe-note, .schwabe-empty {
   font-size: 11.5px; color: var(--ink-3); line-height: 1.6;
 }
@@ -569,6 +570,7 @@ strong { font-weight: 650; }
 
 @media (max-width: 720px) {
   .verdict-body { grid-template-columns: 1fr; }
+  .schwabe-name { -webkit-line-clamp: 3; }
 }
 
 /* ── allocation bar ────────────────────────────────────── */

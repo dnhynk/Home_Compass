@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: home-compass
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    autoDeployTrigger: "off"
+    healthCheckPath: /api/health
+    numInstances: 1
+    disk:
+      name: home-compass-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: HOME_COMPASS_ENV
+        value: production
+      - key: HOME_COMPASS_COOKIE_SECURE
+        value: "true"
+      - key: HOME_COMPASS_STORE_URL
+        value: sqlite:///var/data/home_compass.db
+      - key: HOME_COMPASS_LOG_FILE
+        value: /var/data/observability.jsonl
+      - key: HOME_COMPASS_SEED_COUNSELOR_PASSWORD
+        sync: false
+      - key: HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD
+        sync: false

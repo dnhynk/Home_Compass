@@ -2,7 +2,7 @@
 """
 build_ppt.py - Technical specification deck builder for "Home_Compass".
 
-Generates docs/competition/기술설명서_Home_Compass.pptx (16:9, 15 slides, 맑은 고딕).
+Generates docs/competition/기술설명서_Home_Compass.pptx (16:9, 19 slides, 맑은 고딕).
 All architecture / engine-flow diagrams are drawn with real pptx shapes
 (rectangles, arrows, connectors) - never as plain bullet text.
 
@@ -47,7 +47,7 @@ FONT = "맑은 고딕"
 SLIDE_W = 13.333
 SLIDE_H = 7.5
 
-# KB brand tone: yellow + dark grey (no logo usage)
+# Home_Compass visual system: warm yellow + dark grey.
 YELLOW = RGBColor(0xFF, 0xB8, 0x00)
 YELLOW_DK = RGBColor(0xD9, 0x9A, 0x00)
 YELLOW_LT = RGBColor(0xFF, 0xF4, 0xD6)
@@ -351,11 +351,10 @@ def slide_01_cover(prs):
     rect(slide, 6.42, 5.72, 3.0, 0.9, fill=RGBColor(0x38, 0x38, 0x38), line=None,
          radius=0.10, align=PP_ALIGN.LEFT, insets=(0.24, 0.14, 0.20, 0.12),
          anchor=MSO_ANCHOR.MIDDLE,
-         items=[("참가 구분", 9.5, True, YELLOW),
-                # 개인 참가다. 팀명 자리가 아니라 참가 구분 자리로 쓴다 —
-                # 과제명(서비스명)은 표지 제목이 이미 지고 있다.
-                ("개인 참가", 12, True, WHITE, 3)])
-    txbox(slide, 1.10, 6.82, 6.0, 0.3, [("2026년 8월 3일", 10.5, False, GRAY_LT)])
+         items=[("제출 구분", 9.5, True, YELLOW),
+                ("작동형 웹서비스 · 기술설명", 12, True, WHITE, 3)])
+    txbox(slide, 1.10, 6.82, 6.0, 0.3,
+          [("2026 금융 AI Challenge 제출본", 10.5, False, GRAY_LT)])
     return slide
 
 
@@ -885,7 +884,7 @@ def slide_09_e2(prs):
                    ["만 19~34세 요건 충족 (28세) · 연소득 5,000만원 이하 충족 (4,200만원)",
                     "주택 유형·전세가율·선순위 채권 규모에 따라 보증 가입이 제한될 수 있습니다. (conditional)"])
     txbox(slide, CONTENT_X, 6.50, CONTENT_W, 0.30,
-          [("정책 요건은 공개된 일반 기준 수준으로만 기술하며, 구체적 금리·한도 수치는 예시값으로 명시합니다. (14장 참조)",
+          [("정책 요건은 공개된 일반 기준 수준으로만 기술하며, 구체적 금리·한도 수치는 예시값으로 명시합니다. (18장 참조)",
             10, False, GRAY)])
     return slide
 
@@ -1447,7 +1446,7 @@ def slide_18_data_notice(prs):
                 ("· 서비스 화면 하단 상시 노출", 10.5, False, WHITE, 7),
                 ("· API 응답 meta.disclaimer", 10.5, False, WHITE, 4),
                 ("· 정책 항목별 disclaimer 필드", 10.5, False, WHITE, 4),
-                ("· 본 기술설명서 14장", 10.5, False, WHITE, 4)])
+                ("· 본 기술설명서 18장", 10.5, False, WHITE, 4)])
     txbox(slide, CONTENT_X, 6.40, CONTENT_W, 0.30,
           [("본 산출물은 의사결정을 보조하는 참고 도구이며, 금융상품 청약·계약 권유나 투자 자문이 아닙니다.",
             10.5, True, GRAY)])
@@ -1455,12 +1454,12 @@ def slide_18_data_notice(prs):
 
 
 def slide_19_impact(prs):
-    slide = new_slide(prs, 19, "KB 사업 연계 · 기대효과 · 향후 확장",
+    slide = new_slide(prs, 19, "금융 서비스 연계 · 기대효과 · 향후 확장",
                       "주택금융 접점에서 바로 쓰일 수 있는 판정 엔진을 지향합니다.",
                       eyebrow="BUSINESS FIT & ROADMAP")
 
     links = [
-        ("사업 연결성", ["KB국민은행의 핵심 사업영역인", "주택금융·전세자금대출 접점과 직결됩니다.",
+        ("사업 연결성", ["은행·보증기관의 핵심 사업영역인", "주택금융·전세자금대출 접점과 직결됩니다.",
                      "첫 주거를 준비하는 청년 고객의", "첫 접점 도구로 활용할 수 있습니다."]),
         ("상담 품질", ["판정 결과와 근거 문자열이 함께 남아", "상담원이 설명 근거로 그대로 사용하고",
                     "고객은 상담 전에 자기 상황을", "정량적으로 파악한 채 방문합니다."]),
@@ -1482,7 +1481,7 @@ def slide_19_impact(prs):
     txbox(slide, CONTENT_X, 3.62, 6.0, 0.30, [("향후 확장 로드맵", 12.5, True, DARK)])
     steps = [("Phase 1", "프로토타입", ["4대 엔진 · 대시보드", "· AI 상담 (현재)"]),
              ("Phase 2", "데이터 연동", ["공신력 있는 시세·정책", "데이터 소스 연결"]),
-             ("Phase 3", "상품 연계", ["KB 주택금융 상품 카탈로그", "· 내부망 모델 전환"]),
+             ("Phase 3", "상품 연계", ["기관별 주택금융 상품 카탈로그", "· 내부망 모델 전환"]),
              ("Phase 4", "사후 관리", ["계약 이후 주거비 모니터링", "· 갱신 시점 재판정"])]
     pw = (CONTENT_W - 3 * 0.40) / 4
     for i, (ph, t, lines) in enumerate(steps):
@@ -1538,7 +1537,7 @@ def build() -> str:
     cp = prs.core_properties
     cp.title = "Home_Compass 기술설명서"
     cp.subject = "2026 금융 AI Challenge"
-    cp.author = "개인 참가"
+    cp.author = "Home_Compass"
 
     builders = [
         slide_01_cover, slide_02_problem, slide_03_gap, slide_04_overview,

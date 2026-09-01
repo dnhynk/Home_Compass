@@ -55,7 +55,9 @@ python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1
 
 처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `HOME_COMPASS_SEED_COUNSELOR_PASSWORD`와 `HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 않습니다.
 
-개발 환경에서 두 값을 생략하면 임시 비밀번호가 표준 오류에 한 번 출력됩니다. 공개 배포 설정은 별도 하드닝 작업에서 fail-closed 방식으로 전환할 예정입니다.
+개발 환경에서 두 값을 생략하면 임시 비밀번호가 표준 오류에 한 번 출력됩니다. 공개 배포는
+`HOME_COMPASS_ENV=production`일 때 두 비밀번호(각 16자 이상)와 Secure 쿠키 설정이 없으면
+기동을 거부합니다.
 
 ## 선택적 LLM 연동
 
@@ -83,7 +85,28 @@ Copy-Item .env.example .env
 | `HOME_COMPASS_CONTRACTS_DIR` | JSON Schema·OpenAPI 계약 디렉터리 |
 | `MOLIT_API_KEY` | 국토교통부 실거래가 OpenAPI 인증키 |
 
-공개 배포에서는 단일 인스턴스·단일 worker와 영구 볼륨의 SQLite를 전제로 합니다. 호스팅별 설정과 보안 경계는 배포 하드닝 후 이 문서에 확정합니다.
+공개 배포에서는 단일 인스턴스·단일 worker와 영구 볼륨의 SQLite를 전제로 합니다.
+
+## 공개 배포
+
+저장소 루트의 `Dockerfile`은 저장소 시드, 운영 설정 검증, 단일 worker 기동을 한 경로로
+묶습니다. `render.yaml`은 서울과 가까운 Singapore 리전, 영구 디스크, HTTPS Secure 쿠키,
+헬스체크를 포함한 Render Blueprint입니다. 두 운영 계정 비밀번호는 Blueprint 생성 화면에서
+비밀값으로 입력하며 저장소에는 남지 않습니다.
+
+로컬에서 컨테이너만 스모크하려면 HTTPS 프록시가 없으므로 개발 모드로 실행합니다.
+공개 Render 배포는 `render.yaml`이 운영 모드와 Secure 쿠키를 강제합니다.
+
+```powershell
+docker build -t home-compass .
+docker run --rm -p 8000:8000 `
+  -e HOME_COMPASS_ENV=development `
+  -e HOME_COMPASS_COOKIE_SECURE=false `
+  home-compass
+```
+
+실제 제출 순서와 외부 URL 검증 방법은
+[`docs/competition/SUBMISSION_RUNBOOK.md`](docs/competition/SUBMISSION_RUNBOOK.md)에 고정합니다.
 
 ## 데이터 파이프라인
 

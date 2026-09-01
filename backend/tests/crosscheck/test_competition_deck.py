@@ -147,6 +147,8 @@ def test_the_deck_does_not_repeat_the_corrected_falsehoods(builder):
         "0–39", "40–69", "70–100",
         "policies.json의 요건 배열",
         "구조 시연용 예시 데이터",
+        "KB 사업 연계", "KB국민은행", "KB 주택금융",
+        "개인 참가", "2026년 8월 3일", "14장 참조", "본 기술설명서 14장",
     ]
     found = [d for d in dead if d in body]
     assert not found, f"고쳤던 문구가 덱에 되살아났다: {found}"

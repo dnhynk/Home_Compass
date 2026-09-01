@@ -193,6 +193,21 @@ WORKER_PATHS: dict[str, list[str]] = {
     #   `REJECTION_LABEL` 에 대해 이미 그 형태를 세워 두었다(`label_table_drift` + 프로브 셋).
     #   `backend/tests/api/` 를 통째로 주면 인증·헬스 테스트까지 삼켜 `api` 배정과 겹친다.
     "W-admin-ui": OWNERSHIP["admin"] + ["backend/tests/api/test_admin_screen.py"],
+    #
+    # --- 적대적 리뷰 지적 수정 (run_b70307c8c66d) — **과업이 닫히면 지운다** --------
+    #
+    # ★ H3 은 판정 엔진의 결함이라 `engines` 를 통째로 준다. 코디네이터가 직접 재현했다 —
+    #   `newlywed_jeonse` 의 `ageMax: 200` 이 무제한 센티넬과 같아 `200 < 200` 이 False 가
+    #   되고, 그 한 줄이 `ageMin` 검사까지 끈다. `age=0` 이 `status=eligible` 로 나오며
+    #   **연령 사유가 한 줄도 없다.**
+    "W-eligibility-fix": OWNERSHIP["engines"],
+    # ★ H1·H2 는 `.env` 로더의 허용목록과 시드 재주입 경로에 걸쳐 있어 `api` 를 통째로
+    #   준다. 코디네이터가 재현했다 — `ENV_KEYS` 가 LLM 키 넷뿐이라 `.env` 의
+    #   `HOME_COMPASS_COOKIE_SECURE` 와 `HOME_COMPASS_ENV` 가 조용히 버려진다.
+    #   `.env.example` 과 런북은 코디네이터 소유와 겹치지만, 겹침은 라벨만 흔들고
+    #   `violations()` 판정은 바꾸지 않는다.
+    "W-deploy-safety": OWNERSHIP["api"] + [".env.example",
+                                           "docs/competition/SUBMISSION_RUNBOOK.md"],
 }
 
 # 코디네이터만 바꿀 수 있는 것 (SPEC 8.2 #5). 워커 PR 에 이게 있으면 즉시 반려.

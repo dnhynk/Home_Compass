@@ -34,7 +34,7 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 
 | 항목 | 확인 방법 |
 |---|---|
-| 전체 테스트 | `backend/tests` **1740 passed · 2 skipped** + `store` **555 passed** = **2295 · 0 failed** |
+| 전체 테스트 | `backend/tests` **1879 passed · 2 skipped** + `store` **555 passed** = **2434 · 0 failed** |
 | 제출 preflight | **pass=6 · pending=4 · fail=0** (`.venv` 파이썬으로 돌린다) |
 | 공식 양식 대조 | `.hwpx` 2종을 대회 페이지에서 받아 `hp:t` 추출. 생성기 섹션 제목이 **7개/5개 항목과 문자 단위 일치** |
 | 배포 경로 | ★ T1 이 컨테이너를 **실기동**했다 — 5개 경로 200, 볼륨 유지 재기동 시 11개 테이블 행수·해시 동일(시드 멱등) |
@@ -96,7 +96,7 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 | T5 기획서 설득력 보강 | `task_d61d3d9469df` | ✅ PR #6 머지 · 정리 완료 |
 | T6 적대적 리뷰 | `task_a49b5c196d38` | ✅ High 3 / Medium 4 / Low 5 · 정리 완료 |
 | T8 배포 안전 경계 (H1·H2) | `task_993ce521f825` | ✅ PR #10 머지 · 정리 완료 |
-| **T7 연령 판정 결함 (H3)** | `task_eea4dd30e53b` | **진행 중** · `ctx_4cedd9a4e50c` · worktree `eligibility-fix` |
+| T7 연령 판정 결함 (H3) | `task_eea4dd30e53b` | ✅ PR #12 머지 · 정리 완료 |
 | D1 결정 전용 (Gate 거치) | `task_fd4840c0b9ea` | Gate `gate_74f5571a0eaa` 대기 |
 
 ---
@@ -105,11 +105,15 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 
 `WORKER_PATHS` 에 이 Run 이 더한 항목 전부를 **T7 머지 직후** 지운다.
 
+워커 배정 넷은 **전부 회수했다** — `W-web-ui`(#7) · `W-admin-ui`(#8) ·
+`W-deploy-safety`(#10) · `W-eligibility-fix`(#12). 배정표는 `Coordinator` 하나뿐이고
+그것이 저장소가 선언한 정상 상태다.
+
+**남은 것은 하나뿐이다.**
+
 | 항목 | 회수 시점 |
 |---|---|
-| `Coordinator` 에 더한 8경로 (`Dockerfile` · `.dockerignore` · `render.yaml` · `.env.example` · `auth.py` · `main.py` · `test_auth.py` · `frontend/styles.css`) | 배포 URL 확정 후 |
-| `W-web-ui` · `W-admin-ui` | **지금 지워도 된다** (T3·T4 머지 완료) |
-| `W-eligibility-fix` · `W-deploy-safety` | T7 머지 후 (T8 몫은 지금 지워도 된다) |
+| `Coordinator` 에 더한 8경로 (`Dockerfile` · `.dockerignore` · `render.yaml` · `.env.example` · `auth.py` · `main.py` · `test_auth.py` · `frontend/styles.css`) | **배포 URL 확정 후** |
 
 남기면 미래 PR 의 `owner_guess` 가 선언 순서로 Coordinator 를 돌려주고, Coordinator 는
 `CONTRACT_DELEGATED` 에 있으므로 `violations()` 가 **계약 변경을 못 잡는다.**
@@ -119,14 +123,16 @@ SPEC 8.2 #5 게이트가 조용히 열린다. PR #81·#85 가 그 사고다.
 
 ## 다음 작업 (첫 항목은 바로 실행 가능)
 
-1. **T7 완료 보고를 받아 PR 을 심사·머지한다.** 통과 조건 — 골든 diff 가 삽입 12 / 삭제 0 이고
-   전부 `newlywed_jeonse` 의 「만 19세 이상 요건 충족」 한 줄일 것, `age=28` 분포가
-   적격4/조건부1/부적격3 그대로일 것(제출 PDF 가 그 수를 인용한다), JS 오프라인 경로에서도
-   `age=5` 가 `ineligible` 로 나올 것.
-2. 임시 등재 회수 PR.
-3. **사용자에게 Render 배포를 Gate 로 요청한다.** 런북 2절(컨테이너 리허설) → 3절(배포) 순.
-4. 배포 URL 확보 후 `submission_preflight.py --strict --url ...` 전 항목 PASS 확인.
-5. 남은 다듬기 (아래 「이월된 열린 항목」의 앞 네 개).
+**코드 쪽 결함 수정은 전부 닫혔다. 남은 것은 사람이 해야 하는 것과 다듬기다.**
+
+1. **팀명 Gate(`gate_7401786a5663`) 의 답을 받는다.** 이것 없이는 제출할 수 없다 —
+   PDF 의 팀명·구성원 실명이 자리표시자인 채로 남는다.
+2. **사용자가 Render 에 배포한다.** 런북 2절(컨테이너 리허설) → 3절(배포) 순.
+   T1 이 로컬 리허설을 이미 통과시켰으므로 남은 위험은 Render 고유 계층뿐이다.
+3. 배포 URL 확보 후 `submission_preflight.py --strict --url <URL>` 전 항목 PASS 확인.
+   여기서 처음으로 pending 4건이 전부 닫힌다.
+4. `Coordinator` 의 임시 8경로 회수 PR.
+5. 남은 다듬기 (아래 「이월된 열린 항목」의 앞 네 개). 마감까지 여유가 있으면 한다.
 
 ---
 

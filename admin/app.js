@@ -52,6 +52,12 @@
     while (node.firstChild) { node.removeChild(node.firstChild); }
   }
 
+  //: 초점을 옮긴다. `focus` 가 없는 자리에서 터지지 않게 한 겹 두른다 — 이 파일은
+  //  브라우저 밖(`test_status_screen_render.py` 의 최소 DOM)에서도 부팅된다.
+  function focusNode(node) {
+    if (node && typeof node.focus === 'function') { node.focus(); }
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) { node.className = className; }
@@ -96,9 +102,14 @@
   // 표시 헬퍼
   // ------------------------------------------------------------------
 
+  //: 값 한 칸의 표시. ★ `null` 을 **`null` 이라고만** 적지 않는다 — 규칙관리자는
+  //  간헐 업무자이고(SPEC 7.3) 그 다섯 글자는 개발자 어휘다. 그렇다고 「없음」만
+  //  남기면 개발자가 재현할 수 없다. 그래서 **옮긴 말과 원래 값을 함께** 적는다 —
+  //  같은 파일의 `SAID_LABEL.explicit_null` 이 이미 쓰고 있는 규약이고, 이 표가
+  //  「없음」(null)과 「모름」(not_found)을 가르는 자리라서 어휘가 어긋나면 안 된다.
   function show(value, present) {
     if (present === false) { return '(없는 필드)'; }
-    if (value === null) { return 'null'; }
+    if (value === null) { return '「없음」(null)'; }
     if (value === undefined) { return '(없는 필드)'; }
     if (typeof value === 'object') { return JSON.stringify(value); }
     return String(value);
@@ -208,6 +219,36 @@
     span_store_rejected: '검증은 통과했으나 저장소가 근거 구간을 거부했습니다'
   };
 
+  // ------------------------------------------------------------------
+  // 초안 상태의 어휘 — 큐 · 검토창 머리말 · 결정 차단이 함께 쓴다
+  // ------------------------------------------------------------------
+  //
+  // ★ 화면에 `extraction_failed` · `pending` 이 **날것 그대로** 찍히고 있었다. 규칙관리자는
+  //   간헐 업무자이고(SPEC 7.3) 그것은 개발자 어휘다. 위 `REJECTION_LABEL` 이 사유에 대해
+  //   이미 푼 문제인데 **상태에 대해서는 안 풀려 있었다** — 한쪽만 친절한 화면이었다.
+  //
+  // ★ 이것도 **손으로 쓴 사본**이다. 정본은 서버의 `store/models.py` `DRAFT_STATUSES` 이고,
+  //   SQLite 의 CHECK 제약이 같은 넷을 다시 적는다. 사본이 조용히 낡는 것이 이 저장소가
+  //   반복해서 당한 부류라, `REJECTION_LABEL` 과 **정확히 같은 방식으로**
+  //   `test_admin_screen.py` 의 파수병이 서버 어휘와 매번 대조한다.
+  var DRAFT_STATUS_LABEL = {
+    pending: '승인 대기',
+    approved: '승인됨',
+    rejected: '반려됨',
+    extraction_failed: '추출 실패'
+  };
+
+  //: 옮긴 말. **모르는 상태는 지어내지 않고 원래 코드를 그대로 돌려준다** — 서버가
+  //  어휘를 늘렸는데 파수병이 아직 안 돈 그 사이에도 화면이 거짓말하지 않게 한다.
+  function statusLabel(status) {
+    return DRAFT_STATUS_LABEL[status] || status;
+  }
+
+  //: 옮긴 말 옆에 **원래 코드를 함께** 세운다. 번역만 남기면 개발자가 재현할 수 없다.
+  function statusCode(status) {
+    return el('code', 'raw-code', status);
+  }
+
   //: 사유 문자열의 형태는 `코드: 자세히` 이고, 여럿이면 ` / ` 로 이어진다
   //  (`ingest/extraction.py` 의 join · `extraction_verify.Rejection` 의 문자열화).
   //
@@ -275,19 +316,31 @@
 
       var box = document.createElement('input');
       box.type = 'checkbox';
+      // ★ 서버와 **같은 규칙**이다 — `_pending_draft_or_error` 는 `pending` 이 아닌 초안을
+      //   전부 409 로 막고 승인·반려가 둘 다 그 관문을 지난다. 여기서 상태 하나를 특수
+      //   분기로 잠그면 그 규칙이 두 벌이 된다.
       box.disabled = draft.status !== 'pending';
       box.checked = state.selectedIds.indexOf(draft.id) >= 0;
-      box.setAttribute('aria-label', draft.id + ' 일괄 승인 대상으로 선택');
+      // 잠긴 칸은 회색만으로 말하지 않는다 — 초점이 왔을 때 **왜** 잠겼는지가 들려야 한다.
+      box.setAttribute('aria-label', box.disabled
+        ? draft.id + ' 는 승인 대기 상태가 아니라 일괄 승인 대상으로 고를 수 없습니다'
+        : draft.id + ' 일괄 승인 대상으로 선택');
       box.addEventListener('change', function () {
         toggleSelected(draft.id, box.checked);
       });
 
       var open = el('button', 'queue-open');
       open.type = 'button';
+      // 지금 오른쪽에 열려 있는 초안. 배경색만으로 나르면 색을 못 보는 사용자에게는
+      // 표시가 없는 것과 같다.
+      if (draft.id === state.currentId) { open.setAttribute('aria-current', 'true'); }
       open.appendChild(el('span', 'queue-policy', draft.policyId));
       open.appendChild(el('span', 'queue-id', draft.id));
-      var meta = el('span', 'queue-meta',
-        draft.status + ' · ' + shortTime(draft.createdAt));
+      // 옮긴 말 + 원래 코드 + 생성 시각. 상태를 코드로만 적으면 간헐 업무자가 읽지 못하고,
+      // 옮긴 말만 적으면 개발자가 재현하지 못한다.
+      var meta = el('span', 'queue-meta', statusLabel(draft.status));
+      meta.appendChild(statusCode(draft.status));
+      meta.appendChild(document.createTextNode(' · ' + shortTime(draft.createdAt)));
       open.appendChild(meta);
       // 실패 초안은 **큐에서부터** 사유를 보인다. 열어 봐야 아는 것으로 두면 대기 큐가
       // [무엇이 밀려 있는가] 는 말해도 [무엇을 해야 하는가] 는 말하지 않는다.
@@ -661,6 +714,11 @@
         renderDetail(detail);
         $('reviewEmpty').hidden = true;
         $('review').hidden = false;
+        // ★ 새 내용은 **오른쪽**에 나타나는데 초점은 왼쪽 큐에 남아 있었다. 키보드로
+        //   여는 사람은 남은 큐 항목을 전부 지나야 검토창에 닿았고, 읽어 주는 화면에는
+        //   [무엇이 열렸는가] 가 아무 데서도 나오지 않았다. 초점을 제목으로 옮기면 둘이
+        //   같이 풀린다 — 구역 전체를 `aria-live` 로 읽히던 것을 대신하는 자리이기도 하다.
+        focusNode($('reviewTitle'));
         // 영향 사례는 무거우므로(회귀 프로필 × 판정 2회) 상세 렌더가 끝난 뒤 이어 붙인다.
         return request('GET', '/api/admin/drafts/' + encodeURIComponent(draftId) + '/impact');
       })
@@ -683,7 +741,7 @@
     var meta = $('reviewMeta');
     clear(meta);
     addMeta(meta, '초안 ID', draft.id);
-    addMeta(meta, '초안 상태', draft.status);
+    addMeta(meta, '초안 상태', statusLabel(draft.status), draft.status);
     addMeta(meta, '생성', shortTime(draft.createdAt));
     addMeta(meta, '현행 규칙 버전', detail.current ? detail.current.ruleVersionId : '없음 (첫 승인)');
     addMeta(meta, '원문', draft.policySourceId);
@@ -747,10 +805,13 @@
     });
   }
 
-  function addMeta(parent, label, value) {
+  //: `code` 는 옮긴 말 옆에 세우는 **원래 값**이다. 안 주면 안 선다.
+  function addMeta(parent, label, value, code) {
     var wrap = document.createElement('div');
     wrap.appendChild(el('dt', null, label));
-    wrap.appendChild(el('dd', null, value));
+    var dd = el('dd', null, value);
+    if (code) { dd.appendChild(statusCode(code)); }
+    wrap.appendChild(dd);
     parent.appendChild(wrap);
   }
 
@@ -792,7 +853,15 @@
 
       var evidence = document.createElement('td');
       if (field.evidence) {
-        evidence.appendChild(el('span', 'f-quote', field.evidence.quote));
+        // ★ 근거 인용은 **누르는 것**이다 (「행을 누르면 오른쪽 원문에서 그 근거 구간이
+        //   강조됩니다」). 지금까지 그 동작은 `tr` 의 click 하나에만 붙어 있어서 마우스로만
+        //   닿았다 — 키보드로는 이 화면의 핵심 동작을 아예 할 수 없었다. 손으로 키 처리를
+        //   짜는 대신 **`button` 을 쓴다**: Tab 과 Enter/Space 가 그냥 딸려 온다.
+        //   줄 전체 클릭은 마우스 편의로 그대로 남긴다.
+        var quote = el('button', 'f-quote', field.evidence.quote);
+        quote.type = 'button';
+        quote.addEventListener('click', function () { focusField(field.path, row); });
+        evidence.appendChild(quote);
         if (field.evidence.ambiguous) {
           evidence.appendChild(el('span', 'f-note',
             '⚠ 이 인용은 원문에 ' + field.evidence.occurrences + '번 나옵니다 — '
@@ -821,11 +890,17 @@
     });
   }
 
+  //: 어느 근거를 보고 있는지. 줄 배경(`.active`)과 인용 버튼의 `aria-current` 가 **같은
+  //  사실**을 각각 눈과 보조기술에 말한다 — 색 하나로 나르지 않는다.
   function focusField(path, row) {
     state.activeField = path;
     var rows = $('fieldBody').children;
     for (var i = 0; i < rows.length; i += 1) {
       rows[i].classList.remove('active');
+      var quotes = rows[i].getElementsByTagName('button');
+      for (var j = 0; j < quotes.length; j += 1) {
+        quotes[j].setAttribute('aria-current', rows[i] === row ? 'true' : 'false');
+      }
     }
     row.classList.add('active');
     highlightActive();
@@ -976,8 +1051,9 @@
       return '추출에 실패한 초안이라 승인·반려할 수 없습니다. '
         + '아래 사유를 보고 재추출을 지시하거나 수동으로 입력해야 합니다.';
     }
-    return '이미 처리된 초안입니다 (현재 상태: ' + draft.status + '). '
-      + '승인은 한 번만 일어납니다.';
+    // 서버의 409 문구를 그대로 쓰되 상태만 **옮긴 말과 원래 코드를 함께** 적는다.
+    return '이미 처리된 초안입니다 (현재 상태: ' + statusLabel(draft.status)
+      + ' / ' + draft.status + '). 승인은 한 번만 일어납니다.';
   }
 
   function syncDecisionButtons() {
@@ -1010,8 +1086,16 @@
       state.selectedIds = [];
       // 승인·반려는 초안을 `pending` 에서 빼므로 병합 상태가 달라진다 (SPEC 6.4, 잠정).
       // 신고 큐를 다시 읽지 않으면 화면이 이미 끝난 초안과 묶인 신고를 계속 보인다.
+      //
+      // ★ 지표도 같이 읽는다. 대기 건수와 최장 대기일이 바뀌는 것은 **일괄 승인만이
+      //   아니다** — 건별 승인·반려도 똑같이 초안을 큐에서 뺀다. 그런데 `loadStatus` 가
+      //   `batchApprove` 에만 붙어 있어서, 방금 두 건을 처리하고도 상단 상시 배지가
+      //   「대기 3건」을 그대로 들고 있었다 (브라우저 실측: 새로고침하면 1건). SPEC 7.3 이
+      //   그 배지를 둔 이유가 [밀린 일이 몇 건인가] 인데, 그 수가 검토자 자신의 결정을
+      //   반영하지 않으면 배지는 밀린 일이 아니라 낡은 수를 말하는 것이다.
       return loadQueue()
         .then(loadReports)
+        .then(loadStatus)
         .then(function () { return openDraft(state.currentId); })
         .then(function () { result(message, 'ok'); });
     }).catch(function (error) {

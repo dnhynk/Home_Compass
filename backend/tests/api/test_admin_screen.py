@@ -319,11 +319,18 @@ class TestAFailedDraftShowsItsReasonAndCannotBeDecided:
 # ★ 검사 함수를 밖으로 뺀 이유는 **프로브 때문**이다. 실제 파일이 깨끗한 것과 검사기가
 #   작동하는 것은 다른 사실이고, 이 파일의 파수병 1번이 이미 그렇게 하고 있다.
 
-def label_table_drift(source: str, server_codes: set[str]) -> dict[str, list[str]]:
-    """화면의 사유 어휘와 서버 어휘의 어긋남. 없으면 두 목록이 다 비어 있다."""
-    block = re.search(r"var REJECTION_LABEL = \{(.*?)\n  \};", source, re.S)
+def label_table_drift(
+    source: str, server_codes: set[str], table: str = "REJECTION_LABEL"
+) -> dict[str, list[str]]:
+    """화면의 어휘 표와 서버 어휘의 어긋남. 없으면 두 목록이 다 비어 있다.
+
+    ★ `table` 을 받는 이유는 **손사본이 둘이 됐기 때문**이다 (아래 ④). 사유 어휘와 초안
+      상태 어휘는 정본이 다를 뿐 [서버의 닫힌 목록을 화면이 손으로 베꼈다] 는 성질이
+      같다. 검사기를 둘로 복사하면 한쪽만 고쳐질 자리가 생긴다.
+    """
+    block = re.search(rf"var {table} = \{{(.*?)\n  \}};", source, re.S)
     if block is None:
-        return {"missing": sorted(server_codes), "unknown": ["REJECTION_LABEL 이 없다"]}
+        return {"missing": sorted(server_codes), "unknown": [f"{table} 이 없다"]}
     keys = set(re.findall(r"^\s+([a-z_]+):", block.group(1), re.M))
     return {"missing": sorted(server_codes - keys), "unknown": sorted(keys - server_codes)}
 
@@ -355,3 +362,87 @@ class TestTheFailureVocabularyOnScreenMatchesTheServer:
     def test_a_table_that_vanished_is_caught(self):
         drift = label_table_drift("var nothing = 1;\n", self._server_codes())
         assert drift["unknown"], "표가 통째로 사라진 것을 못 잡았다"
+
+
+# --- ④ 초안 상태도 같은 규약을 지킨다 ---------------------------------------
+#
+# 화면에 `extraction_failed` · `pending` 이 **날것 그대로** 찍히고 있었다 (브라우저 실측,
+# 2026-09-01). 규칙관리자는 간헐 업무자이고(SPEC 7.3) 그것은 개발자 어휘다. ③ 이 사유에
+# 대해 이미 푼 문제인데 상태에 대해서는 안 풀려 있었다 — 한쪽만 친절한 화면이었다.
+#
+# 그래서 화면이 `DRAFT_STATUS_LABEL` 을 갖는다. 그 순간 **손사본이 하나 더 생기므로**
+# ③ 과 같은 파수병을 함께 세운다. 정본은 `store.models.DRAFT_STATUSES` 이고, SQLite 의
+# CHECK 제약이 같은 넷을 다시 적는다 — 어느 쪽이 늘어도 여기서 걸린다.
+
+class TestTheDraftStatusVocabularyOnScreenMatchesTheServer:
+    TABLE = "DRAFT_STATUS_LABEL"
+
+    @staticmethod
+    def _server_statuses() -> set[str]:
+        from home_compass.store.models import DRAFT_STATUSES
+
+        return set(DRAFT_STATUSES)
+
+    def test_the_real_file_matches(self):
+        drift = label_table_drift(
+            APP_JS.read_text(encoding="utf-8"), self._server_statuses(), self.TABLE)
+        assert drift == {"missing": [], "unknown": []}, (
+            f"화면의 초안 상태 어휘가 서버와 어긋난다: {drift}")
+
+    def test_a_missing_status_is_caught(self):
+        source = APP_JS.read_text(encoding="utf-8")
+        drift = label_table_drift(
+            source, self._server_statuses() | {"status_added_later"}, self.TABLE)
+        assert drift["missing"] == ["status_added_later"], (
+            f"서버가 상태를 늘렸는데 놓쳤다: {drift}")
+
+    def test_a_stale_status_is_caught(self):
+        source = APP_JS.read_text(encoding="utf-8")
+        drift = label_table_drift(
+            source, self._server_statuses() - {"extraction_failed"}, self.TABLE)
+        assert drift["unknown"] == ["extraction_failed"], (
+            f"서버가 상태를 지웠는데 화면에 남은 것을 못 잡았다: {drift}")
+
+    def test_a_table_that_vanished_is_caught(self):
+        drift = label_table_drift("var nothing = 1;\n", self._server_statuses(), self.TABLE)
+        assert drift["unknown"], "표가 통째로 사라진 것을 못 잡았다"
+
+    def test_the_two_tables_do_not_share_one_block(self):
+        """★ 검사기가 `table` 을 받게 됐으니 **엉뚱한 블록을 읽고 통과하는** 경우를 막는다.
+
+        정규식이 이름을 무시하면 상태 표에 사유 어휘를 먹여도 통과한다. 그러면 파수병이
+        둘인 척하면서 실제로는 하나만 보는 것이 된다.
+        """
+        source = APP_JS.read_text(encoding="utf-8")
+        crossed = label_table_drift(source, self._server_statuses(), "REJECTION_LABEL")
+        assert crossed["missing"] and crossed["unknown"], (
+            "사유 표를 상태 어휘로 검사했는데 통과했다 — 검사기가 블록 이름을 안 본다")
+
+
+# --- ⑤ 옮긴 말만 남기지 않는다 — 상태에도 원래 코드가 함께 선다 -----------------
+#
+# ③ 이 사유에 대해 고정한 것과 같은 규율이다. 번역만 남기면 개발자가 재현할 수 없다.
+
+class TestTheScreenShowsBothTheKoreanAndTheRawStatus:
+    def test_the_queue_row_carries_both(self):
+        source = APP_JS.read_text(encoding="utf-8")
+        block = re.search(r"function renderQueue\(\)\s*\{.*?\n  \}", source, re.S)
+        assert block is not None, "renderQueue 가 없다"
+        assert "statusLabel(draft.status)" in block.group(0), "큐가 상태를 옮기지 않는다"
+        assert "statusCode(draft.status)" in block.group(0), (
+            "큐가 원래 상태 코드를 함께 싣지 않는다 — 번역만 남으면 재현할 수 없다")
+
+    def test_the_review_header_carries_both(self):
+        source = APP_JS.read_text(encoding="utf-8")
+        assert re.search(
+            r"addMeta\(meta, '초안 상태', statusLabel\(draft\.status\), draft\.status\)",
+            source,
+        ), "검토창 머리말이 옮긴 말과 원래 코드를 함께 싣지 않는다"
+
+    def test_an_unknown_status_falls_back_to_the_raw_code(self):
+        """★ 서버가 어휘를 늘렸는데 파수병이 아직 안 돈 사이에도 화면이 지어내지 않는다."""
+        source = APP_JS.read_text(encoding="utf-8")
+        block = re.search(r"function statusLabel\(status\)\s*\{.*?\n  \}", source, re.S)
+        assert block is not None, "statusLabel 이 없다"
+        assert "|| status" in block.group(0), (
+            "모르는 상태에서 원래 코드로 물러나지 않는다 — 빈 칸이나 지어낸 말이 남는다")

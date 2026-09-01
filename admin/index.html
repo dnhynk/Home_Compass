@@ -51,6 +51,13 @@
 
 <main id="main" class="app">
 
+  <!-- ★ 이 화면에는 **로그인한 뒤 `h1` 이 하나도 없었다** (브라우저 실측: h1 1개 ·
+       보이는 것 0개). 유일한 `h1` 이 로그인 패널 안에 있어서, 게이트를 지나면 문서가
+       `h2` 열 개로 시작했다. 화면의 주어가 없으면 보조기술 사용자는 [여기가 어디인가] 를
+       목차에서 읽을 수 없다. 제목 줄은 상단바가 이미 눈으로 말하고 있으므로 여기서는
+       구조만 세운다 — 화면이 말하지 않는 사실을 숨기는 자리가 아니다. -->
+  <h1 class="sr-only">규칙 검토·승인</h1>
+
   <!-- ══════════════ 0. 로그인 게이트 ══════════════ -->
   <!--
     ★ 이 화면은 **버튼을 숨겨서 권한을 지키지 않는다.** 권한 검사는 API 계층이 하고
@@ -61,18 +68,20 @@
     <form class="panel gate-panel" id="loginForm" novalidate>
       <div class="panel-head">
         <p class="eyebrow">규칙관리자 전용</p>
-        <h1 class="panel-title">검토·승인 화면</h1>
+        <h2 class="panel-title">검토·승인 화면</h2>
         <p class="panel-sub">
           승인은 판정을 바꾸는 유일한 경로입니다. 로그인해야 대기 큐가 열립니다.
         </p>
       </div>
+      <!-- 로그인 실패 문구는 `#loginNote` 한 자리에만 뜬다. `aria-describedby` 로 묶어야
+           읽어 주는 화면에서 [무엇이 틀렸는지] 가 입력칸에 붙는다. -->
       <div class="field">
         <label for="username">아이디</label>
-        <div class="input-wrap"><input type="text" id="username" autocomplete="username" value="rulemanager"></div>
+        <div class="input-wrap"><input type="text" id="username" autocomplete="username" value="rulemanager" aria-describedby="loginNote"></div>
       </div>
       <div class="field">
         <label for="password">비밀번호</label>
-        <div class="input-wrap"><input type="password" id="password" autocomplete="current-password"></div>
+        <div class="input-wrap"><input type="password" id="password" autocomplete="current-password" aria-describedby="loginNote"></div>
       </div>
       <p class="gate-note" id="loginNote" role="status"></p>
       <button type="submit" class="btn btn-primary btn-block" id="btnLogin">로그인</button>
@@ -140,20 +149,26 @@
         <ul class="queue reports" id="reportList"></ul>
 
         <div class="queue-foot">
-          <p class="batch-note">
+          <p class="batch-note" id="batchNote">
             <strong>일괄 승인은 검토를 건너뛰는 것이 아니라 반영을 묶는 것입니다.</strong>
             건별로 아래 네 항목을 확인한 뒤 선택하세요. 한 건이라도 실패하면
             <em>전체가 반영되지 않습니다.</em>
           </p>
-          <button type="button" class="btn btn-outline btn-block" id="btnBatch" disabled>
+          <button type="button" class="btn btn-outline btn-block" id="btnBatch" disabled aria-describedby="batchNote">
             선택한 <span id="batchCount">0</span>건 일괄 승인
           </button>
         </div>
       </section>
     </aside>
 
-    <!-- ────────── 오른쪽 · 검토 ────────── -->
-    <section class="col-review" aria-live="polite">
+    <!-- ────────── 오른쪽 · 검토 ──────────
+         ★ `aria-live` 를 걷었다. 이 구역 전체에 걸려 있었고, 초안 하나를 열면 **12,949자**가
+           통째로 읽히기 시작했다 (브라우저 실측). 그러면 정작 알려야 할 두 자리 —
+           `#decideBlocked` 와 `#decideResult` 의 `role="status"` — 가 그 안에 묻힌다.
+           바뀐 곳을 알리는 일은 그 둘이 지고, [무엇이 열렸는가] 는 초점을 옮겨서 말한다
+           (app.js `openDraft`). 초점 이동은 키보드 사용자에게도 필요했다 — 왼쪽 큐에서
+           초안을 열면 새 내용은 오른쪽에 나타나는데 초점은 큐에 남아 있었다. -->
+    <section class="col-review">
 
       <div class="empty" id="reviewEmpty">
         <h2>왼쪽에서 초안을 하나 고르세요</h2>
@@ -171,7 +186,9 @@
           <header class="card-head">
             <div>
               <p class="eyebrow" id="reviewEyebrow">검토 대상</p>
-              <h2 class="card-title" id="reviewTitle">—</h2>
+              <!-- 초안을 열면 초점이 여기로 온다 (app.js `openDraft`). `tabindex="-1"` 은
+                   Tab 순서에 넣지 않고 스크립트로만 초점을 줄 수 있게 한다. -->
+              <h2 class="card-title" id="reviewTitle" tabindex="-1">—</h2>
             </div>
             <span class="chip chip-lg" id="changeTypeChip">—</span>
           </header>
@@ -203,7 +220,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">6.4 — 현장 신고</p>
-              <h2 class="card-title">같은 제도에 올라온 신고</h2>
+              <h3 class="card-title">같은 제도에 올라온 신고</h3>
             </div>
             <span class="chip" id="draftReportChip">—</span>
           </header>
@@ -219,7 +236,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">4.4 ① · ③ — 필드별 근거와 변경</p>
-              <h2 class="card-title">무엇이 어떻게 바뀌는가</h2>
+              <h3 class="card-title">무엇이 어떻게 바뀌는가</h3>
             </div>
           </header>
           <p class="card-lead">
@@ -247,7 +264,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">4.4 ① — 근거 원문</p>
-              <h2 class="card-title">원문 대조</h2>
+              <h3 class="card-title" id="sourceHeading">원문 대조</h3>
             </div>
             <span class="chip" id="sourceChip">—</span>
           </header>
@@ -255,7 +272,10 @@
             구간은 서버가 <strong>유니코드 코드포인트</strong> 기준으로 잘라 보냅니다
             (SPEC 4.2.1). 화면은 받은 조각을 순서대로 그릴 뿐 오프셋을 다시 계산하지 않습니다.
           </p>
-          <div class="source" id="sourceView" tabindex="0"></div>
+          <!-- 스크롤되는 상자라서 Tab 으로 닿아야 하고(키보드로만 굴릴 수 있어야 한다),
+               닿았을 때 **이름이 있어야** 한다 — 이름 없는 `tabindex="0"` 은 읽어 주는
+               화면에서 [빈 곳] 으로 들린다. 이름은 바로 위 제목을 가리킨다. -->
+          <div class="source" id="sourceView" tabindex="0" role="region" aria-labelledby="sourceHeading"></div>
         </section>
 
         <!-- 4.4 #2 — 승인 영향 -->
@@ -263,7 +283,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">4.4 ② — 승인 영향</p>
-              <h2 class="card-title">승인하면 판정이 이렇게 바뀝니다</h2>
+              <h3 class="card-title">승인하면 판정이 이렇게 바뀝니다</h3>
             </div>
             <span class="chip" id="impactChip">—</span>
           </header>
@@ -291,7 +311,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">한계</p>
-              <h2 class="card-title">이 화면이 보여 줄 수 없는 것</h2>
+              <h3 class="card-title">이 화면이 보여 줄 수 없는 것</h3>
             </div>
           </header>
           <ul class="limits" id="limitList"></ul>
@@ -302,7 +322,7 @@
           <header class="card-head">
             <div>
               <p class="eyebrow">STEP 02 · 결정</p>
-              <h2 class="card-title">승인 또는 반려</h2>
+              <h3 class="card-title">승인 또는 반려</h3>
             </div>
           </header>
 
@@ -311,12 +331,17 @@
                화면은 거들 뿐이다 (SPEC D-9). -->
           <p class="decide-blocked" id="decideBlocked" role="status" hidden></p>
 
+          <!-- ★ 두 버튼이 **왜 닫혔는지**가 버튼에 붙어야 한다. 지금까지 막힌 이유는
+               `#decideBlocked` 에, 사유가 비었다는 사실은 `#reasonHint` 에 눈으로만
+               있었고, 초점이 버튼에 왔을 때는 「사용 안 함」밖에 들리지 않았다.
+               `hidden` 이거나 빈 문구일 때는 설명이 그냥 없는 것이 되므로, 막히지
+               않은 초안에서 없는 이유를 지어내지 않는다. -->
           <div class="decide-grid">
             <div class="decide-col">
               <p class="decide-lead">승인하면 새 규칙 버전이 생기고 즉시 판정에 참여합니다.</p>
               <label class="field-inline" for="approveReason">승인 사유 <span class="opt">(선택)</span></label>
               <input type="text" id="approveReason" maxlength="2000" placeholder="예) 2026-08-14 공고문과 대조 완료">
-              <button type="button" class="btn btn-primary btn-block" id="btnApprove">승인</button>
+              <button type="button" class="btn btn-primary btn-block" id="btnApprove" aria-describedby="decideBlocked">승인</button>
             </div>
             <div class="decide-col decide-reject">
               <p class="decide-lead">
@@ -324,9 +349,9 @@
                 서버와 저장소가 각각 한 겹씩 막고 있으며, 이 화면이 세 번째 겹입니다.
               </p>
               <label class="field-inline" for="rejectReason">반려 사유 <span class="req">(필수)</span></label>
-              <input type="text" id="rejectReason" maxlength="2000" placeholder="예) 3조 인용이 원문과 다르다" required>
+              <input type="text" id="rejectReason" maxlength="2000" placeholder="예) 3조 인용이 원문과 다르다" required aria-describedby="reasonHint">
               <p class="reason-hint" id="reasonHint">사유를 입력해야 반려할 수 있습니다.</p>
-              <button type="button" class="btn btn-danger btn-block" id="btnReject" disabled>반려</button>
+              <button type="button" class="btn btn-danger btn-block" id="btnReject" disabled aria-describedby="decideBlocked reasonHint">반려</button>
             </div>
           </div>
 

@@ -201,7 +201,13 @@ WORKER_PATHS: dict[str, list[str]] = {
     # 「왜 그렇게 판정했는지 항상 보여준다」를 화면에서 직접 깎는 자리다. 사유 문구는
     # `engines` 가 만들고 표식은 `frontend` 가 그리므로 둘을 함께 준다.
     # `contracts/` 는 주지 않는다 — 계약을 바꿔야 한다면 근거를 갖고 요청하게 한다.
-    "W-verdict-readability": OWNERSHIP["web"] + OWNERSHIP["engines"],
+    # ★ `golden/rationale.json` 은 [모든 생성물] 이라 원칙은 코디네이터 재생성이다.
+    #   T7 때와 같은 예외이고 같은 통제다 — 바뀐 엔진을 가진 워크트리가 워커 쪽뿐이고,
+    #   골든과 동작 변경은 원자적으로 같은 커밋에 들어가야 CI 가 성립한다. 통제는
+    #   PR 본문의 재생성 명령·diff 통계 대조로 유지한다.
+    "W-verdict-readability": OWNERSHIP["web"] + OWNERSHIP["engines"] + [
+        "backend/tests/golden/rationale.json",
+    ],
 }
 
 # 코디네이터만 바꿀 수 있는 것 (SPEC 8.2 #5). 워커 PR 에 이게 있으면 즉시 반려.

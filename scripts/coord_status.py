@@ -173,6 +173,11 @@ WORKER_PATHS: dict[str, list[str]] = {
         "Dockerfile", ".dockerignore", "render.yaml", ".env.example",
         "backend/src/home_compass/auth.py", "backend/src/home_compass/main.py",
         "backend/tests/api/test_auth.py", "frontend/styles.css",
+        # ★ `Policy.failures` 계약 추가의 파급. 이 테스트가 신고 가능 항목을
+        #   `Policy.model_fields` 에서 유도하므로 필드를 더하면 함께 깨진다 —
+        #   SPEC 8.2 #3 이 요구하는 「양쪽이 동시에 깨진다」가 실제로 작동한 자리다.
+        #   계약 변경은 SPEC 8.2 #5 로 코디네이터만 하므로 그 파급도 코디네이터가 진다.
+        "backend/tests/api/test_report_api.py",
     ],
     # --- 백로그 마감 파동 (2026-08-16) — **전부 회수했다** -------------------
     #

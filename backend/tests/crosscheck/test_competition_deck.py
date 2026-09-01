@@ -59,6 +59,92 @@ def builder():
     return module
 
 
+# --- 인용한 판정 문구가 엔진과 어긋나지 않는다 ------------------------------
+#
+# ★ **이 파수병이 없는 동안 덱은 엔진이 내지 않는 문장을 「실제 반환 문자열」이라며
+#   인용하고 있었다** — `(safe)` · `(conditional)` · `(stretch)` 셋이다. 셋 다 원시 enum 이
+#   시민 화면에 새던 것을 걷어내면서 엔진에서 사라졌는데 **덱만 그대로 들고 있었다.**
+#   PR #76 이 만든 사고(생성기를 고치고 생성물을 안 뽑음)와 **같은 부류의 반대 방향**이다 —
+#   이번에는 코드가 앞서갔고 제출물이 뒤에 남았다.
+#
+# 왜 숫자까지 대조하지 않는가. 덱의 `_rationale_box` 는 자체 예시 프로필(연소득 4,200만원 ·
+# 보증금 2억 8,000만원)을 쓰고 회귀 프로필과 값이 다르다. 그것은 거짓이 아니라 예시다 —
+# 상자 머리글이 「형식 예시」라고 밝힌다. **거짓이 되는 것은 판정 어휘 쪽이다:** 엔진이
+# 괄호로 내지 않는 enum 을 덱이 괄호로 달면 심사위원은 없는 출력을 본다.
+#
+# 그래서 대조 대상을 **괄호 안의 판정 enum** 으로 좁힌다. 골든(`rationale.json`)이 엔진
+# 출력의 정본이므로, 덱이 쓰는 `(enum)` 은 거기 실재해야 한다.
+
+#: `Literal[...]` 로 계약에 박혀 있는 판정 어휘. 여기 없는 괄호는 이 검사의 대상이 아니다
+#: (예: `(아파트/기타)` 같은 설명 괄호).
+_VERDICT_ENUMS = (
+    "safe", "caution", "risk",
+    "low", "medium", "high",
+    "affordable", "stretch", "unaffordable",
+    "eligible", "conditional", "ineligible",
+)
+
+_ENUM_IN_PARENS = re.compile(r"\((%s)\)" % "|".join(_VERDICT_ENUMS))
+
+GOLDEN_RATIONALE = REPO_ROOT / "backend" / "tests" / "golden" / "rationale.json"
+
+
+def _engine_strings():
+    """골든에 담긴 **모든** 문자열. 엔진이 실제로 낸 것의 정본이다."""
+
+    def walk(node):
+        if isinstance(node, dict):
+            for value in node.values():
+                yield from walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                yield from walk(value)
+        elif isinstance(node, str):
+            yield node
+
+    return list(walk(json.loads(GOLDEN_RATIONALE.read_text(encoding="utf-8"))))
+
+
+def deck_enum_drift(source: str, engine_strings: list[str]) -> list[str]:
+    """덱이 괄호로 다는 판정 enum 중 엔진이 내지 않는 것. 없으면 빈 목록이다."""
+    emitted = {
+        match.group(0)
+        for line in engine_strings
+        for match in _ENUM_IN_PARENS.finditer(line)
+    }
+    quoted = re.findall(
+        r"_rationale_box\(slide,\s*[\d.]+,\s*\n?\s*\[(.*?)\]\)", source, re.S)
+    used = {
+        match.group(0)
+        for block in quoted
+        for match in _ENUM_IN_PARENS.finditer(block)
+    }
+    return sorted(used - emitted)
+
+
+class TestTheQuotedVerdictWordsExistInTheEngine:
+    def test_the_real_builder_matches(self):
+        drift = deck_enum_drift(BUILDER.read_text(encoding="utf-8"), _engine_strings())
+        assert drift == [], (
+            f"덱이 엔진에 없는 판정 어휘를 인용한다: {drift}. "
+            "엔진에서 원시 enum 을 걷어냈다면 덱의 인용도 함께 고쳐야 한다."
+        )
+
+    def test_a_vanished_enum_is_caught(self):
+        """엔진이 어휘를 지웠는데 덱에 남은 것을 실제로 잡는지 — 프로브."""
+        engine = [s for s in _engine_strings() if "(low)" not in s]
+        drift = deck_enum_drift(BUILDER.read_text(encoding="utf-8"), engine)
+        assert "(low)" in drift, (
+            f"엔진이 (low) 를 지웠는데 덱에 남은 것을 못 잡았다: {drift}")
+
+    def test_a_planted_enum_is_caught(self):
+        """덱이 없는 어휘를 새로 다는 것을 잡는지 — 프로브."""
+        planted = BUILDER.read_text(encoding="utf-8").replace(
+            "안정적인 구간입니다.", "안정적인 구간(caution)입니다.", 1)
+        drift = deck_enum_drift(planted, _engine_strings())
+        assert "(caution)" in drift, f"덱에 심은 (caution) 을 못 잡았다: {drift}"
+
+
 # --- 있어야 할 것들 ---------------------------------------------------------
 
 def test_the_builder_and_the_deck_both_exist():

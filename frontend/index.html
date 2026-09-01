@@ -326,10 +326,10 @@
             <p class="card-sub">모든 판정에는 그렇게 판단한 <strong>사유</strong>가 붙습니다.</p>
           </div>
           <div class="filter-row" id="policyFilter" role="group" aria-label="정책 상태 필터">
-            <button type="button" class="pill is-on" data-filter="all">전체</button>
-            <button type="button" class="pill" data-filter="eligible">적격</button>
-            <button type="button" class="pill" data-filter="conditional">조건부</button>
-            <button type="button" class="pill" data-filter="ineligible">부적격</button>
+            <button type="button" class="pill is-on" data-filter="all" aria-pressed="true">전체</button>
+            <button type="button" class="pill" data-filter="eligible" aria-pressed="false">적격</button>
+            <button type="button" class="pill" data-filter="conditional" aria-pressed="false">조건부</button>
+            <button type="button" class="pill" data-filter="ineligible" aria-pressed="false">부적격</button>
           </div>
         </header>
         <ul class="policy-list" id="policyList"></ul>
@@ -470,6 +470,7 @@
 
     <label class="report-label" for="reportReason">무엇이 어떻게 다릅니까</label>
     <textarea id="reportReason" class="report-reason" rows="4" maxlength="2000"
+              aria-describedby="reportNote"
               placeholder="예) 이 제도는 2026-07 공고로 종료됐다고 기관에서 안내받았습니다."></textarea>
 
     <p class="report-privacy" id="reportPrivacy"></p>

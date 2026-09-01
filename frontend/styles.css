@@ -66,7 +66,12 @@
 /* must outrank the id-level display rules on #onboarding / #skeleton / #dashboard */
 [hidden] { display: none !important; }
 html, body { margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+/* 상단바가 sticky 66px 라 앵커·건너뛰기 링크가 그 아래로 들어간다. 측정: 「본문
+   바로가기」를 누르면 #main 상단 66px 가 상단바에 덮였다 (WCAG 2.2 2.4.11). */
+html {
+  -webkit-text-size-adjust: 100%; scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-h) + 10px);
+}
 body {
   font-family: var(--font);
   background: var(--plane);
@@ -124,7 +129,13 @@ strong { font-weight: 650; }
   padding: 0 clamp(16px, 3vw, 34px);
   display: flex; align-items: center; gap: 18px;
 }
-.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: inherit; min-width: 0; }
+/* min-height 는 좁은 폭에서 마크와 부제가 빠지고 제목 한 줄(15px)만 남을 때를 위한
+   것이다. 측정: 390px 에서 이 링크의 히트 영역이 92×15 로 WCAG 2.2 2.5.8(24×24)
+   미달인 유일한 대상이었다. */
+.brand {
+  display: flex; align-items: center; gap: 11px; text-decoration: none;
+  color: inherit; min-width: 0; min-height: 24px;
+}
 .brand-mark { display: block; flex: none; filter: drop-shadow(0 3px 8px rgba(27,25,21,.18)); }
 .brand-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
 .brand-text strong {
@@ -159,18 +170,33 @@ strong { font-weight: 650; }
 /* Narrow viewports: the three topbar items cannot share 358px of usable width,
    which pushed the document to 503px and produced a horizontal scroll on a
    390px phone. The status badge collapses to its colour-coded dot; the full
-   wording stays reachable via aria-label/title, set alongside the text in JS. */
-@media (max-width: 620px) {
+   wording stays in the accessible name via a visually-hidden span (a role-less
+   <span> may not carry aria-label — ARIA prohibits naming `generic`).
+
+   ★ 두 단의 임계는 감이 아니라 잰 값이다. `.topbar-actions` 는 nowrap 이라
+     줄지 않고, 부족분을 전부 `.brand`(min-width:0) 가 먹는다. 측정한 브랜드
+     폭 — 820px:160 · 800px:157(잘림 시작) · 768px:127 · 700px:63 · 640px:7.
+     즉 접힘이 620px 이면 621~810px 대역에서 제품 이름이 지워진다. 접힘을
+     810px 로 올리면 actions 가 633→250 이 되어 468px 까지 온전하다.
+     두 번째 단(마크 숨김 + 13px)도 같은 이유로 400 → 470 이다 — 401~460px
+     에서 다시 잘렸다. */
+@media (max-width: 810px) {
   .topbar-inner { gap: 10px; }
   .topbar-actions { gap: 8px; }
   .brand-text em { display: none; }
   .conn { padding: 0 9px; gap: 0; }
-  .conn #connText { display: none; }
+  .conn #connText {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 }
-@media (max-width: 400px) {
+@media (max-width: 470px) {
   .brand-mark { display: none; }
   .brand-text strong { font-size: 13px; letter-spacing: -.03em; }
-  .btn-ghost { padding: 0 10px; font-size: 12px; }
+  /* `.btn-ghost` 축소는 여기 있었지만 **한 번도 적용된 적이 없다** — 기반 규칙
+     `.btn-ghost`(아래 BUTTONS 절)가 특이도는 같고 순서가 뒤라 이겼다. 측정:
+     375px 에서 #btnSample 이 padding 13px / font-size 12.5px, 즉 기반값 그대로였다.
+     실제로 듣도록 정의 뒤로 옮겼다. */
 }
 
 /* ── buttons ───────────────────────────────────────────── */
@@ -187,6 +213,11 @@ strong { font-weight: 650; }
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2);
 }
 .btn-ghost:hover { background: var(--accent-yellow-wash); border-color: var(--accent-yellow); color: var(--ink-1); }
+/* 좁은 폭에서 상단바가 브랜드를 밀어내지 않도록 고스트 버튼을 줄인다.
+   TOP BAR 절에 있던 같은 규칙이 순서 때문에 죽어 있었다(그 자리 주석 참조). */
+@media (max-width: 470px) {
+  .btn-ghost { padding: 0 10px; font-size: 12px; }
+}
 .btn-primary {
   background: var(--ink-1); color: #fff;
   box-shadow: 0 1px 2px rgba(27,25,21,.2), 0 12px 24px -14px rgba(27,25,21,.6);
@@ -338,6 +369,15 @@ strong { font-weight: 650; }
   color: var(--ink-3); flex: none;
 }
 .field-help { margin-top: 5px; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+/* 오류는 동작이 일어난 자리에 적는다 — 토스트는 사라지고 어느 칸인지 남지 않는다.
+   색만으로 알리지 않도록 앞에 「!」 표식을 둔다. --critical-ink 는 흰 면·plane 위
+   모두 AA 다. */
+.field-error {
+  margin-top: 5px; font-size: 11.5px; line-height: 1.45; font-weight: 600;
+  color: var(--critical-ink);
+}
+.field-error::before { content: "! "; font-weight: 700; }
+.input-wrap:has([aria-invalid="true"]) { border-color: var(--critical); }
 .money-echo { color: var(--ink-2); font-weight: 600; }
 .money-echo:empty { display: none; }
 
@@ -537,10 +577,14 @@ strong { font-weight: 650; }
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, 1.4fr) auto;
   gap: 10px; align-items: center;
 }
+/* 클램프 2줄은 1440px 의 이름 칸에서만 성립했다. 1100~1280px(노트북)과
+   721~820px 에서 「월세 — 지역 표준 보증금 + 청년전용 보증부월세대출」이
+   중간에 잘렸다 (측정: scrollHeight 49 / clientHeight 32). 가장 긴 라벨이
+   요구하는 3줄로 맞춘다 — 720px 이하에서 이미 쓰던 값과 같다. */
 .schwabe-name {
   font-size: 12px; color: var(--ink-2); min-width: 0;
   line-height: 1.35; overflow: hidden; white-space: normal;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
 }
 .schwabe-bar { min-width: 0; }
 .schwabe-val { font-size: 13px; font-weight: 700; letter-spacing: -.02em; text-align: right; }
@@ -570,7 +614,6 @@ strong { font-weight: 650; }
 
 @media (max-width: 720px) {
   .verdict-body { grid-template-columns: 1fr; }
-  .schwabe-name { -webkit-line-clamp: 3; }
 }
 
 /* ── allocation bar ────────────────────────────────────── */
@@ -751,7 +794,11 @@ strong { font-weight: 650; }
 .policy[data-status="eligible"]::before    { background: var(--good); }
 .policy[data-status="conditional"]::before { background: var(--caution); }
 .policy[data-status="ineligible"]::before  { background: var(--line-strong); }
-.policy[data-status="ineligible"] { opacity: .72; }
+/* 후퇴는 **면**으로 한다. 여기 있던 `opacity: .72` 는 카드 전체를 배경 쪽으로
+   합성해 :root 가 보장한다고 적어 둔 ink 램프의 AA 를 깼다 — 측정값 3.62:1
+   (#817d77 on #f3f1ec, axe serious, 31개 노드). 글자 휘도를 건드리지 않고
+   면만 낮추면 같은 위계를 유지하면서 7.3:1 / 4.9:1 로 돌아온다. */
+.policy[data-status="ineligible"] { background: var(--plane); }
 .policy-main { min-width: 0; }
 .policy-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .policy-name { font-size: 14.5px; font-weight: 700; letter-spacing: -.025em; }
@@ -800,7 +847,10 @@ strong { font-weight: 650; }
   padding-left: clamp(14px, 1.6vw, 22px); border-left: 1px solid var(--line);
 }
 
-.factor-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 8px; }
+/* minmax 의 하한은 컨테이너가 그보다 좁아도 줄지 않는다. 측정: 320px 뷰포트에서
+   li.factor 가 290px 트랙을 붙들어 문서 폭이 327px 이 됐다(가로 스크롤 발생, 유일한
+   원인). `min(290px, 100%)` 는 290px 이상에서는 지금과 같고 그 아래에서만 접힌다. */
+.factor-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: 8px; }
 .risk-foot { margin-top: 14px; font-size: 11.5px; color: var(--ink-4); line-height: 1.55; }
 .factor {
   display: grid; grid-template-columns: minmax(0,1fr) auto;
@@ -1041,6 +1091,14 @@ strong { font-weight: 650; }
 @media (max-width: 860px) {
   .session-form input { width: 88px; }
 }
+/* 상단바 접힘 2단(≤810px)에서도 621~653px 대역은 브랜드가 4px 모자랐다.
+   여기서 더 줄일 수 있는 것은 로그인 칸뿐이다 — 자리표시자만 짧아지고
+   입력은 그대로 된다. 620px 의 `display: none` 은 **올리지 않는다**:
+   그 아래에서는 직원 로그인이 이미 불가능하고(칸이 없다), 대역을 넓히면
+   그 결함이 커진다. 별건으로 보고한다. */
+@media (max-width: 810px) {
+  .session-form input { width: 76px; }
+}
 @media (max-width: 620px) {
   .session-form input { display: none; }
 }
@@ -1076,7 +1134,7 @@ strong { font-weight: 650; }
   margin-top: 14px; padding: 13px 15px;
   background: var(--plane); border: 1px solid var(--line-soft); border-radius: var(--r-md);
 }
-.grade-group h4 {
+.grade-group h3 {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
   font-size: 13.5px; font-weight: 700; color: var(--ink-1);
 }
@@ -1108,10 +1166,10 @@ strong { font-weight: 650; }
 
 /* ── 내부 정보 (SPEC 6.1) ────────────────────────────────── */
 .card-internal { border-color: var(--line-strong); background: var(--accent-yellow-wash); }
-#internalBody h4 {
+#internalBody h3 {
   margin-top: 18px; font-size: 13px; font-weight: 700; color: var(--ink-1);
 }
-#internalBody h4:first-child { margin-top: 0; }
+#internalBody h3:first-child { margin-top: 0; }
 .table-scroll { overflow-x: auto; margin-top: 8px; }
 .internal-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
 .internal-table th, .internal-table td {

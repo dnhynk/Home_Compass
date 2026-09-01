@@ -624,21 +624,56 @@
         esc(REPORT_FIELD_LABEL[key] || key) + '</option>';
     }).join('');
     $('#reportReason').value = '';
+    $('#reportReason').removeAttribute('aria-invalid');
     $('#reportNote').textContent = '';
+    /* 대화상자를 연 버튼을 기억해 둔다. 닫을 때 그 자리로 초점을 돌려주지 않으면
+       키보드 사용자는 문서 맨 앞으로 튕긴다. */
+    STATE.reportOpener = document.activeElement;
     $('#reportModal').hidden = false;
     $('#reportReason').focus();
   }
 
   function closeReportDialog() {
+    var opener = STATE.reportOpener;
     $('#reportModal').hidden = true;
     STATE.report = null;
+    STATE.reportOpener = null;
+    if (opener && document.contains(opener) && opener.focus) opener.focus();
+  }
+
+  /* aria-modal="true" 를 선언한 대화상자는 그 계약대로 동작해야 한다. 측정:
+     Escape 가 닫지 않았고, 탭이 두 번 만에 대화상자를 빠져나가 뒤쪽 페이지를
+     돌아다녔다(오버레이 뒤 요소가 계속 조작 가능했다). 둘 다 여기서 막는다. */
+  function reportModalKeydown(e) {
+    if ($('#reportModal').hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeReportDialog(); return; }
+    if (e.key !== 'Tab') return;
+    var stops = $$('#reportModal button, #reportModal select, #reportModal textarea, #reportModal input')
+      .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
+    if (!stops.length) return;
+    var first = stops[0];
+    var last = stops[stops.length - 1];
+    var here = document.activeElement;
+    if (e.shiftKey && (here === first || !$('#reportModal').contains(here))) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && (here === last || !$('#reportModal').contains(here))) {
+      e.preventDefault(); first.focus();
+    }
   }
 
   function submitReport(e) {
     e.preventDefault();
     if (!STATE.report) return;
     var reason = $('#reportReason').value.trim();
-    if (!reason) { $('#reportNote').textContent = '사유를 적어야 신고할 수 있습니다.'; return; }
+    if (!reason) {
+      /* 오류 문구가 어느 칸의 것인지 묶고, 초점을 그 칸으로 보낸다.
+         전에는 문구만 뜨고 초점이 제출 버튼에 남았다. */
+      $('#reportNote').textContent = '사유를 적어야 신고할 수 있습니다.';
+      $('#reportReason').setAttribute('aria-invalid', 'true');
+      $('#reportReason').focus();
+      return;
+    }
+    $('#reportReason').removeAttribute('aria-invalid');
 
     apiFetch('/api/reports', {
       method: 'POST',
@@ -794,9 +829,9 @@
             : '') + '</li>';
       }).join('');
       return '<section class="grade-group" data-type="' + esc(type) + '">' +
-        '<h4>' + chipHTML(m, 'chip-sm') +
+        '<h3>' + chipHTML(m, 'chip-sm') +
         '<span class="grade-count">' + buckets[type].length + '건</span>' +
-        '<span class="grade-owner">대응 주체 — ' + esc(m.owner) + '</span></h4>' +
+        '<span class="grade-owner">대응 주체 — ' + esc(m.owner) + '</span></h3>' +
         '<p class="grade-why">' + esc(m.why) + '</p>' +
         '<ul class="grade-facts">' + items + '</ul></section>';
     }).join('');
@@ -841,12 +876,12 @@
     }).join('');
 
     $('#internalBody').innerHTML =
-      '<h4>판정에 참여한 승인 규칙</h4>' +
+      '<h3>판정에 참여한 승인 규칙</h3>' +
       '<div class="table-scroll"><table class="internal-table"><thead><tr>' +
       '<th>정책</th><th>규칙 버전</th><th>승인 출처</th><th>유효기간</th></tr></thead><tbody>' +
       (versions || '<tr><td colspan="4">없음</td></tr>') + '</tbody></table></div>' +
-      '<h4>이 판정에 쓰인 시세의 신선도</h4>' + freshness +
-      '<h4>부적격·조건부 정책의 문턱</h4>' +
+      '<h3>이 판정에 쓰인 시세의 신선도</h3>' + freshness +
+      '<h3>부적격·조건부 정책의 문턱</h3>' +
       '<ul class="internal-thresholds">' + (thresholds || '<li>해당 없음</li>') + '</ul>';
   }
 
@@ -931,10 +966,12 @@
     if (!badge) return;
     badge.setAttribute('data-state', state);
     $('#connText').textContent = text;
-    /* Under 620px the badge collapses to its dot, so the wording has to survive
-       on the element itself for pointer and assistive-tech users. */
+    /* 좁은 폭에서 배지는 점만 남는다. 문구는 `#connText` 를 시각적으로만 숨겨
+       (styles.css 의 ≤810px 규칙) **내용으로** 살려 둔다.
+       ★ 여기 있던 `aria-label` 은 지웠다 — ARIA 는 role 없는 <span>(generic)에
+         이름을 붙이는 것을 금지하고, 실제로 axe 가 serious 로 잡았다. 그 상태에서
+         ≤620px 는 텍스트가 display:none 이라 상태가 **색 점 하나로만** 전달됐다. */
     badge.setAttribute('title', text);
-    badge.setAttribute('aria-label', '백엔드 연결 상태: ' + text);
   }
 
   /**
@@ -1043,6 +1080,20 @@
     renderRegionReport();
   }
 
+  /* 라디오 그룹은 **하나의 탭 정지**다. 선택된 버튼만 탭으로 들어오고, 그 안에서는
+     화살표키로 옮긴다. 선택과 탭 정지를 한 곳에서 같이 바꿔야 둘이 어긋나지 않는다. */
+  function syncPreferredTypeTabStops() {
+    $$('#preferredType button').forEach(function (b) {
+      b.setAttribute('tabindex', b.getAttribute('aria-checked') === 'true' ? '0' : '-1');
+    });
+  }
+
+  function selectPreferredType(btn) {
+    $$('#preferredType button').forEach(function (b) { b.setAttribute('aria-checked', 'false'); });
+    btn.setAttribute('aria-checked', 'true');
+    syncPreferredTypeTabStops();
+  }
+
   function readProfile() {
     var seg = $('#preferredType [aria-checked="true"]');
     return {
@@ -1060,16 +1111,51 @@
     };
   }
 
+  /* ── 폼 오류 표기 ────────────────────────────────────────────────────────
+     오류가 토스트뿐이었다. 토스트는 사라지고, 어느 칸이 문제인지 접근성 트리에
+     남지 않는다 (측정: aria-invalid 없음 · aria-describedby 없음 · 칸 옆 문구 없음).
+     칸 옆에 적고, 그 문구를 칸에 묶고, aria-invalid 를 세운다. 토스트는 그대로
+     둔다 — 스크롤이 결과 쪽에 가 있을 때 알림 역할이 남아 있다. */
+  function setFieldError(id, message) {
+    var input = document.getElementById(id);
+    if (!input) return;
+    var errId = id + 'Error';
+    var node = document.getElementById(errId);
+    if (!node) {
+      node = document.createElement('p');
+      node.className = 'field-error';
+      node.id = errId;
+      node.setAttribute('role', 'alert');
+      (input.closest('.field') || input.parentNode).appendChild(node);
+    }
+    node.textContent = message;
+    node.hidden = false;
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', errId);
+  }
+
+  function clearFieldError(id) {
+    var input = document.getElementById(id);
+    var node = document.getElementById(id + 'Error');
+    if (node) { node.hidden = true; node.textContent = ''; }
+    if (input) { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
+  }
+
   function analyze(e) {
     if (e) e.preventDefault();
     var profile = readProfile();
+    clearFieldError('monthlyNetIncome');
+    clearFieldError('regionCode');
     if (profile.monthlyNetIncomeKRW <= 0) {
+      setFieldError('monthlyNetIncome', '월 실수령액을 0보다 크게 입력해 주세요.');
       toast('월 실수령액을 <b>0보다 크게</b> 입력해 주세요.');
       $('#monthlyNetIncome').focus();
       return;
     }
     if (!profile.regionCode) {
+      setFieldError('regionCode', '지역 시세를 얻을 수 없어 판정할 수 없습니다. 백엔드를 켜거나 생성물을 재생성하세요.');
       toast('지역 시세를 얻을 수 없어 판정할 수 없습니다. 백엔드를 켜거나 생성물을 재생성하세요.');
+      $('#regionCode').focus();
       return;
     }
     var btn = $('#btnAnalyze');
@@ -1337,6 +1423,7 @@
     $$('#preferredType button').forEach(function (b) {
       b.setAttribute('aria-checked', String(b.getAttribute('data-value') === SAMPLE.preferredType));
     });
+    syncPreferredTypeTabStops();
     if (STATE.regions.length) $('#regionCode').value = STATE.regions[0].code;
     syncMoneyEcho();
     updateRegionHelp();
@@ -1435,12 +1522,23 @@
       if (input) input.addEventListener('input', syncMoneyEcho);
     });
 
-    $$('#preferredType button').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        $$('#preferredType button').forEach(function (b) { b.setAttribute('aria-checked', 'false'); });
-        btn.setAttribute('aria-checked', 'true');
+    /* role="radiogroup" 을 붙였으면 그 계약을 지켜야 한다. 측정: 화살표키가 아무
+       것도 하지 않았고(핸들러 자체가 없었다) 세 버튼이 모두 탭 정지였다 —
+       스크린리더 사용자는 라디오 그룹이라고 안내받은 뒤 라디오처럼 조작할 수 없었다.
+       로빙 탭인덱스 + 화살표 이동/선택으로 맞춘다 (WAI-ARIA APG radio group). */
+    $$('#preferredType button').forEach(function (btn, idx, all) {
+      btn.addEventListener('click', function () { selectPreferredType(btn); });
+      btn.addEventListener('keydown', function (e) {
+        var step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
+          : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+        if (!step) return;
+        e.preventDefault();
+        var next = all[(idx + step + all.length) % all.length];
+        selectPreferredType(next);
+        next.focus();
       });
     });
+    syncPreferredTypeTabStops();
 
     /* 이상 신고 (SPEC 6.4) — 위임으로 받는다. 정책 카드는 매 판정마다 다시 그려지므로
        버튼에 직접 걸면 렌더할 때마다 다시 걸어야 하고, 한 번 빠지면 그 자리만 조용히
@@ -1452,12 +1550,19 @@
     });
     $('#reportForm').addEventListener('submit', submitReport);
     $('#reportCancel').addEventListener('click', closeReportDialog);
+    document.addEventListener('keydown', reportModalKeydown);
     $('#reportPrivacy').textContent = REPORT_PRIVACY_NOTICE;
 
+    /* 선택 상태가 `is-on` 클래스뿐이었다 — 화면에는 보이지만 접근성 트리에는 없다.
+       aria-pressed 로 같은 사실을 노출한다. 값은 클래스와 한 곳에서 함께 바꾼다. */
     $$('#policyFilter .pill').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        $$('#policyFilter .pill').forEach(function (b) { b.classList.remove('is-on'); });
+        $$('#policyFilter .pill').forEach(function (b) {
+          b.classList.remove('is-on');
+          b.setAttribute('aria-pressed', 'false');
+        });
         btn.classList.add('is-on');
+        btn.setAttribute('aria-pressed', 'true');
         STATE.policyFilter = btn.getAttribute('data-filter');
         if (STATE.lastResult) renderPolicies(STATE.lastResult.policies || []);
       });

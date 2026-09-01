@@ -16,6 +16,11 @@
   --accent-yellow-deep:   #D99C00;
   --accent-yellow-tint:   #FFF3D2;
   --accent-yellow-wash:   #FFFAEE;
+  /* 글자·상태선에 쓰는 강조색. `--accent-yellow-deep` 은 흰 바탕에서 **2.41:1** 이라
+     본문 크기 글자(WCAG 1.4.3 는 4.5:1)에도, 상태를 나르는 테두리(1.4.11 은 3:1)에도
+     못 미친다 — 브라우저에서 실측했다. 이 값은 흰 바탕 5.49:1 · `--plane` 4.99:1 이고,
+     새 색이 아니라 로고 바늘 그림자에 이미 있던 색이다 (`index.html` 의 brand SVG). */
+  --accent-yellow-ink:    #8A6200;
 
   /* — ink / surface (warm neutral ramp) ————————— */
   --ink-1:  #1B1915;
@@ -68,6 +73,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3, h4, p, dl, dd, figure, ol, ul { margin: 0; }
+/* 이 화면의 문단은 대부분 [무엇을 하지 않는가] 를 적은 긴 고지다. 마지막 줄에 낱말
+   하나만 남으면 그 줄이 끊긴 것처럼 읽힌다. 제목은 균형, 본문은 고아줄 제거. */
+h1, h2, h3, h4 { text-wrap: balance; }
+p { text-wrap: pretty; }
 ul, ol { list-style: none; padding: 0; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
@@ -83,6 +92,13 @@ code { font-family: var(--mono); font-size: .92em; }
   background: var(--ink-1); color: #fff; padding: 10px 16px; border-radius: 0 0 var(--r-sm) 0;
 }
 .skip-link:focus { left: 0; }
+
+/* 화면에는 없고 보조기술에만 있는 글. **여기 쓰는 것은 화면이 이미 말하고 있는 것을
+   구조로 다시 적는 자리뿐이다** — 화면이 말하지 않는 사실을 여기 숨기지 않는다. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
 
 /* ── top bar ───────────────────────────────────────────── */
 .topbar {
@@ -149,9 +165,11 @@ code { font-family: var(--mono); font-size: .92em; }
 .card { padding: 22px; margin-bottom: 18px; }
 
 .panel-head { margin-bottom: 16px; }
+/* 구역 표찰. 간헐 업무자가 화면 어디에 있는지 아는 유일한 단서라서 **읽혀야 한다** —
+   `--accent-yellow-deep` 은 흰 바탕 2.41:1 로 못 읽힌다(실측). */
 .eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--accent-yellow-deep); margin-bottom: 6px;
+  color: var(--accent-yellow-ink); margin-bottom: 6px;
 }
 .panel-title, .card-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
 .panel-sub, .card-lead { font-size: 13.5px; color: var(--ink-3); margin-top: 6px; }
@@ -199,7 +217,10 @@ code { font-family: var(--mono); font-size: .92em; }
   background: var(--surface); text-align: left; width: 100%;
 }
 .queue-item:hover { border-color: var(--line-strong); background: var(--plane); }
-.queue-item.active { border-color: var(--accent-yellow-deep); background: var(--accent-yellow-wash); }
+/* 지금 검토 중인 초안. 오른쪽 전체가 이 한 줄에 매달려 있는데 테두리가 흰 바탕에서
+   2.41:1 이라 보이지 않았다 — 상태를 나르는 선은 3:1 이 필요하다 (WCAG 1.4.11).
+   색만으로 나르지도 않는다: 같은 항목에 `aria-current` 가 함께 선다 (app.js). */
+.queue-item.active { border-color: var(--accent-yellow-ink); background: var(--accent-yellow-wash); }
 .queue-item input[type="checkbox"] { margin-top: 4px; width: 15px; height: 15px; accent-color: var(--accent-yellow-deep); }
 .queue-open { display: block; width: 100%; text-align: left; padding: 0; }
 .queue-policy { display: block; font-weight: 650; font-size: 14px; }
@@ -254,7 +275,12 @@ code { font-family: var(--mono); font-size: .92em; }
   font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-4);
 }
-.metric-value { font-size: 27px; font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
+/* 지표는 새로고침마다 자릿수가 바뀐다. 비례숫자면 카드마다 값의 시작점이 흔들려
+   여덟 장을 세로로 훑을 수 없다. */
+.metric-value {
+  font-size: 27px; font-weight: 700; letter-spacing: -.03em; line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
 .metric-unit { font-size: 15px; font-weight: 650; color: var(--ink-3); margin-left: 3px; }
 /* 관측이 없는 자리. **0 과 다른 것으로 보여야 한다** — 크기와 색을 함께 낮춘다. */
 .metric-value.is-none { font-size: 17px; color: var(--ink-4); font-weight: 650; }
@@ -273,7 +299,8 @@ code { font-family: var(--mono); font-size: .92em; }
 }
 .queue-badge { font-variant-numeric: tabular-nums; }
 .queue-badge strong { color: var(--ink-1); }
-.queue-badge .sep { color: var(--line-strong); }
+/* 두 수를 가르는 칸막이. `--line-strong` 은 1.52:1 이라 글자로 그려 놓고 안 보였다. */
+.queue-badge .sep { color: var(--ink-4); }
 
 /* ── chips ─────────────────────────────────────────────── */
 .chip {
@@ -332,12 +359,17 @@ code { font-family: var(--mono); font-size: .92em; }
   border: 1px solid var(--line); border-radius: var(--r-sm);
 }
 .failure-label { display: block; font-size: 13px; font-weight: 650; color: var(--ink-1); }
-.failure-code, .failure-pointer {
+/* 옮긴 말 옆에 서는 **원래 코드**. 서버 어휘를 지운 것이 아니라 함께 둔 것이며,
+   `.raw-code` 는 초안 상태가 같은 규약을 쓰는 자리다 (app.js `statusCode`).
+   형태를 새로 만들지 않고 이미 있던 알약을 같이 쓴다. */
+.failure-code, .failure-pointer, .raw-code {
   display: inline-block; margin: 5px 5px 0 0; padding: 1px 6px;
   font-size: 11.5px; border-radius: 999px;
   background: var(--plane-sunk); color: var(--ink-3);
 }
 .failure-pointer { background: var(--critical-bg); color: var(--critical-ink); }
+/* 글줄 안에 끼어드는 자리라서 위쪽 여백이 없다. */
+.raw-code { margin: 0 0 0 5px; }
 .failure-detail {
   margin-top: 6px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2);
   white-space: pre-wrap; overflow-wrap: anywhere;
@@ -366,13 +398,30 @@ tbody tr:last-child td { border-bottom: 0; }
 .fields tbody tr.is-inherited { color: var(--ink-3); background: var(--plane); }
 .f-label { font-weight: 650; color: var(--ink-1); }
 .f-path { display: block; font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
-.f-val { font-family: var(--mono); font-size: 12px; word-break: break-all; }
+/* ★ 값 칸은 `break-word` 다. `break-all` 은 띄어쓰기가 있어도 글자 단위로 끊어서
+   「이 정책의 판정」 칸이 `ineligible` 을 `ineligi` / `ble` 로 갈랐다 (브라우저 실측).
+   판정값이 반토막 나면 그것은 읽기 불편이 아니라 **다른 값으로 보이는 것**이다.
+   `.failure-detail` 의 `anywhere` 와 다른 값을 쓰는 이유는 목적이 반대이기 때문이다 —
+   그쪽은 넓은 상자에서 끊을 자리 없는 긴 토큰을 강제로 접어 가로 넘침을 막는 것이고,
+   여기는 좁은 표 칸에서 낱말이 쪼개지는 것을 막는 것이다. `anywhere` 는 최소폭 계산까지
+   바꿔서 칸을 좁게 잡은 뒤 결국 낱말 가운데를 끊는다 — 실제로 그렇게 나왔다.
+   값이 칸보다 길면 `.table-scroll` 이 가로로 밀어 준다. 값을 망가뜨리지 않는다. */
+.f-val { font-family: var(--mono); font-size: 12px; overflow-wrap: break-word; }
 .f-val.was { color: var(--ink-3); }
 .f-note { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.45; }
+/* 근거 인용은 **누르는 것**이다 — 누르면 오른쪽 원문의 그 구간이 강조된다. 그래서
+   `button` 이고, 그 덕에 Tab 으로 닿고 Enter 로 눌린다. 줄 전체를 누르는 것은 마우스
+   편의로 남는다 (app.js `renderFields`). */
 .f-quote {
   font-size: 12px; color: var(--ink-2); background: var(--accent-yellow-wash);
   border: 1px solid var(--accent-yellow-tint); border-radius: var(--r-sm); padding: 5px 8px;
-  display: inline-block; max-width: 44ch;
+  display: inline-block; max-width: 44ch; text-align: left; line-height: 1.5;
+}
+.f-quote:hover { border-color: var(--accent-yellow-deep); }
+/* 지금 원문에서 강조된 근거. 색만으로 나르지 않는다 — 같은 자리에 `aria-current` 가 선다. */
+.f-quote[aria-current="true"] {
+  background: var(--accent-yellow-tint); border-color: var(--accent-yellow-ink);
+  color: var(--ink-1); font-weight: 650;
 }
 .f-nospan { font-size: 12px; color: var(--ink-4); }
 
@@ -380,7 +429,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .impact-axis { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; max-width: 46ch; }
 .impact-arrow { color: var(--ink-4); padding: 0 4px; }
 .impact-diff { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
-.impact-diff li { padding: 1px 0; word-break: break-all; }
+.impact-diff li { padding: 1px 0; overflow-wrap: anywhere; }
 .impact-more { font-size: 11.5px; color: var(--ink-4); }
 
 /* ── source text with evidence highlights ──────────────── */

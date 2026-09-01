@@ -19,7 +19,12 @@ import json
 from pathlib import Path
 
 # 설명 문장을 담는 키. 이 키에 걸린 값은 통째로 text 쪽으로 간다.
-TEXT_KEYS = frozenset({"rationale", "reasons", "summary", "note", "disclaimer"})
+TEXT_KEYS = frozenset({"rationale", "reasons", "summary", "note", "disclaimer",
+                       # `failures` 는 `reasons` 의 부분집합이고 같은 산문이다.
+                       # 여기 없으면 상수를 박은 문장(「연소득 3,000만원 이하 요건
+                       # 미충족」)이 **숫자 골든**으로 들어가, 상수 하나를 바꿀 때마다
+                       # 엄격한 대조가 통째로 흔들린다 — SPEC 5.3 이 금지한 그것이다.
+                       "failures"})
 
 # 제외 목록은 **없다.** 예전에는 `VOLATILE_KEYS = {"generatedAt"}` 가 여기 있었다 —
 # 엔진이 `datetime.now()` 를 직접 읽어 그 필드를 고정할 수 없었기 때문이다. SPEC 5.3 이

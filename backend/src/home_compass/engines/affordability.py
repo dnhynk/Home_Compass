@@ -148,9 +148,9 @@ def assess_affordability(
             )
 
     band_message = {
-        "safe": "소득 대비 주거비 여력이 안정적인 구간(safe)입니다.",
-        "caution": "주거비 여력이 빠듯해 주의가 필요한 구간(caution)입니다.",
-        "risk": "현재 소득·부채 구조로는 주거비 부담이 위험한 구간(risk)입니다.",
+        "safe": "소득 대비 주거비 여력이 안정적인 구간입니다.",
+        "caution": "주거비 여력이 빠듯해 주의가 필요한 구간입니다.",
+        "risk": "현재 소득·부채 구조로는 주거비 부담이 위험한 구간입니다.",
     }[band]
     rationale.append(band_message)
 

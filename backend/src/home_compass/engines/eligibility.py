@@ -173,6 +173,12 @@ def evaluate_policy(
         "category": policy.get("category", ""),
         "status": status,
         "reasons": reasons,
+        # 판정을 **결정한** 사유만 따로 싣는다 (SPEC 6.1 「왜 그렇게 판정했는지」).
+        # `reasons` 의 부분집합이고 문자열은 원문 그대로다 — 화면이 사유의 "미충족"
+        # 을 파싱하지 않고 두 계약 필드를 대조해 가를 수 있게 하는 것이 목적이다
+        # (SPEC 5.3: 문자열은 계약이 아니므로 그것에 표시를 결합시키지 않는다).
+        # 문턱값 자체는 여기 오지 않는다 — 그것은 인증 요청의 `internal` 몫이다.
+        "failures": failures,
         "maxAmountKRW": safe_int(policy.get("maxAmountKRW")),
         "rateRangePct": list(policy.get("rateRangePct") or [0.0, 0.0]),
         "source": policy.get("source", ""),

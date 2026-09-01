@@ -539,8 +539,17 @@
           '<div class="policy-top">' + chipHTML(meta, 'chip-sm') +
             '<span class="policy-name">' + esc(p.name) + '</span>' +
             '<span class="policy-cat">' + esc(p.category) + '</span></div>' +
+          /* SPEC 6.1 「왜 그렇게 판정했는지」 — 충족과 미충족이 **같은 체크 표식**으로
+             늘어서면 어느 줄이 이 제도를 떨어뜨렸는지 화면에서 알 수 없다. 가르는
+             기준은 응답의 `failures` 다. 사유 문자열의 "미충족" 을 매칭하지 않는다 —
+             SPEC 5.3 이 문자열을 계약으로 보지 않으므로 문구를 다듬는 순간 조용히
+             깨진다. `failures` 는 `reasons` 의 부분집합이고 원문 그대로 실린다.
+             필드가 없는 응답(구 계약)에서는 빈 목록이 되어 현행 표시로 되돌아간다. */
           '<ul class="policy-reasons">' + (p.reasons || []).map(function (r) {
-            return '<li>' + esc(r) + '</li>';
+            if ((p.failures || []).indexOf(r) < 0) return '<li>' + esc(r) + '</li>';
+            /* 낭독 순서에서도 분류가 문장보다 앞선다 — 표식이 시각적으로 주는 것과 같다. */
+            return '<li data-met="false"><span class="sr-only">미충족 사유 — </span>' +
+              esc(r) + '</li>';
           }).join('') + '</ul>' +
           '<p class="policy-src"><b>출처</b> ' + esc(p.source || '—') +
             (p.disclaimer ? ' · ' + esc(p.disclaimer) : '') + '</p>' +
@@ -569,10 +578,13 @@
     '이 칸의 내용은 감사기록에 그대로 남아 지울 수 없습니다.';
 
   /* 신고 대상이 **아닌** 키. 나머지는 전부 신고할 수 있는 항목이다.
-     · policy — `id` 는 대상 그 자체이고, `disclaimer` 는 엔진이 붙이는 고정 문구다
+     · policy — `id` 는 대상 그 자체이고, `disclaimer` 는 엔진이 붙이는 고정 문구다.
+       `failures` 는 `reasons` 의 부분집합이고 문자열이 같다 — 두 항목이 같은 사실을
+       가리키면 감사기록의 「어느 항목인가」가 두 곳을 가리키게 된다. 사유의 오류는
+       `reasons` 로 신고한다. (저장소의 `POLICY_REPORT_FIELDS` 도 이 셋을 뺀 값이다.)
      · region — `code`·`name` 은 지역 식별자이고 `source` 는 계보 표시다 */
   var REPORT_SKIP_FIELDS = {
-    policy: ['id', 'disclaimer'],
+    policy: ['id', 'disclaimer', 'failures'],
     region: ['code', 'name', 'source']
   };
 

@@ -308,20 +308,40 @@
     var isNewlywed = Boolean(profile.isNewlywed);
     var isSME = Boolean(profile.isSMEEmployee);
 
-    /* --- 연령 --- */
+    /* --- 연령 ---
+       상한과 하한을 **각각** 판단한다. 소득·자산이 그렇듯 한쪽의 부재가 다른 쪽의 검사를
+       지우면 안 된다. 무제한 센티넬은 상한에만 뜻이 있다 — `ageMax` 가 200 이어도
+       `ageMin` 은 여전히 거른다 (`newlywed_jeonse` 가 19/200 이다).
+
+       `ageMin` 0 은 "선언되지 않음"과 같게 다룬다. `age` 는 `safeInt` 를 지나 항상 0
+       이상이므로 `age >= 0` 은 항등식이고, 아무도 거르지 못하는 검사에 사유 줄을 내면
+       "만 0세 이상 요건 충족" 같은 소음만 남는다 (`hug_deposit_guarantee` 가 0/200 이다).
+
+       `eligibility.py` 의 같은 블록과 **줄 단위로 같은 판단**을 해야 한다. 두 벌이 갈리면
+       시민은 온라인과 오프라인에서 다른 판정을 본다 (D-11). */
     var ageMin = crit.ageMin;
     var ageMax = crit.ageMax;
-    if (ageMin != null && ageMax != null && ageMax < ageMaxUnlimited) {
-      var label = '만 ' + ageMin + '~' + ageMax + '세';
-      if (ageMin <= age && age <= ageMax) {
-        reasons.push(label + ' 요건 충족 (' + age + '세)');
-        if (ageMax - age <= ageCapImminentYears) {
-          caveats.push('연령 상한(' + ageMax + '세)에 임박했습니다. 신청 시점 기준으로 재확인이 필요합니다.');
-        }
-      } else {
-        var ageMsg = label + ' 요건 미충족 (' + age + '세)';
+    var hasAgeMin = ageMin != null && ageMin > 0;
+    var hasAgeMax = ageMax != null && ageMax < ageMaxUnlimited;
+    var ageLabel = '';
+    if (hasAgeMin && hasAgeMax) {
+      ageLabel = '만 ' + ageMin + '~' + ageMax + '세';
+    } else if (hasAgeMin) {
+      ageLabel = '만 ' + ageMin + '세 이상';
+    } else if (hasAgeMax) {
+      ageLabel = '만 ' + ageMax + '세 이하';
+    }
+    if (ageLabel) {
+      if ((hasAgeMin && age < ageMin) || (hasAgeMax && age > ageMax)) {
+        var ageMsg = ageLabel + ' 요건 미충족 (' + age + '세)';
         reasons.push(ageMsg);
         failures.push(ageMsg);
+      } else {
+        reasons.push(ageLabel + ' 요건 충족 (' + age + '세)');
+        /* 임박 caveat 은 상한이 실재할 때만 뜻이 있다. */
+        if (hasAgeMax && ageMax - age <= ageCapImminentYears) {
+          caveats.push('연령 상한(' + ageMax + '세)에 임박했습니다. 신청 시점 기준으로 재확인이 필요합니다.');
+        }
       }
     }
 

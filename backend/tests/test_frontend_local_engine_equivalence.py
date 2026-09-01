@@ -15,9 +15,20 @@ PR #59 의 「검증하지 않은 것 ②」가 그 구멍을 명시적으로 6�
   파이썬 변  `home_compass.engines.analyze()` — 저장소의 상수·지역·활성 규칙을 주입받아
   JS 변      `frontend/local_engine.js` — `frontend/generated/*.js` 를 읽어
   모집단     `contracts/regression_profiles.json` 프로필 x 저장소 지역 **전수**
-  비교 대상  SPEC 5.3 의 numeric 갈래 — 판정 숫자와 상태 필드
-  제외       `rationale` · `reasons` · `summary` · `note` · `disclaimer`
+  비교 대상  SPEC 5.3 의 numeric 갈래 — 판정 숫자와 상태 필드 **+ `policies[].reasons`**
+  제외       `rationale` · `summary` · `note` · `disclaimer`
              (SPEC 5.3 — 문자열은 계약이 아니다. 코디네이터 결정 2026-08-15 조건 4)
+
+`reasons` 만 text 갈래에서 끌어올린 이유는 **그것이 산문이 아니라 기준별 판정 흔적**이기
+때문이다. 적대적 리뷰 H3 이 잡은 결함(연령 상한 센티넬 하나가 하한 검사까지 지우던 것)은
+양쪽에 **같은 모양으로** 있었고, status 는 갈리지 않아 이 파수병을 그대로 통과했다 —
+회귀 프로필 12개의 age 가 전부 19 이상이라 되살아난 하한이 아무도 떨어뜨리지 않았기
+때문이다. 즉 「적용되지 않은 기준이 조용히 사라지는」 결함류의 관측 가능한 서명은 숫자가
+아니라 **사유 목록의 길이와 내용**이다.
+
+나머지 셋을 함께 올리지 않는 것은 오늘 그것들이 이미 일치하기 때문이 아니다(131건 전부
+일치한다). 걸어 두면 문구를 다듬을 때마다 두 파일을 맞춰야 하고, 그 유지비가 SPEC 5.3 과
+위 결정이 피하려던 바로 그 비용이다. 오늘 공짜인 것과 유지비가 싼 것은 다르다.
 
 ■ 이 파수병이 공허해지지 않게 하는 장치 (코디네이터 결정 조건 3)
 
@@ -118,7 +129,7 @@ def _store_lineage_inputs() -> tuple[list, list]:
         return list(store.regions.list()), list(store.rule_versions.active(FROZEN_NOW))
 
 
-def _python_side() -> tuple[dict, dict]:
+def _python_side() -> tuple[dict, dict, dict]:
     """(numeric 스냅샷, 계보) 두 벌. 계보는 API 계층이 조립하므로 `build_lineage` 를 부른다.
 
     엔진이 아니라 api 가 계보를 조립하는 것은 SPEC 1.2 의 방향 때문이다 — 엔진은 저장소를
@@ -128,7 +139,7 @@ def _python_side() -> tuple[dict, dict]:
     regions = store_regions()
     policies = store_policies(FROZEN_NOW)
     region_records, versions = _store_lineage_inputs()
-    out, lineage = {}, {}
+    out, lineage, reasons = {}, {}, {}
     for profile_id, region_key, profile in CASES:
         key = f"{profile_id}@{region_key}"
         try:
@@ -148,9 +159,20 @@ def _python_side() -> tuple[dict, dict]:
             constant_provenance=MODEL_CONSTANT_PROVENANCE,
         ))
         lineage[key] = _lineage_of(result)
+        reasons[key] = _reasons_of(result)
         numeric, _text = split_snapshot(result)
         out[key] = numeric
-    return out, lineage
+    return out, lineage, reasons
+
+
+def _reasons_of(response: dict) -> dict:
+    """정책별 사유 목록만 뽑는다 — `id` 로 키를 잡아 **정렬 순서에 기대지 않는다.**
+
+    두 경로의 정렬은 `status` -> `-maxAmountKRW` 로 같지만, 순서로 짝을 맞추면 정렬이
+    갈렸을 때 「3번 정책의 사유가 다르다」는 엉뚱한 자리를 가리킨다. 어느 제도의 사유가
+    갈렸는지가 그대로 나오는 편이 낫다.
+    """
+    return {p["id"]: p["reasons"] for p in response["policies"]}
 
 
 def _lineage_of(response: dict) -> dict:
@@ -167,7 +189,7 @@ def _lineage_of(response: dict) -> dict:
     }
 
 
-def _js_side(mutation: str = "") -> tuple[dict, dict]:
+def _js_side(mutation: str = "") -> tuple[dict, dict, dict]:
     """node 프로세스 **한 번**으로 전 사례를 돌린다.
 
     `mutation` 은 프로브용 JS 조각이다 — 생성물을 메모리에서만 흔들어 비교가
@@ -198,21 +220,22 @@ def _js_side(mutation: str = "") -> tuple[dict, dict]:
             "FROZEN_NOW_MS": FROZEN_NOW_MS,
         },
     )
-    out, lineage = {}, {}
+    out, lineage, reasons = {}, {}, {}
     for key, value in raw.items():
         if isinstance(value, dict) and value.get("raised"):
             out[key] = value
             continue
         lineage[key] = _lineage_of(value)
+        reasons[key] = _reasons_of(value)
         for extra in NUMERIC_ONLY_ON_LOCAL:
             value.pop(extra, None)
         numeric, _text = split_snapshot(value)
         out[key] = numeric
-    return out, lineage
+    return out, lineage, reasons
 
 
-PYTHON_SIDE, PYTHON_LINEAGE = _python_side()
-JS_SIDE, JS_LINEAGE = _js_side()
+PYTHON_SIDE, PYTHON_LINEAGE, PYTHON_REASONS = _python_side()
+JS_SIDE, JS_LINEAGE, JS_REASONS = _js_side()
 
 
 def _first_difference(left, right, path=""):
@@ -253,6 +276,21 @@ def test_the_local_path_and_the_backend_agree_on_every_number(key):
     )
 
 
+@pytest.mark.parametrize("key", sorted(PYTHON_REASONS), ids=sorted(PYTHON_REASONS))
+def test_the_local_path_and_the_backend_agree_on_every_policy_reason(key):
+    """판정 **사유 목록**도 양쪽이 같은가 (적대적 리뷰 H3).
+
+    숫자만 대면 「적용되지 않은 기준이 조용히 사라지는」 결함류가 그대로 지나간다.
+    H3 이 그랬다 — 두 구현에 같은 모양의 결함이 있었고 status 가 갈리지 않아 위 숫자
+    비교가 초록이었다. 갈린 것은 사유 목록의 길이뿐이었다.
+    """
+    difference = _first_difference(PYTHON_REASONS[key], JS_REASONS[key])
+    assert difference is None, (
+        f"로컬 판정 경로가 백엔드와 다른 사유를 냈다 [{key}] — {difference}\n"
+        "한쪽에만 있는 사유 줄은 곧 한쪽에서만 적용된 기준이다."
+    )
+
+
 # --------------------------------------------------------------------------
 # 이 파수병이 공허하지 않다는 것의 증거 (코디네이터 결정 2026-08-15 조건 3)
 # --------------------------------------------------------------------------
@@ -260,6 +298,41 @@ def test_the_local_path_and_the_backend_agree_on_every_number(key):
 def test_the_comparison_actually_covered_something():
     """사례가 0건이면 위 테스트는 아무것도 검증하지 않고 초록이 된다."""
     assert len(CASES) >= 100, len(CASES)
+
+
+def test_the_reason_comparison_actually_covered_something():
+    """사유가 0건이면 위 비교는 빈 리스트끼리 대보고 초록이 된다."""
+    assert len(PYTHON_REASONS) >= 100, len(PYTHON_REASONS)
+    sample = PYTHON_REASONS[sorted(PYTHON_REASONS)[0]]
+    assert len(sample) >= 8, f"정책 수가 너무 적다: {len(sample)}"
+    assert all(lines for lines in sample.values()), "사유가 빈 정책이 있다"
+
+
+def test_a_shaken_age_bound_actually_breaks_the_reason_comparison():
+    """**프로브** — 사유 비교가 실제로 깨지는지 본다 (조건 3).
+
+    로컬 경로의 연령 하한을 메모리에서만 흔들어 놓고 비교가 빨간불이 되는지 확인한다.
+    이것이 없으면 위 테스트는 「양쪽 다 사유를 안 낸다」로도 초록이 될 수 있다.
+    파일은 건드리지 않는다 — 생성물도 소스도 손으로 고치지 않는다.
+    """
+    _numeric, _lineage, shaken = _js_side(
+        mutation="""
+        globalThis.HOME_COMPASS_POLICY_RULES.ruleVersions.forEach(function (v) {
+          if (v.payload && v.payload.criteria && v.payload.criteria.ageMin != null) {
+            v.payload.criteria.ageMin = 65;
+          }
+        });
+        """
+    )
+    differing = [
+        key for key in PYTHON_REASONS
+        if key in shaken and _first_difference(PYTHON_REASONS[key], shaken[key])
+    ]
+    assert differing, (
+        "연령 하한을 65 로 흔들었는데 사유 비교가 하나도 깨지지 않았다 — "
+        "이 파수병은 사유를 실제로 대보고 있지 않다."
+    )
+
     assert set(PYTHON_SIDE) == set(JS_SIDE)
     graded = [k for k, v in PYTHON_SIDE.items() if "raised" not in v]
     assert len(graded) >= 100, f"판정이 성립한 사례가 {len(graded)}건뿐이다"
@@ -339,7 +412,7 @@ def test_a_shaken_verification_actually_breaks_the_grade_comparison():
     `verified` 로 올리는 방향인 것이 요점이다 — 등급을 **좋게** 만드는 조작이 통과하면
     이 파수병은 정확히 막아야 할 것을 막지 못한다.
     """
-    _numeric, shaken = _js_side(
+    _numeric, shaken, _reasons = _js_side(
         mutation="""
         var e = globalThis.HOME_COMPASS_MODEL_CONSTANTS.entries;
         Object.keys(e).forEach(function (k) {
@@ -376,7 +449,7 @@ def test_a_shaken_constant_actually_breaks_the_comparison():
     깨지지 않으면 위 테스트는 「무조건 통과하던 검사」이며, 이 저장소에서 그 부류가
     이미 두 번 나왔다. 생성물 파일은 건드리지 않고 **메모리에서만** 흔든다.
     """
-    shaken, _lineage = _js_side(
+    shaken, _lineage, _reasons = _js_side(
         mutation="""
         globalThis.HOME_COMPASS_MODEL_CONSTANTS.entries['affordability.housing_cost_ratio_cap'].value = 0.31;
         """

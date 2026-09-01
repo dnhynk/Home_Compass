@@ -57,20 +57,38 @@ def evaluate_policy(
     is_sme = bool(profile.get("isSMEEmployee"))
 
     # --- Age ---------------------------------------------------------------
+    # 상한과 하한은 **각각** 판단한다. 소득·자산이 그렇듯 한쪽의 부재가 다른 쪽의
+    # 검사를 지우면 안 된다. 무제한 센티넬은 상한에만 뜻이 있다 — `ageMax` 가 200
+    # 이어도 `ageMin` 은 여전히 거른다 (`newlywed_jeonse` 가 19/200 이다).
+    #
+    # `ageMin` 0 은 "선언되지 않음"과 같게 다룬다. `age` 는 `safe_int` 를 지나 항상
+    # 0 이상이므로 `age >= 0` 은 항등식이고, 아무도 거르지 못하는 검사에 사유 줄을
+    # 내면 화면에 "만 0세 이상 요건 충족" 같은 소음만 남는다 (`hug_deposit_guarantee`
+    # 가 0/200 이다). 적용됐는데 숨는 것과 적용될 여지가 없는 것은 다르다.
     age_min = crit.get("ageMin")
     age_max = crit.get("ageMax")
-    if age_min is not None and age_max is not None and age_max < age_max_unlimited:
+    has_age_min = age_min is not None and age_min > 0
+    has_age_max = age_max is not None and age_max < age_max_unlimited
+    if has_age_min and has_age_max:
         label = f"만 {age_min}~{age_max}세"
-        if age_min <= age <= age_max:
-            reasons.append(f"{label} 요건 충족 ({age}세)")
-            if age_max - age <= age_cap_imminent_years:
-                caveats.append(
-                    f"연령 상한({age_max}세)에 임박했습니다. 신청 시점 기준으로 재확인이 필요합니다."
-                )
-        else:
+    elif has_age_min:
+        label = f"만 {age_min}세 이상"
+    elif has_age_max:
+        label = f"만 {age_max}세 이하"
+    else:
+        label = ""
+    if label:
+        if (has_age_min and age < age_min) or (has_age_max and age > age_max):
             msg = f"{label} 요건 미충족 ({age}세)"
             reasons.append(msg)
             failures.append(msg)
+        else:
+            reasons.append(f"{label} 요건 충족 ({age}세)")
+            # 임박 caveat 은 상한이 실재할 때만 뜻이 있다.
+            if has_age_max and age_max - age <= age_cap_imminent_years:
+                caveats.append(
+                    f"연령 상한({age_max}세)에 임박했습니다. 신청 시점 기준으로 재확인이 필요합니다."
+                )
 
     # --- Income ------------------------------------------------------------
     income_cap = crit.get("annualIncomeMaxKRW")

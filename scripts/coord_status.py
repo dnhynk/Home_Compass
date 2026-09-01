@@ -184,43 +184,19 @@ WORKER_PATHS: dict[str, list[str]] = {
     # ★ **배정이 Coordinator 하나뿐인 것이 정상 상태다.** 워커가 없으면 표도 비어 있어야
     #   한다. 다음 워커를 띄우는 사람이 등재 PR 을 먼저 낸다.
     #
-    # --- 제출 UI 파동 (run_b70307c8c66d) — **과업이 닫히면 지운다** -------------
+    # --- 이 Run 의 워커 배정은 전부 회수했다 (run_b70307c8c66d) -----------------
     #
-    # ui-skills 감사 기반 정밀 수정. 두 화면은 경로가 갈려 있어 서로 충돌하지 않는다.
-    "W-web-ui": OWNERSHIP["web"],
-    # ★ `test_admin_screen.py` 하나만 더 준다. 이 워커가 화면에 `DRAFT_STATUS_LABEL`
-    #   손사본을 만들기 때문이며, **손사본은 파수병 없이 두지 않는다** — 같은 파일 ③ 절이
-    #   `REJECTION_LABEL` 에 대해 이미 그 형태를 세워 두었다(`label_table_drift` + 프로브 셋).
-    #   `backend/tests/api/` 를 통째로 주면 인증·헬스 테스트까지 삼켜 `api` 배정과 겹친다.
-    "W-admin-ui": OWNERSHIP["admin"] + ["backend/tests/api/test_admin_screen.py"],
+    # `W-web-ui`(#7) · `W-admin-ui`(#8) · `W-deploy-safety`(#10) · `W-eligibility-fix`(#12).
+    # 넷 다 머지됐다. **배정이 Coordinator 하나뿐인 것이 정상 상태다** — 다음 워커를
+    # 띄우는 사람이 등재 PR 을 먼저 낸다.
     #
-    # --- 적대적 리뷰 지적 수정 (run_b70307c8c66d) — **과업이 닫히면 지운다** --------
+    # --- 판정 사유 가독성 (run_b70307c8c66d) — **과업이 닫히면 지운다** -------------
     #
-    # ★ H3 은 판정 엔진의 결함이라 `engines` 를 통째로 준다. 코디네이터가 직접 재현했다 —
-    #   `newlywed_jeonse` 의 `ageMax: 200` 이 무제한 센티넬과 같아 `200 < 200` 이 False 가
-    #   되고, 그 한 줄이 `ageMin` 검사까지 끈다. `age=0` 이 `status=eligible` 로 나오며
-    #   **연령 사유가 한 줄도 없다.**
-    #   ★★ **쌍둥이가 JS 쪽에 있다.** `frontend/local_engine.js:314` 가 같은 결합 조건을
-    #     그대로 쓴다. 동등성 테스트는 `status` 와 숫자만 비교하고 `reasons` 는 비교하지
-    #     않으며, 회귀 프로필 12개의 age 가 전부 19 이상이라 `status` 가 갈리지 않는다 —
-    #     **그래서 파수병이 이 결함류를 구조적으로 못 잡는다.** 워커를 나누면 두 수정의
-    #     모양이 갈리므로 같은 워커가 함께 고친다. `frontend/` 의 나머지는 주지 않는다.
-    #   ★ `golden/rationale.json` 은 [모든 생성물] 이라 원칙은 코디네이터 재생성이다.
-    #     이번만 워커가 뽑는다 — 고쳐진 엔진을 가진 워크트리는 그쪽뿐이고, 골든과 엔진
-    #     수정은 원자적으로 같은 커밋에 들어가야 CI 가 성립한다. 통제는 PR 본문의
-    #     재생성 명령·diff 통계 대조로 유지한다 (삽입 12 / 삭제 0 이어야 한다).
-    "W-eligibility-fix": OWNERSHIP["engines"] + [
-        "frontend/local_engine.js",
-        "backend/tests/test_frontend_local_engine_equivalence.py",
-        "backend/tests/golden/rationale.json",
-    ],
-    # ★ H1·H2 는 `.env` 로더의 허용목록과 시드 재주입 경로에 걸쳐 있어 `api` 를 통째로
-    #   준다. 코디네이터가 재현했다 — `ENV_KEYS` 가 LLM 키 넷뿐이라 `.env` 의
-    #   `HOME_COMPASS_COOKIE_SECURE` 와 `HOME_COMPASS_ENV` 가 조용히 버려진다.
-    #   `.env.example` 과 런북은 코디네이터 소유와 겹치지만, 겹침은 라벨만 흔들고
-    #   `violations()` 판정은 바꾸지 않는다.
-    "W-deploy-safety": OWNERSHIP["api"] + [".env.example",
-                                           "docs/competition/SUBMISSION_RUNBOOK.md"],
+    # 화면이 충족 사유와 미충족 사유에 같은 표식을 쓴다. 이 제품이 기획서에서 내세우는
+    # 「왜 그렇게 판정했는지 항상 보여준다」를 화면에서 직접 깎는 자리다. 사유 문구는
+    # `engines` 가 만들고 표식은 `frontend` 가 그리므로 둘을 함께 준다.
+    # `contracts/` 는 주지 않는다 — 계약을 바꿔야 한다면 근거를 갖고 요청하게 한다.
+    "W-verdict-readability": OWNERSHIP["web"] + OWNERSHIP["engines"],
 }
 
 # 코디네이터만 바꿀 수 있는 것 (SPEC 8.2 #5). 워커 PR 에 이게 있으면 즉시 반려.

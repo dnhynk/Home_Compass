@@ -1387,6 +1387,14 @@
             "title": "Disclaimer",
             "type": "string"
           },
+          "failures": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Failures",
+            "type": "array"
+          },
           "id": {
             "title": "Id",
             "type": "string"

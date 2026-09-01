@@ -668,6 +668,17 @@ class Policy(_Strict):
     category: str
     status: Literal["eligible", "conditional", "ineligible"]
     reasons: list[str]
+    #: `reasons` 중 **이 정책을 떨어뜨린 것들**. `reasons` 의 부분집합이며 원문 그대로다.
+    #:
+    #: 왜 별도 필드인가 — 화면이 충족 사유와 미충족 사유를 갈라 그리려면 그 구분이
+    #: **계약에 있어야** 한다. 없으면 프런트가 사유 문자열에서 「미충족」을 찾는 수밖에
+    #: 없고, 그것은 SPEC 5.3(문자열은 계약이 아니다)이 금지한 결합이다 — 문구를 한 번
+    #: 다듬으면 시민 화면이 조용히 깨진다.
+    #:
+    #: 기본값이 빈 배열인 이유는 이 필드를 **추가하는 변경과 채우는 변경을 나누기**
+    #: 위해서다 (SPEC 8.2 #5 — 계약 변경은 코디네이터만). 엔진이 아직 안 실어도
+    #: 계약은 성립하고 CI 는 초록이다.
+    failures: list[str] = []
     maxAmountKRW: int
     rateRangePct: list[float]
     source: str

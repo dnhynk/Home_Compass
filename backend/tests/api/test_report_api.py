@@ -251,11 +251,15 @@ class TestTheTargetIsAnItemNotFreeText:
         이므로, 신고 가능한 항목은 그 스키마에서 유도되어야 한다. 손으로 적어 두면
         스키마가 바뀔 때 조용히 어긋나고, 그때 화면에는 있는데 신고는 400 이 된다.
 
-        빠지는 둘에는 각각 이유가 있다 —
+        빠지는 셋에는 각각 이유가 있다 —
           · `id`   : 대상 그 자체(`targetId`)이지 신고할 **항목**이 아니다
           · `disclaimer` : 엔진이 붙이는 고정 문구다. 데이터가 아니므로 고칠 대상이 없다
+          · `failures` : `reasons` 의 **부분집합**이고 같은 문장이다. 둘 다 신고할 수
+            있으면 같은 오류가 두 이름으로 접수되어 감사 흔적이 갈린다. 상담원은 그
+            사유가 틀렸다고 신고하는 것이지 「떨어뜨린 사유 목록」을 따로 신고하지 않는다
         """
-        assert set(POLICY_REPORT_FIELDS) == set(Policy.model_fields) - {"id", "disclaimer"}
+        assert (set(POLICY_REPORT_FIELDS)
+                == set(Policy.model_fields) - {"id", "disclaimer", "failures"})
 
 
 # ==========================================================================

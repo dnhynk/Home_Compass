@@ -34,7 +34,7 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 
 | 항목 | 확인 방법 |
 |---|---|
-| 전체 테스트 | `backend/tests` **1879 passed · 2 skipped** + `store` **555 passed** = **2434 · 0 failed** |
+| 전체 테스트 | `pytest backend/tests -q` **2438 passed · 2 skipped · 0 failed** (한 프로세스에서 전수 실행된다 — 인계가 적던 conftest 충돌은 재현되지 않았다) |
 | 제출 preflight | **pass=6 · pending=4 · fail=0** (`.venv` 파이썬으로 돌린다) |
 | 공식 양식 대조 | `.hwpx` 2종을 대회 페이지에서 받아 `hp:t` 추출. 생성기 섹션 제목이 **7개/5개 항목과 문자 단위 일치** |
 | 배포 경로 | ★ T1 이 컨테이너를 **실기동**했다 — 5개 경로 200, 볼륨 유지 재기동 시 11개 테이블 행수·해시 동일(시드 멱등) |
@@ -97,6 +97,9 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 | T6 적대적 리뷰 | `task_a49b5c196d38` | ✅ High 3 / Medium 4 / Low 5 · 정리 완료 |
 | T8 배포 안전 경계 (H1·H2) | `task_993ce521f825` | ✅ PR #10 머지 · 정리 완료 |
 | T7 연령 판정 결함 (H3) | `task_eea4dd30e53b` | ✅ PR #12 머지 · 정리 완료 |
+| T9 판정 사유 가독성 | `task_c4b4e5c26e76` | ✅ PR #15 머지 · 정리 완료 |
+| 계약 추가 `Policy.failures` | (코디네이터) | ✅ PR #14 — SPEC 8.2 #5 |
+| 덱의 판정 어휘 드리프트 | (코디네이터) | ✅ PR #17 — 파수병 포함 |
 | D1 결정 전용 (Gate 거치) | `task_fd4840c0b9ea` | Gate `gate_74f5571a0eaa` 대기 |
 
 ---
@@ -105,15 +108,15 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 
 `WORKER_PATHS` 에 이 Run 이 더한 항목 전부를 **T7 머지 직후** 지운다.
 
-워커 배정 넷은 **전부 회수했다** — `W-web-ui`(#7) · `W-admin-ui`(#8) ·
-`W-deploy-safety`(#10) · `W-eligibility-fix`(#12). 배정표는 `Coordinator` 하나뿐이고
-그것이 저장소가 선언한 정상 상태다.
+워커 배정 다섯은 **전부 회수했다** — `W-web-ui`(#7) · `W-admin-ui`(#8) ·
+`W-deploy-safety`(#10) · `W-eligibility-fix`(#12) · `W-verdict-readability`(#15).
+배정표는 `Coordinator` 하나뿐이고 그것이 저장소가 선언한 정상 상태다.
 
 **남은 것은 하나뿐이다.**
 
 | 항목 | 회수 시점 |
 |---|---|
-| `Coordinator` 에 더한 8경로 (`Dockerfile` · `.dockerignore` · `render.yaml` · `.env.example` · `auth.py` · `main.py` · `test_auth.py` · `frontend/styles.css`) | **배포 URL 확정 후** |
+| `Coordinator` 에 더한 9경로 (`Dockerfile` · `.dockerignore` · `render.yaml` · `.env.example` · `auth.py` · `main.py` · `test_auth.py` · `frontend/styles.css` · `test_report_api.py`) | **배포 URL 확정 후** |
 
 남기면 미래 PR 의 `owner_guess` 가 선언 순서로 Coordinator 를 돌려주고, Coordinator 는
 `CONTRACT_DELEGATED` 에 있으므로 `violations()` 가 **계약 변경을 못 잡는다.**
@@ -123,18 +126,19 @@ SPEC 8.2 #5 게이트가 조용히 열린다. PR #81·#85 가 그 사고다.
 
 ## 다음 작업 (첫 항목은 바로 실행 가능)
 
-**코드 쪽 결함 수정은 전부 닫혔다. 남은 것은 사람이 해야 하는 것과 다듬기다.**
+**코드 쪽은 닫혔다. 남은 것은 전부 사람이 해야 하는 것이다.**
 
 1. **팀명 Gate(`gate_7401786a5663`) 의 답을 받는다.** 이것 없이는 제출할 수 없다 —
-   PDF 의 팀명·구성원 실명이 자리표시자인 채로 남는다.
-2. **사용자가 Render 에 배포한다.** 런북 2절(컨테이너 리허설) → 3절(배포) 순.
-   T1 이 로컬 리허설을 이미 통과시켰으므로 남은 위험은 Render 고유 계층뿐이다.
-3. 배포 URL 확보 후 `submission_preflight.py --strict --url <URL>` 전 항목 PASS 확인.
-   여기서 처음으로 pending 4건이 전부 닫힌다.
-4. `Coordinator` 의 임시 8경로 회수 PR.
-5. 남은 다듬기 (아래 「이월된 열린 항목」의 앞 네 개). 마감까지 여유가 있으면 한다.
-
----
+   PDF 의 팀명·구성원 실명이 자리표시자인 채로 남고 preflight 가 `PENDING` 셋을 유지한다.
+2. **사용자가 Render 에 배포한다** (`gate_0454cb1b4c00`). 런북 2절(로컬 컨테이너 리허설)
+   → 3절(Render Blueprint) 순. T1 이 로컬 리허설을 통과시켰으므로 남은 위험은
+   Render 고유 계층(빌드 파이프라인·디스크 프로비저닝·라우팅)뿐이다.
+3. 배포 URL 확보 후 `submission_preflight.py --strict --url <URL>`. 여기서 처음으로
+   pending 4건이 전부 닫힌다.
+4. `Coordinator` 의 임시 9경로 회수 PR (아래 표).
+5. 남은 다듬기는 **심사 범위 밖이라 하지 않았다** — 관리자 화면의 마크다운 별표
+   리터럴(`main.py:3184,3191`)과 ≤620px 직원 로그인. 심사 계정 기본값이 「미제공」이라
+   심사위원이 그 화면에 닿지 않는다. 계정 Gate 가 「넣는다」로 오면 그때 한다.
 
 ## 작업 규율 — 반복해 깨졌던 것 (여전히 유효)
 
@@ -159,15 +163,22 @@ SPEC 8.2 #5 게이트가 조용히 열린다. PR #81·#85 가 그 사고다.
 
 ## 이월된 열린 항목
 
-**이번 Run 의 워커들이 발견했고 아직 안 고친 것**
+**이번 Run 이 닫은 것 — 되돌리지 마라**
 
-- **정책 사유의 충족/미충족이 같은 체크 표식이다** — 계약에 사유별 `met` 필드가 필요하다 (Coordinator)
-- **요약 문장의 조사 처리** — `engines/__init__.py:269` 의 「이(가)」, 그리고 백엔드 원시 enum 이
-  `app.js` `humanizeEnums` 를 지나 「(무리)」로 찍힌다. 백엔드·프런트가 함께 걸려 순서 배정이 필요
-- **≤620px 에서 직원 로그인 불가** (T3 가 별건으로 분리)
+- **정책 사유의 충족/미충족 구분**은 `Policy.failures` 계약 필드로 닫았다(#14·#15).
+  문자열에서 「미충족」을 찾는 방식으로 되돌리지 마라 — SPEC 5.3 이 금지한 결합이다
+- **`text` 절반 전체 동등성 비교는 기각했다.** `policies[].reasons` 와 `failures` 만 건다.
+  측정해 보면 오늘은 131건 전부 일치하지만, 넓히면 문구를 다듬을 때마다 두 파일을
+  맞춰야 한다 — SPEC 5.3 과 2026-08-15 결정 조건 4 가 피하려던 비용이다
+- **덱의 괄호 판정 enum 파수병**(#17). 엔진이 어휘를 걷어내면 덱도 함께 고쳐야 한다
+
+**심사 범위 밖이라 남긴 것**
+
 - **지표 카드의 마크다운 별표가 리터럴로 찍힌다** — `main.py:3184,3191`
-- **`text` 절반 전체 동등성 비교는 기각했다.** `policies[].reasons` 만 건다 — SPEC 5.3 과
-  2026-08-15 결정 조건 4 를 뒤집지 않기 위해서다. 되돌리지 마라
+- **≤620px 에서 직원 로그인 불가**
+
+둘 다 관리자 화면이고, 심사 계정 기본값이 「미제공」이라 심사위원이 닿지 않는다.
+계정 Gate 가 「넣는다」로 오면 **그때 반드시 함께 고쳐야 한다.**
 
 **이전 Run 에서 이월된 것**
 

@@ -233,6 +233,137 @@ def test_e2_age_boundary_disqualifies_youth_products():
     assert any("40세" in reason for reason in buttress["reasons"])
 
 
+def test_e2_unlimited_age_cap_does_not_disable_the_age_floor():
+    """상한이 무제한 센티넬이어도 **하한은 그대로 거른다** (적대적 리뷰 H3).
+
+    결함은 연령 블록 전체가 `ageMax < 200` 하나에 걸려 있던 것이다. `newlywed_jeonse`
+    의 `ageMax` 가 센티넬 200 이라 `200 < 200` 이 False 가 되고, 그 순간 **`ageMin` 19
+    검사까지 함께 사라졌다.** 소득·자산은 각각 독립 if 인데 연령만 결합돼 있었다.
+
+    API 는 age 를 `ge=0` 으로만 받으므로(main.py) 이것은 이론적 입력이 아니다. 이 테스트가
+    없으면 화면에서 나이 5 를 넣은 심사위원에게 신혼부부 전세자금대출이 **적격**으로 뜬다.
+    그리고 더 나쁜 것은, 적용되지 않은 기준이 `reasons` 에서 **존재 자체를 감춘다**는 것이다.
+    """
+    child = dict(BASE_PROFILE, age=5, isNewlywed=True, annualIncomeKRW=0)
+    policies = evaluate_policies(
+        child, POLICIES, "서울 마포구", constants=CONSTANTS)["policies"]
+    newlywed = next(p for p in policies if p["id"] == "newlywed_jeonse")
+
+    assert newlywed["status"] == "ineligible"
+    # 판정만이 아니라 **사유가 보이는지**를 함께 건다. H3 의 핵심이 그것이다.
+    assert any("19" in r and "미충족" in r and "5세" in r for r in newlywed["reasons"]),         newlywed["reasons"]
+
+
+def test_e2_unlimited_age_cap_still_states_the_floor_when_met():
+    """하한을 넘긴 쪽도 **충족 사유가 보여야** 한다 — 침묵은 판정 근거가 아니다.
+
+    위 테스트의 짝이다. 하한 검사가 되살아났는지를 실패 쪽에서만 보면, 검사를 통째로
+    '항상 미충족'으로 만들어도 통과한다. 통과 쪽에 사유 줄이 서는지까지 봐야 검사가
+    실제로 판단하고 있다는 것이 고정된다.
+    """
+    policies = evaluate_policies(
+        dict(BASE_PROFILE, isNewlywed=True), POLICIES, "서울 마포구",
+        constants=CONSTANTS)["policies"]
+    newlywed = next(p for p in policies if p["id"] == "newlywed_jeonse")
+
+    assert newlywed["status"] in ("eligible", "conditional")
+    assert any("19" in r and "충족" in r and "미충족" not in r
+               for r in newlywed["reasons"]), newlywed["reasons"]
+    # 상한이 없으므로 '연령 상한 임박' caveat 은 절대 서면 안 된다 (나이와 무관하게).
+    old = evaluate_policies(
+        dict(BASE_PROFILE, age=99, isNewlywed=True), POLICIES, "서울 마포구",
+        constants=CONSTANTS)["policies"]
+    old_newlywed = next(p for p in old if p["id"] == "newlywed_jeonse")
+    assert not any("상한" in r and "임박" in r for r in old_newlywed["reasons"])
+
+
+def test_e2_policy_declaring_only_an_age_floor_is_still_checked():
+    """`ageMin` 만 선언한 정책 — **합성 정책으로** 건다 (`requireSME` 와 같은 이유).
+
+    결함의 두 번째 갈래다. 옛 조건은 `ageMin is not None and ageMax is not None` 이라
+    **둘 중 하나만 선언한 정책은 어느 쪽도 검사되지 않았다.** 시드 8개는 모두 두 키를
+    함께 갖고 있어 이 갈래는 시드 데이터로 밟히지 않는다. 그래서 엔진 분기 자체를
+    대상으로 삼는다 — 어떤 상품이 마침 존재하는지와 무관하게 성립한다.
+    """
+    floor_only = [{
+        "id": "synthetic_floor_only",
+        "name": "합성 하한 전용 상품",
+        "category": "대출",
+        "summary": "ageMin 만 선언된 정책을 밟기 위한 테스트 전용 정책이다. 시드 데이터가 아니다.",
+        "maxAmountKRW": 100_000_000,
+        "rateRangePct": [1.2, 1.5],
+        "source": "테스트 픽스처",
+        "disclaimer": "테스트 전용",
+        "criteria": {"ageMin": 19},
+        "conditionalChecks": [],
+    }]
+
+    under = evaluate_policies(
+        dict(BASE_PROFILE, age=18), floor_only, "서울 마포구", constants=CONSTANTS)["policies"][0]
+    assert under["status"] == "ineligible"
+    assert any("19" in r and "미충족" in r for r in under["reasons"]), under["reasons"]
+
+    over = evaluate_policies(
+        dict(BASE_PROFILE, age=19), floor_only, "서울 마포구", constants=CONSTANTS)["policies"][0]
+    assert over["status"] == "eligible"
+    assert any("19" in r and "미충족" not in r for r in over["reasons"]), over["reasons"]
+
+
+def test_e2_policy_declaring_only_an_age_cap_is_still_checked():
+    """짝이 되는 갈래 — `ageMax` 만 선언한 정책. 하한 부재가 상한을 지우지 않는다."""
+    cap_only = [{
+        "id": "synthetic_cap_only",
+        "name": "합성 상한 전용 상품",
+        "category": "대출",
+        "summary": "ageMax 만 선언된 정책을 밟기 위한 테스트 전용 정책이다. 시드 데이터가 아니다.",
+        "maxAmountKRW": 100_000_000,
+        "rateRangePct": [1.2, 1.5],
+        "source": "테스트 픽스처",
+        "disclaimer": "테스트 전용",
+        "criteria": {"ageMax": 34},
+        "conditionalChecks": [],
+    }]
+
+    over = evaluate_policies(
+        dict(BASE_PROFILE, age=35), cap_only, "서울 마포구", constants=CONSTANTS)["policies"][0]
+    assert over["status"] == "ineligible"
+    assert any("34" in r and "미충족" in r for r in over["reasons"]), over["reasons"]
+
+    under = evaluate_policies(
+        dict(BASE_PROFILE, age=28), cap_only, "서울 마포구", constants=CONSTANTS)["policies"][0]
+    assert under["status"] == "eligible"
+
+
+def test_e2_fully_unbounded_age_emits_no_age_reason():
+    """양쪽 다 무제한이면 연령 사유 줄을 **내지 않는다** (`hug_deposit_guarantee` 0/200).
+
+    `age` 는 `safe_int` 를 지나 항상 0 이상이므로 `ageMin` 0 은 항등식이고 아무도 거르지
+    못한다. 거기에 "만 0세 이상 요건 충족" 을 세우면 화면에는 판정에 기여하지 않은 줄이
+    하나 늘 뿐이다. **적용됐는데 숨는 것**(H3 가 지적한 결함)과 **적용될 여지가 없는 것**은
+    다르게 다룬다.
+    """
+    for age in (0, 28, 99):
+        policies = evaluate_policies(
+            dict(BASE_PROFILE, age=age), POLICIES, "서울 마포구",
+            constants=CONSTANTS)["policies"]
+        hug = next(p for p in policies if p["id"] == "hug_deposit_guarantee")
+        assert not any("만 " in r and "세" in r for r in hug["reasons"]), hug["reasons"]
+
+
+def test_e2_range_policies_keep_the_combined_age_label():
+    """두 경계가 모두 실재하면 사유 줄은 **한 줄**이고 문구는 예전 그대로다.
+
+    하한·상한을 각각 판단하도록 고쳤지만 표시까지 둘로 쪼개지는 않았다. 결함은
+    '검사되지 않는 경계'였지 '한 줄로 묶인 라벨'이 아니고, 쪼개면 시드 8개 중 6개의
+    사유 목록이 이유 없이 흔들린다.
+    """
+    policies = evaluate_policies(
+        BASE_PROFILE, POLICIES, "서울 마포구", constants=CONSTANTS)["policies"]
+    buttress = next(p for p in policies if p["id"] == "buttress_youth")
+    age_lines = [r for r in buttress["reasons"] if "만 " in r and "세" in r]
+    assert age_lines == ["만 19~34세 요건 충족 (28세)"], age_lines
+
+
 def test_e2_region_scoped_policy_is_ineligible_outside_its_region():
     busan = dict(BASE_PROFILE, regionCode="26350", annualIncomeKRW=25_000_000)
     policies = evaluate_policies(busan, POLICIES, "부산 해운대구", constants=CONSTANTS)["policies"]

@@ -78,15 +78,50 @@ docker rm -f home-compass-rehearsal
 docker logs home-compass-rehearsal   # [startup] store ready 가 다시 나오고 기동이 거부되지 않는다
 ```
 
-시드는 멱등이다. 이미 있는 계정의 비밀번호는 덮어쓰지 않으므로 환경변수를 바꿔 재기동해도
-비밀번호는 바뀌지 않는다. 바꾸려면 디스크를 비워야 한다.
+### 시드 비밀번호 회전
 
-마지막으로 컨테이너 로그에 비밀번호와 세션 토큰이 없는지 본다. 비밀번호를 환경변수로
-주입하면 아무것도 출력되지 않는다. 주입하지 않으면 무작위 비밀번호가 stderr에 1회 출력되며,
-그것은 운영 배포에서 나오면 안 되는 신호다.
+시드는 멱등이다. 이미 있는 계정의 비밀번호는 덮어쓰지 않으므로, **환경변수를 바꿔
+재기동해도 비밀번호는 바뀌지 않는다.** 영구 디스크가 붙은 뒤로는 대시보드 값을 고치는 것이
+비밀번호 변경 경로가 아니다. 기동은 이 경우 stderr에 다음을 출력한다.
+
+```
+[인증] 이미 있는 계정이라 주입된 시드 비밀번호를 적용하지 않았습니다: counselor
+```
+
+디스크를 비우지 않는다. 그것은 승인된 RuleVersion과 감사원장을 함께 지운다. 시드 계정 행만
+지우고 새 값으로 재기동한다. 사용자 id가 `user:{username}`으로 결정적이라 재시드가 같은 id를
+복구하므로 `approval_record`·`audit_event`의 참조는 끊기지 않는다.
 
 ```powershell
-docker logs home-compass-rehearsal 2>&1 | Select-String -Pattern '\[인증\]'   # 출력이 없어야 한다
+# Render Shell 또는 리허설 컨테이너에서
+sqlite3 /var/data/home_compass.db "DELETE FROM app_user WHERE username IN ('counselor','rulemanager');"
+# 대시보드에서 두 비밀번호를 새 값으로 바꾼 뒤 재배포(또는 컨테이너 재기동)
+```
+
+두 계정을 함께 지우는 이유는 남은 한쪽이 `injected_password_ignored`로 다시 무음이 되기
+때문이다. 스키마는 건드리지 않는다 — `DELETE`만 하고 `ALTER TABLE`은 하지 않는다.
+이 절차는 `backend/tests/api/test_env_boundary.py::TestDocumentedRotationPath`가 검증한다.
+
+### 로그에 비밀이 없는지 확인
+
+컨테이너 로그에 비밀번호와 세션 토큰이 없는지 본다. 비밀번호를 환경변수로 주입하고 계정이
+처음 만들어지면 아무것도 출력되지 않는다. 주입하지 않으면 무작위 비밀번호가 stderr에 1회
+출력되며, 그것은 운영 배포에서 나오면 안 되는 신호다.
+
+```powershell
+docker logs home-compass-rehearsal 2>&1 | Select-String -Pattern '\[인증\]'
+```
+
+- 첫 기동(빈 디스크) + 비밀번호 주입 → **출력이 없어야 한다.**
+- 재기동 + 같은 비밀번호 → 출력이 없어야 한다.
+- 재기동 + **바뀐** 비밀번호 → 위의 `적용하지 않았습니다` 한 줄이 나온다. 값도 해시도
+  찍히지 않는다. 이 줄이 나왔는데 비밀번호를 바꿀 의도였다면 위 회전 절차를 밟는다.
+
+`[설정]`으로 시작하는 줄이 나오면 `.env`에 배포 경계 키를 적은 것이다. 그 값들은 적용되지
+않는다 — `render.yaml`의 envVars나 `docker run -e`로 옮긴다.
+
+```powershell
+docker logs home-compass-rehearsal 2>&1 | Select-String -Pattern '\[설정\]'   # 출력이 없어야 한다
 ```
 
 ## 3. Render에 공개 배포

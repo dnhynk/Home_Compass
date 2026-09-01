@@ -92,15 +92,25 @@ docker logs home-compass-rehearsal   # [startup] store ready 가 다시 나오�
 지우고 새 값으로 재기동한다. 사용자 id가 `user:{username}`으로 결정적이라 재시드가 같은 id를
 복구하므로 `approval_record`·`audit_event`의 참조는 끊기지 않는다.
 
-```powershell
-# Render Shell 또는 리허설 컨테이너에서
-sqlite3 /var/data/home_compass.db "DELETE FROM app_user WHERE username IN ('counselor','rulemanager');"
-# 대시보드에서 두 비밀번호를 새 값으로 바꾼 뒤 재배포(또는 컨테이너 재기동)
+`sqlite3` CLI는 쓰지 않는다. 이미지가 `python:3.13-slim`이라 그 바이너리가 없다. 컨테이너
+안(Render Shell, Linux)에서 파이썬으로 지운다.
+
+```sh
+python - <<'PY'
+import sqlite3
+conn = sqlite3.connect("/var/data/home_compass.db")
+conn.execute("DELETE FROM app_user WHERE username IN ('counselor','rulemanager')")
+conn.commit()
+PY
 ```
 
-두 계정을 함께 지우는 이유는 남은 한쪽이 `injected_password_ignored`로 다시 무음이 되기
-때문이다. 스키마는 건드리지 않는다 — `DELETE`만 하고 `ALTER TABLE`은 하지 않는다.
-이 절차는 `backend/tests/api/test_env_boundary.py::TestDocumentedRotationPath`가 검증한다.
+리허설 컨테이너라면 밖에서 `docker exec -i home-compass-rehearsal python - <<'PY' ... PY`로
+같은 것을 넣는다. 그 다음 대시보드에서 두 비밀번호를 새 값으로 바꾸고 재배포(또는 컨테이너
+재기동)한다.
+
+두 계정을 함께 지우는 이유는 남은 한쪽이 다음 기동에서 다시 무음으로 무시되기 때문이다.
+스키마는 건드리지 않는다 — `DELETE`만 하고 `ALTER TABLE`은 하지 않는다. 이 절차는
+`backend/tests/api/test_env_boundary.py::TestDocumentedRotationPath`가 검증한다.
 
 ### 로그에 비밀이 없는지 확인
 

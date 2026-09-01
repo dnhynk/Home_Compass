@@ -19,7 +19,9 @@ at all.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+from typing import Callable, Mapping
 
 # Search this many directory levels up from backend/ for a .env file.
 ENV_SEARCH_DEPTH = 5
@@ -28,6 +30,34 @@ ENV_FILENAME = ".env"
 # Keys we are willing to import from a .env file. An allowlist, not a blanket
 # import, so a stray .env cannot inject arbitrary environment variables.
 ENV_KEYS = ("OPENAI_API_KEY", "OPENAI_MODEL", "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL")
+
+# 배포 경계를 정하는 키들. **`.env` 에서 읽지 않는다** — 그리고 그것이 의도다.
+#
+# 이 값들은 [지금 프로덕션인가] [쿠키에 Secure 를 붙이는가] 처럼 배포 경계를 세우거나,
+# 시드 비밀번호처럼 비밀이다. 경계는 커밋되어 리뷰를 거치는 매니페스트(`render.yaml`)나
+# 명시적인 `docker run -e` 가 세워야 한다. `.gitignore` 된 작업 파일이 세우면 안 된다.
+#
+# ★ 허용목록을 넓히면 오히려 나빠진다. `load_env_file` 은 `os.environ` 에 **없을 때만**
+#   파일 값을 싣고, README 는 `.env.example` 을 `.env` 로 복사하라고 한다. 이 키들을
+#   허용목록에 넣으면 그 복사본이 [플랫폼이 값을 주지 않는 배포]에서 Secure 를 끄는
+#   실효 설정이 된다 — 아무도 읽지 않는 파일이 HTTPS 배포의 쿠키 보안을 정하게 된다.
+#   그래서 `.env.example` 은 이 키들에 값을 주지 않는다.
+#
+# 이름을 `auth`·`store` 에서 import 하지 않고 리터럴로 적는 이유는 이 모듈이 최하위
+# 계층이기 때문이다 (둘 중 어느 것도 import 하지 않는다). 어긋나면
+# `tests/api/test_env_boundary.py` 가 깨진다.
+PROCESS_ONLY_KEYS = (
+    "HOME_COMPASS_ENV",
+    "HOME_COMPASS_COOKIE_SECURE",
+    "HOME_COMPASS_STORE_URL",
+    "HOME_COMPASS_LOG_FILE",
+    # 시드 비밀번호는 `.env` 로 들어오면 안 되고, 들어와도 버려진다 — 그래서 경고 대상이다.
+    "HOME_COMPASS_SEED_COUNSELOR_PASSWORD",
+    # (이름 둘 사이에 이 주석이 있는 이유: 인접한 두 따옴표 리터럴은
+    #  `test_auth.TestSeedPasswordsAreNotCommitted` 의 [이름 = "값"] 패턴과 모양이 같다.
+    #  그 검사를 약하게 만드는 대신 여기 한 줄을 둔다.)
+    "HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD",
+)
 
 PROVIDER_OPENAI = "openai"
 PROVIDER_ANTHROPIC = "anthropic"
@@ -93,13 +123,40 @@ def find_env_file(start: Path | None = None, depth: int = ENV_SEARCH_DEPTH) -> P
     return None
 
 
-def load_env_file(path: Path | None = None, override: bool = False) -> dict:
+def _warn(lines: list[str]) -> None:
+    """**stderr 로 낸다.** `scripts/gen_contracts.py --stdout` 이 계약 파일 바이트를
+    stdout 으로 흘리는데 이 모듈의 적재가 그 경로에 들어 있다 — stdout 에 한 줄이라도
+    찍으면 생성물 앞에 그 줄이 붙어 계약이 깨진다 (`auth._announce` 와 같은 이유)."""
+    for line in lines:
+        print(line, file=sys.stderr)
+
+
+def ignored_process_only_keys(parsed: Mapping[str, str]) -> list[str]:
+    """`.env` 에 적혔지만 이 로더가 싣지 않는 배포 경계 키. 정렬해 돌려준다.
+
+    **허용목록 밖 키 전부를 보고하지 않는다.** `MOLIT_API_KEY` 는 `.env` 에 있는 것이
+    정상이고 `ingest.market.source.resolve_api_key()` 가 파일을 직접 읽어 쓴다. 올바른
+    설정에서 뜨는 경고는 운영자가 경고 전체를 무시하도록 길들인다. 그래서 [뜻이 있는데
+    이 경로로는 도달하지 않는 키]인 `PROCESS_ONLY_KEYS` 만 본다.
+    """
+    return sorted(k for k in parsed if k in PROCESS_ONLY_KEYS)
+
+
+def load_env_file(
+    path: Path | None = None,
+    override: bool = False,
+    warn: Callable[[list[str]], None] | None = None,
+) -> dict:
     """Load allowlisted keys from a .env file into os.environ.
 
     A real environment variable always wins unless `override=True`, so
     `set OPENAI_API_KEY=` in a shell can deliberately blank the file value.
     Returns the keys that were applied. Never raises on a missing or
     unreadable file.
+
+    파일에 배포 경계 키(`PROCESS_ONLY_KEYS`)가 있으면 **버렸다고 말한다.** 조용히
+    넘어가면 운영자는 `.env` 에 적은 `HOME_COMPASS_COOKIE_SECURE=true` 가 적용된 줄
+    알고 HTTPS 에 Secure 없는 쿠키를 내보내게 된다.
     """
     env_path = path or find_env_file()
     if env_path is None:
@@ -109,13 +166,26 @@ def load_env_file(path: Path | None = None, override: bool = False) -> dict:
     except (OSError, UnicodeDecodeError):
         return {}
 
+    parsed = parse_env_text(text)
     applied = {}
-    for key, value in parse_env_text(text).items():
+    for key, value in parsed.items():
         if key not in ENV_KEYS or not value:
             continue
         if override or key not in os.environ:
             os.environ[key] = value
             applied[key] = value
+
+    ignored = ignored_process_only_keys(parsed)
+    if ignored:
+        emit = _warn if warn is None else warn
+        emit([
+            "",
+            f"[설정] {env_path} 의 다음 키는 읽지 않았습니다: {', '.join(ignored)}",
+            "[설정] 배포 경계와 비밀은 `.env` 가 아니라 프로세스 환경변수로 주입합니다 —",
+            "[설정] render.yaml 의 envVars 또는 `docker run -e KEY=값`.",
+            "[설정] 지금 이 값들은 **적용되지 않은 상태**입니다.",
+            "",
+        ])
     return applied
 
 

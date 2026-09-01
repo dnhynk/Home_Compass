@@ -469,6 +469,10 @@ class SeedAccountResult:
     #: 환경변수가 없어 우리가 만든 비밀번호. 환경변수로 주입됐으면 **None** 이다 —
     #: 주입된 비밀번호를 되돌려주면 그것이 곧 유출 경로가 된다.
     generated_password: str | None
+    #: 계정이 이미 있어서 **주입된 비밀번호를 버렸는가.** 멱등성의 대가이며 무음이면
+    #: 안 되는 사실이다 — 운영자는 대시보드 값을 바꾸고 재배포하면 반영된 줄 안다.
+    #: 값도 해시도 여기 담지 않는다. 담는 순간 이것이 유출 경로가 된다.
+    injected_password_ignored: bool = False
 
 
 def _announce(lines: list[str]) -> None:
@@ -493,6 +497,10 @@ def ensure_seed_accounts(
 
     이미 있는 계정의 비밀번호는 **덮어쓰지 않는다.** 환경변수를 바꿔 재기동하는 것이
     비밀번호 변경 경로가 되면, 그 순간 [기동할 때마다 계정이 초기화되는] 시스템이 된다.
+
+    다만 **버렸다고 말한다.** 영구 디스크가 붙은 배포에서는 대시보드의 비밀번호를 바꾸고
+    재배포해도 계정이 이미 있어 값이 무음으로 무시되고, 기동 로그도 헬스체크도 정상이라
+    운영자는 바뀐 줄 안다. 그 한 줄이 없으면 회수 시점은 [로그인이 안 될 때]가 된다.
     """
     env = os.environ if environ is None else environ
     emit = _announce if announce is None else announce
@@ -500,7 +508,15 @@ def ensure_seed_accounts(
     results: list[SeedAccountResult] = []
     for account in SEED_ACCOUNTS:
         if store.users.get_by_username(account.username) is not None:
-            results.append(SeedAccountResult(account.username, account.role, False, None))
+            results.append(
+                SeedAccountResult(
+                    account.username,
+                    account.role,
+                    False,
+                    None,
+                    injected_password_ignored=bool((env.get(account.env_var) or "").strip()),
+                )
+            )
             continue
         injected = (env.get(account.env_var) or "").strip()
         generated = None if injected else secrets.token_urlsafe(12)
@@ -517,9 +533,23 @@ def ensure_seed_accounts(
             SeedAccountResult(account.username, account.role, True, generated)
         )
 
+    lines: list[str] = []
+
+    ignored = [r for r in results if r.injected_password_ignored]
+    if ignored:
+        lines += [
+            "",
+            "[인증] 이미 있는 계정이라 주입된 시드 비밀번호를 적용하지 않았습니다: "
+            + ", ".join(r.username for r in ignored),
+            "[인증] 시드는 멱등이므로 기동이 계정을 초기화하지 않습니다. 지금 로그인에 쓰이는",
+            "[인증] 값은 그 계정이 처음 만들어질 때의 비밀번호이며 재기동으로 바뀌지 않습니다.",
+            "[인증] 회전 절차는 docs/competition/SUBMISSION_RUNBOOK.md 2절을 보세요.",
+            "",
+        ]
+
     announced = [r for r in results if r.generated_password]
     if announced:
-        lines = [
+        lines += [
             "",
             "[인증] 시드 계정 비밀번호가 환경변수로 주입되지 않아 무작위로 만들었습니다.",
             "[인증] 이 값은 지금 한 번만 출력됩니다. 저장소에도 로그에도 남지 않습니다.",
@@ -532,5 +562,7 @@ def ensure_seed_accounts(
             + ", ".join(a.env_var for a in SEED_ACCOUNTS),
             "",
         ]
+
+    if lines:
         emit(lines)
     return results

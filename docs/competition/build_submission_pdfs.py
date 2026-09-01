@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -77,17 +78,36 @@ def register_fonts() -> tuple[str, str]:
 FONT, FONT_BOLD = register_fonts()
 
 
-def load_profile(path: Path | None) -> dict[str, str]:
+def profile_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return bool(value)
+
+
+def load_profile(path: Path | None) -> dict[str, object]:
     source = path or (DEFAULT_PROFILE if DEFAULT_PROFILE.is_file() else EXAMPLE_PROFILE)
     payload = json.loads(source.read_text(encoding="utf-8"))
     return {
         "team_name": str(payload.get("team_name") or "Home_Compass").strip(),
         "member_names": str(payload.get("member_names") or PLACEHOLDER).strip(),
+        "reviewer_accounts_provided": profile_bool(payload.get("reviewer_accounts_provided", False)),
+        "reviewer_account_instructions": str(payload.get("reviewer_account_instructions") or "").strip(),
     }
 
 
-def validate_profile(profile: dict[str, str], strict: bool) -> None:
-    missing = [key for key, value in profile.items() if not value or "__운영자_" in value]
+def validate_profile(profile: dict[str, object], strict: bool) -> None:
+    if profile["reviewer_accounts_provided"] and not profile["reviewer_account_instructions"]:
+        raise SystemExit(
+            "reviewer_accounts_provided requires reviewer_account_instructions in the ignored "
+            f"{DEFAULT_PROFILE.name} file."
+        )
+    missing = [
+        key
+        for key in ("team_name", "member_names")
+        if not str(profile[key]) or "__운영자_" in str(profile[key])
+    ]
     if strict and missing:
         raise SystemExit(
             "Operator-owned submission fields are incomplete: " + ", ".join(missing)
@@ -178,7 +198,7 @@ def section_block(number: str, title: str, items: list, note: str | None = None)
     return [head, Spacer(1, 3 * mm), *body, Spacer(1, 4 * mm)]
 
 
-def identity_header(attachment: str, title: str, profile: dict[str, str]):
+def identity_header(attachment: str, title: str, profile: dict[str, object]):
     title_table = Table(
         [[para(f"첨부 {attachment}", "body_bold"), para(title, "title")]],
         colWidths=[27 * mm, 147 * mm],
@@ -190,11 +210,12 @@ def identity_header(attachment: str, title: str, profile: dict[str, str]):
             ("LEFTPADDING", (0, 0), (-1, -1), 8),
         ]),
     )
-    member_style = "placeholder" if "__운영자_" in profile["member_names"] else "body"
+    member_names = str(profile["member_names"])
+    member_style = "placeholder" if "__운영자_" in member_names else "body"
     identity = Table(
         [
-            [para("팀명", "cell_head"), para(profile["team_name"], "body")],
-            [para("구성원 성명", "cell_head"), para(profile["member_names"], member_style)],
+            [para("팀명", "cell_head"), para(str(profile["team_name"]), "body")],
+            [para("구성원 성명", "cell_head"), para(member_names, member_style)],
         ],
         colWidths=[44 * mm, 130 * mm],
         rowHeights=[12 * mm, 12 * mm],
@@ -255,6 +276,12 @@ def screenshot(path: Path, caption: str, *, width_mm: float = 174, height_mm: fl
 
 
 def evidence_appendix(title: str, items: list[tuple[Path, str]]):
+    contents = []
+    for path, caption in items:
+        contents += screenshot(path, caption, height_mm=72)
+    if not contents:
+        return []
+
     head = Table(
         [[para(title, "section")]],
         colWidths=[174 * mm],
@@ -267,10 +294,7 @@ def evidence_appendix(title: str, items: list[tuple[Path, str]]):
             ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ]),
     )
-    story = [PageBreak(), head, Spacer(1, 4 * mm)]
-    for path, caption in items:
-        story += screenshot(path, caption, height_mm=72)
-    return story
+    return [PageBreak(), head, Spacer(1, 4 * mm), *contents]
 
 
 class CompetitionDoc(BaseDocTemplate):
@@ -297,7 +321,7 @@ class CompetitionDoc(BaseDocTemplate):
         canvas.restoreState()
 
 
-def planning_story(profile: dict[str, str], evidence_dir: Path):
+def planning_story(profile: dict[str, object], evidence_dir: Path):
     story = identity_header("1", "2026 금융 AI Challenge 기획서", profile)
     story += section_block("1", "서비스 명칭*", [
         "<b>Home_Compass</b> - 청년 임차 가구가 자신의 소득과 자산으로 감당 가능한 집의 범위를 먼저 판정하고, 전세·월세 비용과 정책 자격을 같은 근거 위에서 비교하는 주거 금융 의사결정 서비스",
@@ -314,10 +338,10 @@ def planning_story(profile: dict[str, str], evidence_dir: Path):
         "<b>문제 1 - 비교 기준의 파편화:</b> 청년 임차인은 월세, 전세대출 이자, 관리비, 보증금의 기회비용을 서로 다른 화면과 단위로 접합니다. 월 납입액만 보면 보증금 부담과 5년 총비용이 가려집니다.",
         "<b>문제 2 - 정책 정보의 잦은 변경:</b> 나이·소득·자산·무주택·지역 조건은 정책마다 다르고 공고문은 비정형 문서입니다. 단순 검색은 '왜 나는 제외되는가'와 '무엇을 추가 확인해야 하는가'를 답하지 못합니다.",
         "<b>문제 3 - 금융 AI의 신뢰 경계:</b> 언어모델이 숫자 계산과 자격 판정까지 수행하면 같은 입력에도 결과가 흔들리고, 틀린 규칙이 다수 사용자에게 전파될 수 있습니다.",
-        "<b>대상 고객과 채널:</b> 첫 독립 주거를 준비하거나 계약 갱신을 앞둔 청년 임차 가구를 대상으로 합니다. 사전 탐색은 모바일·웹에서 익명으로 제공하고, 상담원과 정책 운영자는 같은 웹서비스의 역할별 화면에서 근거를 이어받습니다.",
-        "<b>제안 배경:</b> 청년에게 필요한 첫 질문은 '어떤 상품이 인기인가'가 아니라 '내가 지금 얼마짜리 집에 살아도 되는가'입니다. 이 질문을 먼저 풀어야 이후의 대출·보증·지원정책 선택이 과도한 차입을 유도하지 않습니다.",
+        "<b>왜 청년 임차 가구인가 - 데이터 근거:</b> 국토교통부 「2024년도 주거실태조사」에서 임대료·대출금 상환 부담 응답은 청년가구 76.5%, 일반가구 63.3%였습니다. 청년 임차가구의 소득 대비 임대료 중위수는 16.0%로 일반 임차가구 15.8%와 비슷하므로 격차를 과장하지 않습니다. 평균 부담보다 첫 계약에서 보증금·대출·월세·지원정책을 동시에 판단해야 하는 의사결정 구조에 집중합니다.",
+        KeepTogether([bullet("<b>대상 고객과 채널:</b> 첫 독립 주거를 준비하거나 계약 갱신을 앞둔 청년 임차 가구를 대상으로 합니다. 상품 신청 전 비교가 필요한 단계이므로 모바일·웹에서 식별정보 없이 익명 진단을 제공하고, 이후 상담원과 정책 운영자는 같은 근거를 역할별 화면에서 이어받습니다.")]),
+        KeepTogether([bullet("<b>제안 배경:</b> 청년에게 필요한 첫 질문은 '어떤 상품이 인기인가'가 아니라 '내가 지금 얼마짜리 집에 살아도 되는가'입니다. 이 질문을 먼저 풀어야 이후의 대출·보증·지원정책 선택이 과도한 차입을 유도하지 않습니다.")]),
     ])
-    story.append(PageBreak())
     story += section_block("4", "서비스 컨셉 및 차별성*", [
         "<b>추천보다 판정:</b> 가처분소득에서 생활비·기존부채·안전버퍼를 차감하고 소득비율 상한과 교차해 월 주거비 상한 및 권장액을 산출합니다. 감당할 수 없는 선택은 인기 상품이어도 권장하지 않습니다.",
         "<b>동일 단위 비교:</b> 전세·반전세·월세를 대출이자, 월세, 관리비, 보증금 기회비용, 보증료를 포함한 5년 총비용(TCO)과 현재가치(NPV), 월 환산비용으로 비교합니다.",
@@ -332,8 +356,9 @@ def planning_story(profile: dict[str, str], evidence_dir: Path):
         "<b>모델 상수:</b> 법령·공표통계·시장금리·서비스의 규범적 선택을 구분합니다. 값, 단위, 기준시점, 검증상태를 계약 파일로 관리하고 민감도 분석으로 결과 변화를 점검합니다.",
         "<b>생성형 AI 역할 A - 대화형 설명:</b> OpenAI 또는 Anthropic의 tool/function calling을 이용해 사용자의 자연어 질문을 정해진 엔진 도구로 연결하고, 도구가 반환한 숫자와 근거만 설명합니다. 키가 없거나 호출이 실패하면 결정론적 한국어 템플릿으로 즉시 전환합니다.",
         "<b>생성형 AI 역할 B - 정책 규칙 추출:</b> 공고문을 입력으로 받아 엄격한 JSON 스키마의 RuleDraft를 생성합니다. 원문에 실제 존재하는 인용 구간인지 기계 검증하고, 실패한 초안은 승인할 수 없습니다.",
+        "<b>금융에서 LLM이 계산하지 않아야 하는 이유:</b> 생성형 AI의 강점은 비정형 공고문을 구조화하고 복잡한 엔진 결과를 고객 언어로 설명하는 데 있습니다. 반면 금액·자격 판정은 동일 입력의 동일 결과, 변경 전후 회귀 비교, 책임 있는 감사가 필요합니다. 따라서 AI를 덜 쓰는 것이 아니라 AI는 해석에 집중시키고 금전·자격 결정 권한은 재현 가능한 엔진과 사람에게 분리합니다.",
         "<b>사람 승인 게이트:</b> 규칙관리자는 필드별 원문 근거와 기존 사례의 판정 변화(impact)를 확인한 뒤 승인합니다. 승인·반려·로그인·접근거부는 append-only 감사이력으로 남습니다.",
-        "<b>개인정보:</b> 시민 진단의 7개 입력값은 계정 없이 처리되며 저장하지 않습니다. 로그에도 요청 본문을 기록하지 않습니다. 직원 인증은 Argon2id 비밀번호, HttpOnly/Secure/SameSite 쿠키, CSRF 방어를 사용합니다.",
+        "<b>개인정보:</b> 시민 진단의 11개 세부 프로필 필드는 계정 없이 처리되며 저장하지 않습니다. 로그에도 요청 본문을 기록하지 않습니다. 직원 인증은 Argon2id 비밀번호, HttpOnly/Secure/SameSite 쿠키, CSRF 방어를 사용합니다.",
     ])
     story.append(PageBreak())
     story += section_block("6", "기대 효과 및 확장 가능성*", [
@@ -344,21 +369,23 @@ def planning_story(profile: dict[str, str], evidence_dir: Path):
         "<b>시장 확대:</b> 청년 임차에서 신혼부부·고령층·장애인 등 포용금융 대상으로 규칙 세트를 확장할 수 있습니다. 주거 외에도 복잡한 자격 요건과 비용 비교가 필요한 정책금융·소상공인 지원에 같은 '추출-승인-집행' 구조를 적용할 수 있습니다.",
         "<b>운영 확장:</b> 현재 10개 지역의 배치 수집을 전국으로 확장하고, PostgreSQL 등 외부 저장소, 비밀관리, 백업, 알림 채널을 연결할 수 있도록 저장소와 설정 경계를 분리했습니다.",
     ])
-    story += section_block("7", "구현 완성도·안전장치 및 검증", [
-        "<b>작동 범위:</b> 시민용 웹, 규칙관리 웹, FastAPI 백엔드, 18개 HTTP 오퍼레이션, 4개 판정 엔진, 10개 지역, 8개 정책 규칙, 정책 수집·추출·승인·감사 파이프라인을 하나의 동일 오리진 서비스로 구현했습니다.",
-        "<b>검증:</b> 제출 준비 시점 기준 자동 테스트 2,276개가 통과했습니다. 단위·통합·계약·프론트/백엔드 동등성·인증·동시성·감사 append-only·기동 스모크를 포함합니다.",
-        "<b>장애 대응:</b> LLM 키가 없어도 모든 핵심 판정과 설명 템플릿이 동작합니다. 외부 시장 API 장애 시 승인된 이전 스냅샷을 유지하며, 공개 배포는 단일 worker·영구 SQLite·헬스체크로 구성합니다.",
-        "<b>한계 공개:</b> 현재 활성 정책 중 원문 승인을 거치지 않은 시드 규칙과 실거래가로 도출할 수 없는 일부 지역 필드는 데이터 등급 C 사유로 표시합니다. 본 서비스는 금융상품 승인·판매·투자자문이 아닌 의사결정 보조 도구입니다.",
+    story += section_block("7", "금융 AI 신뢰 설계 - LLM 초안·사람 승인·엔진 집행", [
+        callout("한 문장 원칙: LLM이 규칙 초안을 쓰고, 사람이 승인하고, 엔진이 집행합니다. 승인되지 않은 규칙은 판정에 반영되지 않습니다."),
+        Spacer(1, 2 * mm),
+        "<b>왜 이것이 금융 AI의 핵심인가:</b> 정책 공고문은 비정형이고 계속 바뀌어 생성형 AI의 해석 능력이 필요하지만, 한 번의 오해가 금액과 자격 결과를 여러 사용자에게 전파해서는 안 됩니다. Home_Compass는 AI 오류를 곧바로 판정 오류로 만들지 않고 검토·반려할 수 있는 초안으로 격리합니다.",
+        "<b>실질적인 사람 통제:</b> 규칙관리자는 초안의 각 필드를 원문 인용 구간과 대조하고, 기존 사례의 판정 변화까지 본 뒤 승인합니다. 승인된 버전만 엔진이 읽으며 승인·반려 이력은 감사 가능하게 남습니다.",
+        "<b>런타임에서도 같은 경계:</b> 상담 LLM은 엔진이 계산한 값과 근거를 고객 언어로 설명할 뿐 숫자나 자격을 만들 수 없습니다. LLM 키가 없거나 호출이 실패해도 핵심 판정은 동일하게 동작합니다.",
+        "<b>심사 적격성 경계:</b> 시민 입력은 식별자와 연결해 저장하지 않고, 미검증 사실은 등급과 사유로 노출합니다. 서비스는 금융상품 승인·판매·투자자문이 아니라 근거 있는 사전 의사결정을 돕습니다.",
         Spacer(1, 2 * mm),
         grid_table(
-            ["검증 축", "현재 구현 증거"],
+            ["단계", "권한", "금융 통제"],
             [
-                ["정확성", "결정론적 엔진·계약 스냅샷·프론트/백엔드 동등성 테스트"],
-                ["안전성", "LLM 권한 분리, 승인 전 규칙 차단, append-only 감사"],
-                ["운영성", "헬스체크, 시드 멱등성, 영구 저장소, 단일 worker"],
-                ["접근성", "익명 핵심 흐름, 390px 모바일·1440px 데스크톱 실브라우저 확인"],
+                ["정책 해석", "LLM은 RuleDraft만 생성", "원문 span·스키마 검증 실패 시 차단"],
+                ["효력 부여", "사람만 승인·반려", "판정 영향도 확인 후 승인 버전 확정"],
+                ["계산·판정", "결정론 엔진만 집행", "동일 입력·동일 결과, 승인 전 규칙 격리"],
+                ["고객 설명", "LLM 또는 템플릿", "엔진 반환값만 설명, 실패 시 안전 폴백"],
             ],
-            [30, 144],
+            [31, 48, 95],
         ),
     ])
     story += [Spacer(1, 2 * mm), para("주요 출처: 국토교통부 실거래가 OpenAPI, 주택도시기금, HUG, KOSIS·한국은행·한국부동산원 공표자료. 세부 URL과 인용 근거는 소스코드의 contracts/ 및 docs/engineering/diligence/에 기록했습니다.", "small")]
@@ -369,7 +396,31 @@ def planning_story(profile: dict[str, str], evidence_dir: Path):
     return story
 
 
-def feature_story(profile: dict[str, str], evidence_dir: Path):
+def feature_story(profile: dict[str, object], evidence_dir: Path):
+    reviewer_accounts_provided = bool(profile["reviewer_accounts_provided"])
+    reviewer_account_instructions = escape(str(profile["reviewer_account_instructions"])).replace("\n", "<br/>")
+    staff_status = "완료·심사 계정 제공" if reviewer_accounts_provided else "완료·공개 심사 미제공"
+    if reviewer_accounts_provided:
+        staff_flow = (
+            "<b>6) 직원·관리자 검증:</b> 아래 심사 계정 안내에 따라 로그인한 뒤 상담원 화면의 규칙 버전·신선도와 "
+            "/admin/의 원문 근거·판정 영향도·감사이력을 확인합니다."
+        )
+        account_verification = [
+            bullet("<b>절차 E - 상담원:</b> 심사용 상담원 계정으로 로그인 → 같은 샘플 진단 실행 → 내부 문턱·규칙 버전·신선도와 출력 기능을 확인합니다."),
+            bullet("<b>절차 F - 정책 운영:</b> 심사용 규칙관리자 계정으로 /admin/ 접속 → 대기 초안의 원문 span과 영향도 → 상태·감사이력을 확인합니다."),
+            bullet(f"<b>심사 계정 안내:</b> {reviewer_account_instructions}"),
+        ]
+        validation_scope = "익명 시민 F1-F6과 심사 계정이 필요한 F7-F10을 아래 절차로 검증할 수 있습니다."
+    else:
+        staff_flow = (
+            "<b>6) 공개 심사 범위:</b> 배포물은 시민 F1-F6을 계정 없이 검증할 수 있습니다. F7-F10은 구현됐지만 "
+            "심사 계정을 제공하지 않으므로 공개 심사 필수 경로에서 제외합니다."
+        )
+        account_verification = [
+            bullet("<b>계정 및 범위:</b> 시민 F1-F6은 계정 불필요. F7-F10은 구현 완료이나 심사 자격증명을 제공하지 않아 공개 심사 재현 범위에 포함하지 않습니다."),
+        ]
+        validation_scope = "필수 검증 경로는 계정이 필요 없는 시민 F1-F6입니다. 직원·관리자 F7-F10은 공개 심사 범위가 아닙니다."
+
     story = identity_header("2", "2026 금융 AI Challenge 기능 명세서", profile)
     story += section_block("1", "MVP 구현 범위*", [
         "<b>시민용 익명 진단:</b> 프로필 입력, 감당 가능한 월 주거비 상한·권장액 계산, 전세/반전세/월세 4개 시나리오의 5년 TCO·NPV 비교, 정책 적격성 및 사유, 보증금 위험점수, 데이터 계보·등급을 구현했습니다.",
@@ -386,21 +437,21 @@ def feature_story(profile: dict[str, str], evidence_dir: Path):
         ["F4", "보증금 위험", "전세가율·보증 가능성·대출비중·보증금 규모·시장여건을 0-100점으로 제시", "STEP 05", "완료"],
         ["F5", "데이터 등급·계보", "판정에 사용한 사실별 출처·관측시각·검증상태와 A-C 등급 사유 표시", "STEP 06", "완료"],
         ["F6", "AI 상담", "엔진 도구 결과만 인용하는 대화형 설명, 라이브 제공자 실패 시 템플릿 폴백", "AI 상담 카드", "완료"],
-        ["F7", "상담원 확장", "내부 문턱·버전·신선도 확인, 출력, 항목 기반 이상 신고", "시민 화면 로그인 후", "완료"],
-        ["F8", "정책 추출 검토", "원문 span·스키마 검증, 필드 비교, 실패 초안 차단", "/admin/ 초안 상세", "완료"],
-        ["F9", "영향도·승인", "승인 전 회귀 프로필의 판정 변화 확인, 단건/일괄 승인·반려", "/admin/ 검토 화면", "완료"],
-        ["F10", "감사·상태", "로그인·거부·신고·승인 이력과 배치/실패율/대기시간 지표", "/admin/ 상태·감사", "완료"],
+        ["F7", "상담원 확장", "내부 문턱·버전·신선도 확인, 출력, 항목 기반 이상 신고", "시민 화면 로그인 후", staff_status],
+        ["F8", "정책 추출 검토", "원문 span·스키마 검증, 필드 비교, 실패 초안 차단", "/admin/ 초안 상세", staff_status],
+        ["F9", "영향도·승인", "승인 전 회귀 프로필의 판정 변화 확인, 단건/일괄 승인·반려", "/admin/ 검토 화면", staff_status],
+        ["F10", "감사·상태", "로그인·거부·신고·승인 이력과 배치/실패율/대기시간 지표", "/admin/ 상태·감사", staff_status],
     ]
-    story += section_block("2", "주요 기능 목록*", [grid_table(["ID", "기능명", "기능 설명", "관련 화면", "상태"], features, [11, 28, 80, 35, 20])])
+    story += section_block("2", "주요 기능 목록*", [grid_table(["ID", "기능명", "기능 설명", "관련 화면", "상태"], features, [11, 28, 76, 34, 25])])
     story += section_block("3", "사용자 이용 흐름*", [
-        "<b>1) 접속:</b> 제출 탭에 등록된 배포 URL을 Chrome·Edge·Safari 등 최신 브라우저로 엽니다. 시민 기능은 회원가입이나 로그인 없이 사용할 수 있습니다.",
+        "<b>1) 접속:</b> 제출 탭에 등록된 배포 URL을 JavaScript가 활성화된 최신 브라우저로 엽니다. 시민 기능은 회원가입이나 로그인 없이 사용할 수 있습니다.",
         "<b>2) 입력:</b> 상단의 '예시 프로필 채우기'를 누르거나 왼쪽 패널에서 나이, 가구원 수, 희망지역, 연소득, 월 실수령액, 현금성 자산, 기존 대출 상환액과 주거조건을 입력합니다.",
         "<b>3) 진단:</b> '주거비 진단 시작'을 누르면 STEP 02-06이 차례로 표시됩니다. 권장액과 상한, 4개 시나리오, 정책 판정, 위험요인, 데이터 등급을 확인합니다.",
         "<b>4) 근거 확인:</b> 각 카드의 사유와 출처를 펼쳐 어떤 입력·규칙·데이터가 결과를 만들었는지 확인합니다. 조건부 정책은 추가 서류나 물건별 확인사항을 표시합니다.",
         "<b>5) AI 질문:</b> 하단 AI 상담의 추천 질문을 누르거나 자연어로 질문합니다. 답변 상단 칩에서 라이브 LLM 또는 결정론적 템플릿 모드를 확인할 수 있습니다.",
-        "<b>6) 선택 운영 흐름:</b> 운영자가 별도로 제공한 계정이 있는 경우 /admin/에서 정책 초안의 원문 근거와 영향도를 확인하고 승인·반려·감사이력을 검증할 수 있습니다. 시민 핵심 흐름 검증에는 계정이 필요하지 않습니다.",
+        staff_flow,
     ])
-    story += screenshot(evidence_dir / "home_compass_onboarding.png", "[그림 1] 접속 직후 화면 - 왼쪽 입력 7개와 오른쪽 4대 판정 엔진을 한 화면에서 안내")
+    story += screenshot(evidence_dir / "home_compass_onboarding.png", "[그림 1] 접속 직후 화면 - 왼쪽 프로필 입력과 오른쪽 4대 판정 엔진을 한 화면에서 안내")
     story.append(PageBreak())
     story += section_block("4", "AI 및 데이터 처리 방식*", [
         "<b>입력:</b> 시민 프로필(나이·가구·지역·소득·자산·부채·주거조건), 자연어 상담 질문, 정책 운영 시 공고문 텍스트와 출처 메타데이터를 받습니다.",
@@ -410,7 +461,7 @@ def feature_story(profile: dict[str, str], evidence_dir: Path):
         "<b>출력:</b> 권장/최대 주거비, 4개 시나리오의 비용과 적합도, 정책 상태·사유, 위험점수·요인, 데이터 등급·계보, 자연어 상담 답변을 반환합니다.",
         "<b>데이터 저장:</b> 익명 시민 입력과 질문은 영구 저장하지 않고 요청 로그에도 본문을 남기지 않습니다. 정책 원문·규칙 버전·승인·감사이력은 운영 저장소에 보존합니다.",
         "<b>민감정보:</b> 주민등록번호, 계좌·카드번호, 신용점수, 연락처를 입력받지 않습니다. 소득·자산·부채는 판정에 필요한 최소 금액만 받고 사용자 식별자와 연결하지 않습니다.",
-        "<b>실패 처리:</b> LLM 키가 없거나 응답이 실패하면 핵심 판정은 영향 없이 동작하고 상담만 템플릿 모드로 전환됩니다. 외부 시세 API 실패 시 기존 승인 스냅샷을 유지합니다.",
+        "<b>실패 처리:</b> LLM 키가 없거나 응답이 실패하면 핵심 판정은 영향 없이 동작하고 상담만 템플릿 모드로 전환됩니다. 외부 시세 API 배치가 일부라도 실패하면 새 수집분을 커밋하지 않고 이전 성공 수집값을 유지하며, 기존 verified 필드는 stale로 강등합니다.",
         Spacer(1, 2 * mm),
         grid_table(
             ["경로", "처리 주체", "효력·차단선"],
@@ -430,10 +481,10 @@ def feature_story(profile: dict[str, str], evidence_dir: Path):
         ["시나리오", "4개 결과 표시. 최상위 적합도 40점, 월 환산 143.5만원, 상한 초과로 unaffordable"],
         ["정책", "적격 4건 / 조건부 1건 / 부적격 3건"],
         ["위험", "1점 / low"],
-        ["데이터", "계보 84건과 등급 C. 확인되지 않은 정책 시드·일부 지역필드·모델 상수를 강등 사유로 명시"],
+        ["데이터", "계보 항목과 등급 C. 확인되지 않은 정책 시드·일부 지역필드·모델 상수를 강등 사유로 명시"],
     ]
     story += section_block("5", "MVP 검증 방법*", [
-        callout("필수 검증 경로는 익명 시민 화면 하나입니다. 아래 샘플은 현재 커밋의 API 결과와 자동 테스트로 고정되어 있습니다."),
+        callout(validation_scope),
         Spacer(1, 3 * mm),
         grid_table(["구분", "샘플 입력 및 예상 결과"], expected, [29, 145]),
         Spacer(1, 3 * mm),
@@ -441,12 +492,12 @@ def feature_story(profile: dict[str, str], evidence_dir: Path):
         bullet("<b>절차 B - 설명 가능성:</b> 정책 카드와 데이터 등급을 펼쳐 적격/부적격 사유, 데이터 출처, 검증상태가 표시되는지 확인합니다."),
         bullet("<b>절차 C - AI 상담:</b> '전세랑 월세 중 뭐가 나아?' 버튼을 누릅니다. 답변이 진단 결과의 시나리오와 상한을 설명하며, 모드 칩이 현재 제공자 또는 템플릿 상태를 표시하는지 확인합니다."),
         bullet("<b>절차 D - 실패 안전:</b> 새로고침 후에도 핵심 진단이 동작해야 합니다. LLM이 오프라인이어도 F1-F5는 동일하게 작동합니다."),
-        bullet("<b>계정:</b> 시민 핵심 검증은 계정 불필요. 직원·관리자 기능은 운영자 자격증명이 별도 제공된 경우에만 선택 검증합니다."),
-        bullet("<b>브라우저:</b> 최신 Chrome·Edge·Safari 권장. 모바일 390px과 데스크톱 1440px을 검증했습니다. JavaScript가 필요합니다."),
+        *account_verification,
+        bullet("<b>브라우저:</b> Playwright Chromium에서 모바일 390×844px과 데스크톱 1440×900px을 검증했습니다. Edge·Safari는 이번 제출에서 별도 검증하지 않았습니다. JavaScript가 필요합니다."),
         bullet("<b>제한사항:</b> 활성 정책 중 승인 전 시드 규칙과 실거래가로 도출할 수 없는 일부 필드는 화면에서 등급 C로 정직하게 표시됩니다. 실제 계약·대출 심사 전에는 소관 기관 원문을 재확인해야 합니다."),
         bullet("<b>가용성:</b> 제출 URL은 2026-09-07 11:00 KST부터 2026-09-11 23:59 KST까지 외부에서 접근 가능하도록 단일 인스턴스와 헬스체크로 운영합니다."),
     ])
-    story += [para("검증 근거: python -m pytest backend/tests -q 실행 결과 2,276 passed (2026-09-01). 생성 계약·프론트 로컬 엔진·백엔드 엔진의 동등성도 같은 테스트 스위트에 포함됩니다.", "small")]
+    story += [para("검증 근거: 현재 커밋에서 백엔드 자동 테스트와 생성 계약·프론트 로컬 엔진·백엔드 엔진 동등성 검사를 통과했습니다. 제출 직전 동일 명령으로 다시 검증합니다.", "small")]
     story += evidence_appendix("부록 A. 검증 기준 화면", [
         (evidence_dir / "home_compass_dashboard.png", "[그림 2] 샘플 진단 결과 - 문서의 예상값과 화면이 같은지 대조하는 기준"),
         (evidence_dir / "home_compass_chat.png", "[그림 3] AI 상담 - 엔진 근거를 설명하고 현재 제공자/템플릿 모드를 표시"),
@@ -477,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
     build_pdf(feature, "기능 명세서", feature_story(profile, args.evidence_dir))
     print(planning)
     print(feature)
-    if "__운영자_" in profile["member_names"]:
+    if "__운영자_" in str(profile["member_names"]):
         print("WARNING: participant name is still operator-owned and must be filled before submission.")
     return 0
 

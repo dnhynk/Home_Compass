@@ -197,7 +197,16 @@ WORKER_PATHS: dict[str, list[str]] = {
     #
     # `W-verdict-readability`(#15) 도 머지돼 회수했다.
 
-    # `W-staff-login`(#21) 도 머지돼 회수했다. 이 Run 의 워커 배정은 전부 비었다.
+    # `W-staff-login`(#21) 도 머지돼 회수했다.
+    #
+    # --- 관리자 검토 화면의 좁은 폭 (run_b70307c8c66d) — **닫히면 지운다** --------
+    #
+    # 코디네이터가 로그인해 실측했다. 390px 에서 큐 화면은 가로 스크롤 0 인데
+    # **초안 검토 화면이 scrollWidth 625 로 235px 넘친다.** 범인은 `aside.col-queue`
+    # 와 `section.col-review` 의 `min-width: auto` 다 — 그리드 자식이 내용의
+    # 고유 최소폭 아래로 못 줄어드는 전형적인 blowout 이고, 둘 다 601px 로 굳는다.
+    # 심사 계정을 제공하기로 하면서 이 화면이 심사 대상이 됐다.
+    "W-admin-narrow": OWNERSHIP["admin"],
 }
 
 # 코디네이터만 바꿀 수 있는 것 (SPEC 8.2 #5). 워커 PR 에 이게 있으면 즉시 반려.

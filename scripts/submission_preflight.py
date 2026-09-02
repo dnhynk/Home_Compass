@@ -34,7 +34,9 @@ PLANNING_PDF = OUTPUT_DIR / "pdf" / "2026_금융_AI_Challenge_기획서_Home_Com
 FEATURE_PDF = OUTPUT_DIR / "pdf" / "2026_금융_AI_Challenge_기능명세서_Home_Compass.pdf"
 DECK = COMPETITION_DIR / "기술설명서_Home_Compass.pptx"
 SOURCE_ZIP = OUTPUT_DIR / "submission" / "Home_Compass_source.zip"
-PLACEHOLDER = "__운영자_실명_입력__"
+#: 운영자가 채워야 하는 자리는 전부 이 접두어로 시작한다. **정확한 문자열이 아니라
+#: 접두어로 거른다** — 자리가 늘 때마다 이 검사를 고쳐야 하면 다음 자리는 안 걸린다.
+PLACEHOLDER_PREFIX = "__운영자_"
 
 
 @dataclass(frozen=True)
@@ -84,9 +86,34 @@ def check_profile(path: Path) -> Result:
         return failed("participant identity", f"invalid profile JSON: {exc}")
     team = str(profile.get("team_name") or "").strip()
     members = str(profile.get("member_names") or "").strip()
-    if not team or not members or "__운영자_" in team + members:
+    if not team or not members or PLACEHOLDER_PREFIX in team + members:
         return pending("participant identity", "registered team/member names are not filled")
     return passed("participant identity", f"team={team}, members={members}")
+
+
+def check_reviewer_accounts(path: Path) -> Result:
+    """심사 계정을 제공하기로 했으면 그 안내가 실제로 채워져 있어야 한다.
+
+    기능명세서는 F7-F10 을 「완료·심사 계정 제공」으로 선언한다. 안내가 비었거나
+    자리표시자면 심사위원이 그 넷을 재현할 수 없는데 표에는 완료로 적힌다 —
+    **제출물이 스스로 거짓이 되는 자리**다.
+    """
+    if not path.is_file():
+        return pending("reviewer accounts", f"create {path.relative_to(REPO_ROOT)}")
+    try:
+        profile = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return failed("reviewer accounts", f"invalid profile JSON: {exc}")
+    provided = profile.get("reviewer_accounts_provided")
+    if not provided:
+        return passed("reviewer accounts", "not provided — F7-F10 are outside the review scope")
+    guidance = str(profile.get("reviewer_account_instructions") or "").strip()
+    if not guidance or PLACEHOLDER_PREFIX in guidance:
+        return pending(
+            "reviewer accounts",
+            "reviewer_accounts_provided is true but reviewer_account_instructions is empty",
+        )
+    return passed("reviewer accounts", f"guidance present ({len(guidance)} chars)")
 
 
 def _pdf_text(path: Path) -> tuple[int, str]:
@@ -112,7 +139,7 @@ def check_pdf(path: Path, label: str, headings: list[str], minimum_pages: int) -
         results.append(failed(label, f"pages={pages}, missing headings={missing}"))
     else:
         results.append(passed(label, f"pages={pages}, all official headings found"))
-    if PLACEHOLDER in text:
+    if PLACEHOLDER_PREFIX in text:
         results.append(pending(f"{label} identity", "PDF still contains the operator placeholder"))
     else:
         results.append(passed(f"{label} identity", "no operator placeholder"))
@@ -198,7 +225,12 @@ def check_source_zip() -> Result:
         )
     return passed(
         "source archive",
-        f"{len(names)} entries, CRC and manifest SHA-256 OK, no local secrets/output",
+        # ★ `package_submission.py` 는 **224**, 여기는 **225** 를 말한다. 어긋난 것이
+        #   아니라 세는 대상이 다르다 — 매니페스트는 자기 해시를 자기 안에 적을 수 없어
+        #   **자기 자신을 목록에서 뺀다.** 두 수를 나란히 보고 사고로 오해하지 않도록
+        #   여기서 분모를 밝힌다.
+        f"{len(names)} zip entries ({len(names) - 1} files + manifest), "
+        "CRC and manifest SHA-256 OK, no local secrets/output",
     )
 
 
@@ -286,7 +318,11 @@ def main(argv: list[str] | None = None) -> int:
     profile = args.profile.resolve() if args.profile else (
         LOCAL_PROFILE if LOCAL_PROFILE.is_file() else EXAMPLE_PROFILE
     )
-    results = [check_required_files(), check_profile(profile)]
+    results = [
+        check_required_files(),
+        check_profile(profile),
+        check_reviewer_accounts(profile),
+    ]
     results += check_pdf(
         PLANNING_PDF,
         "planning PDF",

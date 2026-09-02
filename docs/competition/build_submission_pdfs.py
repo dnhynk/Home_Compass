@@ -41,7 +41,12 @@ DEFAULT_PROFILE = HERE / "submission_profile.local.json"
 EXAMPLE_PROFILE = HERE / "submission_profile.example.json"
 DEFAULT_EVIDENCE = REPO_ROOT / "output" / "evidence"
 
+#: 운영자가 채워야 하는 자리는 전부 이 접두어로 시작한다. `validate_profile` 과
+#: `submission_preflight` 이 **접두어로** 거르므로 새 자리를 더할 때 검사를 고치지 않아도 된다.
+PLACEHOLDER_PREFIX = "__운영자_"
 PLACEHOLDER = "__운영자_실명_입력__"
+PLACEHOLDER_TEAM = "__운영자_Daker등록명_입력__"
+PLACEHOLDER_REVIEWER = "__운영자_심사계정안내_입력__"
 
 INK = colors.HexColor("#1C1A17")
 INK_2 = colors.HexColor("#4A423A")
@@ -90,7 +95,10 @@ def load_profile(path: Path | None) -> dict[str, object]:
     source = path or (DEFAULT_PROFILE if DEFAULT_PROFILE.is_file() else EXAMPLE_PROFILE)
     payload = json.loads(source.read_text(encoding="utf-8"))
     return {
-        "team_name": str(payload.get("team_name") or "Home_Compass").strip(),
+        # ★ 기본값을 서비스 이름으로 두지 않는다. 이 칸이 요구하는 것은 **Daker 등록명**
+        #   이고 둘은 다르다 — 개인 참가면 등록 화면이 보이는 것은 보통 본인 실명이다.
+        #   서비스 이름을 기본값으로 두면 채우지 않아도 그럴듯해 보여 그대로 제출된다.
+        "team_name": str(payload.get("team_name") or PLACEHOLDER_TEAM).strip(),
         "member_names": str(payload.get("member_names") or PLACEHOLDER).strip(),
         "reviewer_accounts_provided": profile_bool(payload.get("reviewer_accounts_provided", False)),
         "reviewer_account_instructions": str(payload.get("reviewer_account_instructions") or "").strip(),
@@ -103,10 +111,15 @@ def validate_profile(profile: dict[str, object], strict: bool) -> None:
             "reviewer_accounts_provided requires reviewer_account_instructions in the ignored "
             f"{DEFAULT_PROFILE.name} file."
         )
+    # ★ 심사 계정을 제공하기로 했으면 그 안내도 운영자가 채워야 하는 자리다. 자리표시자인
+    #   채로 나가면 심사위원이 F7-F10 을 재현할 수 없는데 표에는 「완료」로 적힌다.
+    keys = ["team_name", "member_names"]
+    if profile["reviewer_accounts_provided"]:
+        keys.append("reviewer_account_instructions")
     missing = [
         key
-        for key in ("team_name", "member_names")
-        if not str(profile[key]) or "__운영자_" in str(profile[key])
+        for key in keys
+        if not str(profile[key]) or PLACEHOLDER_PREFIX in str(profile[key])
     ]
     if strict and missing:
         raise SystemExit(

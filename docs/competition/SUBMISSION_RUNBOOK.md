@@ -25,14 +25,52 @@ Copy-Item docs\competition\submission_profile.example.json `
 notepad docs\competition\submission_profile.local.json
 ```
 
-`team_name`은 Daker 등록 팀명과 글자 단위로 맞추고, `member_names`에는 등록된 구성원 실명을
-쉼표로 구분해 입력한다. 그 다음 실명 반영 PDF를 다시 만든다.
+채울 칸은 넷이다.
+
+| 키 | 무엇을 넣나 |
+|---|---|
+| `team_name` | **Daker 등록 화면에 보이는 이름을 글자 단위로 그대로.** 서비스 이름이 아니다 |
+| `member_names` | 등록된 구성원 실명. 팀이면 팀장부터 쉼표로 구분 |
+| `reviewer_accounts_provided` | 심사위원에게 직원 계정을 줄 것인가 (현재 결정: `true`) |
+| `reviewer_account_instructions` | 그 계정의 아이디와 비밀번호, 그리고 어디로 들어가는지 |
+
+> **개인 참가라면 `team_name` 에 무엇을 넣나.** 공식 양식의 「팀명」 칸은 등록된 이름과
+> 같아야 한다고만 적는다. 개인으로 신청했으면 Daker 제출 화면이 보여주는 이름(보통 본인
+> 실명)을 그대로 옮긴다. **서비스 이름 `Home_Compass` 를 넣지 않는다** — 그것은 등록명이
+> 아니다. 확실하지 않으면 Daker 제출 화면을 열어 눈으로 확인하고 옮겨 적는다.
+
+### 심사 계정 — 3단계보다 **먼저 하지 않는다**
+
+계정 안내에는 실제 비밀번호가 들어간다. 그 값은 3단계에서 Render에 입력할 때 정해지므로
+**순서를 지킨다.**
+
+1. 3단계에서 Render Blueprint에 두 비밀번호를 입력한다.
+2. **같은 값**을 `reviewer_account_instructions` 에 적는다.
+3. 그 다음 PDF를 다시 만든다.
+
+이 순서를 어기면 PDF에 적힌 비밀번호로 로그인이 안 되고, 심사위원은 F7~F10을 재현하지
+못한 채 「완료」라고 적힌 표만 본다.
+
+안내 문구 예시 (배포 주소와 비밀번호는 실제 값으로 바꾼다):
+
+```text
+상담원: 시민 화면 우상단에서 counselor / <실제-비밀번호> 로 로그인
+규칙관리자: https://배포주소/admin/ 에서 rulemanager / <실제-비밀번호> 로 로그인
+```
+
+> ⚠️ **이 값들은 공개 URL에 대한 접근 권한이다.** PDF를 받은 사람은 누구나 승인·반려를
+> 누를 수 있고 영구 디스크라 흔적이 남는다. 사용자가 이 위험을 알고 「넣는다」를 선택했다.
+> 그래도 비밀번호는 **저장소에 커밋하지 않는다** — `submission_profile.local.json` 은
+> `.gitignore` 대상이고 소스 ZIP에도 들어가지 않는다.
+
+칸을 채운 뒤 PDF를 다시 만든다.
 
 ```powershell
 python docs\competition\build_submission_pdfs.py --strict
 ```
 
-`submission_profile.local.json`은 `.gitignore` 대상이며 소스 ZIP에도 들어가지 않는다.
+`--strict` 는 네 칸 중 하나라도 자리표시자(`__운영자_` 로 시작)면 **거부한다.**
+`scripts\submission_preflight.py` 도 같은 것을 다시 본다.
 
 ## 2. 배포 전 프로덕션 컨테이너 리허설
 

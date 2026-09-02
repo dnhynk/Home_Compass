@@ -25,3 +25,16 @@ services:
         sync: false
       - key: HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD
         sync: false
+      # ★ 라이브 LLM 상담. **여기 적어 두는 이유는 생성 화면에서 한 번에 받기 위해서다.**
+      #   Blueprint 를 만든 뒤 대시보드에서 더하면 그것은 재배포이고, 영구 디스크가 붙은
+      #   서비스는 무중단 배포가 안 된다 — 세션이 끊기고 짧은 중단이 생긴다. 가용 시간
+      #   (09-07 11:00 ~ 09-11 23:59) 안에서는 그 중단을 감당할 수 없다.
+      #
+      #   비워 두면 오프라인 템플릿 모드로 정상 동작한다. 값을 넣으면 라이브가 된다.
+      #   `OPENAI_MODEL` 을 비우면 `config.DEFAULT_OPENAI_MODEL` 을 쓴다 — 그 기본값이
+      #   계정에서 거부되면 **호출이 실패하고 조용히 템플릿으로 내려간다.** 확실하지 않으면
+      #   쓰는 모델 id 를 직접 적는다. `submission_preflight --url` 이 실제로 확인한다.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false

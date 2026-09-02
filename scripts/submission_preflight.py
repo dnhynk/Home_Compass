@@ -259,6 +259,36 @@ def _text_request(url: str) -> tuple[int, str]:
         return response.status, response.read().decode("utf-8", errors="replace")
 
 
+def check_live_llm(base: str, sample: dict) -> Result:
+    """배포된 서비스가 **실제로** 라이브 LLM 으로 답하는지 끝까지 확인한다.
+
+    `/api/health` 의 `llm` 은 「키가 있고 SDK 를 import 할 수 있다」까지만 말한다.
+    모델 id 가 계정에서 거부되면 그 값은 여전히 `openai` 인데 **실제 호출은 실패하고
+    응답이 조용히 템플릿으로 내려간다.** 그래서 채팅을 한 번 실제로 불러 `mode` 를 본다 —
+    `live` 는 프로바이더가 답했다는 뜻이고 `offline` 은 템플릿이 답했다는 뜻이다.
+
+    라이브를 쓰지 않기로 했다면 이 항목은 `PENDING` 으로 남고, 그것이 맞는 상태다.
+    """
+    try:
+        status, body = _json_request(
+            base + "/api/chat",
+            {"message": "월세와 전세 중 무엇이 유리한가요?", "profile": sample, "history": []},
+        )
+    except (OSError, ValueError, urllib.error.URLError) as exc:
+        return failed("live LLM", f"/api/chat request failed: {exc}")
+    if status != 200 or not isinstance(body, dict):
+        return failed("live LLM", f"status={status}, body={body!r}")
+    mode = str(body.get("mode") or "")
+    provider = str(body.get("provider") or "")
+    if mode == "live":
+        return passed("live LLM", f"chat answered live (provider={provider})")
+    return pending(
+        "live LLM",
+        f"deployed service answers in template mode (mode={mode!r}, provider={provider!r}) — "
+        "the API key is missing, rejected, or the model id is not available to this account",
+    )
+
+
 def check_public_url(raw_url: str | None) -> list[Result]:
     if not raw_url:
         return [pending("public URL", "deploy and pass --url https://... before submission")]
@@ -305,6 +335,9 @@ def check_public_url(raw_url: str | None) -> list[Result]:
         passed("public URL homepage", f"{base}/ -> Home_Compass HTML"),
         passed("public URL health", f"{base}/api/health -> ok"),
         passed("public URL analysis", "sample profile -> 860,000 / 730,000 KRW and complete evidence"),
+        # ★ 마지막에 부른다. 위 셋이 깨지면 라이브 여부를 물을 것도 없고, 그때는 호출을
+        #   아끼는 편이 낫다 — 이 한 줄이 실제 LLM 요금을 쓰는 유일한 검사다.
+        check_live_llm(base, sample),
     ]
 
 

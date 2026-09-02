@@ -130,15 +130,15 @@ code { font-family: var(--mono); font-size: .92em; }
 
 /* 좁은 폭에서 상단바가 문서를 가로로 벌린다 (결정 #43 · task_84899f576c8e).
    ★ 「어느 한 요소가 범인」이 아니다. 우측 네 항목은 알약이라 **자기 안에서 줄바꿈이
-     안 되고**, 그래서 이 줄의 최소폭이 고정된다 — 실측 592px
-     (브랜드 64 + 항목 488 + gap 16 + padding 48, 어느 폭에서도 안 줄어든다).
-     항목을 하나씩 지워 봐도 회복은 whoBadge 187 · queueBadge 182 · connBadge 82 ·
-     btnLogout 48px 로, **둘을 지워야 비로소 들어간다.** 지울 항목이 없다는 뜻이다.
+     안 되고**, 브랜드의 `Home_Compass` 도 끊을 자리가 없는 한 토큰이다. 그래서 이 줄의
+     최소폭이 고정된다 — 실측 712px (브랜드 153 + 항목 495 + gap 16 + padding 48;
+     항목은 connBadge 72 · queueBadge 179 · whoBadge 177 · btnLogout 38 + gap 30).
+     항목을 하나씩 지워도 **둘을 지워야 비로소 들어간다.** 지울 항목이 없다는 뜻이다.
    ★ 그래서 **접는다.** 항목을 숨기면 연결상태·대기건수·신원 중 하나가 사라지는데,
      좁은 화면이라는 이유로 화면이 아는 것을 안 보여주는 것은 이 화면의 규약이 아니다.
-   경계 600px 은 위 실측 592px 바로 위의 자리다 — 문구가 조금 길어져도 다시 열리지
-   않도록 딱 맞추지 않고 반올림했다. 601px 이상은 한 픽셀도 바뀌지 않는다. */
-@media (max-width: 600px) {
+   경계 720px 은 위 실측 712px 바로 위의 자리다 — 문구가 조금 길어져도 다시 열리지
+   않도록 딱 맞추지 않고 반올림했다. 721px 이상은 한 픽셀도 바뀌지 않는다. */
+@media (max-width: 720px) {
   .topbar { height: auto; }
   .topbar-inner { height: auto; flex-wrap: wrap; padding: 9px 16px; row-gap: 9px; }
   .topbar-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
@@ -154,6 +154,12 @@ code { font-family: var(--mono); font-size: .92em; }
   align-items: start;
 }
 @media (max-width: 1080px) { .desk { grid-template-columns: 1fr; } }
+/* 그리드 자식의 `min-width: auto` 는 **내용의 고유 최소폭 아래로 못 줄어들게 한다.**
+   오른쪽 검토 칸의 고유 최소폭은 필드 표(555px)가 정하는데, 1열로 접힌 뒤에도 그 값이
+   칸의 하한이 되어 두 칸 다 601px 로 벌어졌다 (390px 뷰포트 실측: scrollWidth 625).
+   표는 이미 `.table-scroll` 이 자기 안에서 가로로 밀어 주므로, 칸이 좁아지면 표만
+   스크롤되고 문서는 넘치지 않는다. */
+.col-queue, .col-review { min-width: 0; }
 
 .panel, .card {
   background: var(--surface);
@@ -174,7 +180,9 @@ code { font-family: var(--mono); font-size: .92em; }
 .panel-title, .card-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
 .panel-sub, .card-lead { font-size: 13.5px; color: var(--ink-3); margin-top: 6px; }
 .card-lead { margin-bottom: 14px; }
-.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+/* 제목 옆 칩은 `white-space: nowrap` 이라 안 줄어든다 (예: 「② 요건 변경 — 변경 필드 +
+   영향 사례」 232px). 320px 에서 제목과 한 줄에 못 들어가므로 줄을 내준다. */
+.card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px; }
 
 /* ── login gate ────────────────────────────────────────── */
 .gate { display: flex; justify-content: center; padding-top: 40px; }
@@ -339,6 +347,9 @@ code { font-family: var(--mono); font-size: .92em; }
   margin-top: 16px; padding: 11px 13px;
   background: var(--plane); border: 1px solid var(--line); border-radius: var(--r-md);
   font-size: 12.5px; color: var(--ink-2);
+  /* 출처 링크는 공백 없는 긴 URL 이라 끊을 자리가 없다 — 320px 에서 44px 넘쳤다.
+     `.failure-detail` 과 같은 규약을 쓴다. */
+  overflow-wrap: anywhere;
 }
 
 /* ── 추출 실패의 사유 ──────────────────────────────────────

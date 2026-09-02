@@ -45,7 +45,12 @@ coordinator session `27db16c5-6bbf-4046-a2b0-705b0a7976ba` · 롤오버 자동 �
 ### 미확인 — 아직 실행하지 않은 것
 
 - **Render 실배포를 하지 않았다.** T1 이 증명한 것은 「같은 이미지·환경변수·디스크 배치·HTTPS 종단 형상에서 동작한다」이지 「Render 에서 동작했다」가 아니다
-- **리허설 3회 재현을 이 세션이 재현하지 않았다** (이전 Run 의 증거는 `backend/var/rehearsal-evidence/`)
+- **리허설은 절반만 재현했다.** 자동화된 차단 경로(`frontend/qa/qa_offline.py`)는 병합된
+  `main` 에서 **3회 돌려 출력이 바이트 동일**했고 매회 22 checks · 0 failed 였다
+  (`rec='73만원 / 월'` · `scenarios=4` · `policies=8` · `risk='1'` · `regionOptions=10` ·
+  배너 `백엔드 미연결 · 로컬 판정 경로`). 엔진이 크게 바뀐 뒤의 재현성 증거다.
+  **Part 2 의 무대 대본(S1~S8)은 사람이 눌러야 하므로 재현하지 않았다** — 판정의 정본은
+  여전히 `REHEARSAL.md` Part 3-B 이고 그것은 이전 Run 의 관측이다
 - 스크린리더 미실행 · Edge/Safari 미검증 (Playwright Chromium 만)
 
 ### ★ 반드시 지켜야 할 운영 제약 (T1·T6 이 실측)

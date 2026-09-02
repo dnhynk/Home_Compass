@@ -1458,14 +1458,43 @@
         '<button type="button" class="btn btn-ghost btn-xs" id="btnLogout">로그아웃</button>';
       $('#btnLogout').addEventListener('click', doLogout);
     } else {
-      bar.innerHTML = '<form class="session-form" id="loginForm">' +
+      bar.innerHTML =
+        '<button type="button" class="btn btn-ghost btn-xs session-toggle" id="btnStaffLogin"' +
+        ' aria-expanded="false" aria-controls="loginForm">직원 로그인</button>' +
+        '<form class="session-form" id="loginForm" data-open="false">' +
         '<label class="sr-only" for="loginUser">아이디</label>' +
         '<input type="text" id="loginUser" placeholder="상담원 아이디" autocomplete="username">' +
         '<label class="sr-only" for="loginPass">비밀번호</label>' +
         '<input type="password" id="loginPass" placeholder="비밀번호" autocomplete="current-password">' +
         '<button type="submit" class="btn btn-ghost btn-xs">직원 로그인</button></form>';
       $('#loginForm').addEventListener('submit', doLogin);
+      $('#btnStaffLogin').addEventListener('click', function () {
+        setStaffLoginOpen($('#btnStaffLogin').getAttribute('aria-expanded') !== 'true');
+      });
+      /* Escape 는 패널 안에서만 받는다. 문서 전역으로 걸면 이상 신고
+         대화상자의 Escape 와 같은 키를 두 곳이 나누어 갖게 된다. */
+      var onEscape = function (e) {
+        if (e.key !== 'Escape') return;
+        if ($('#btnStaffLogin').getAttribute('aria-expanded') !== 'true') return;
+        setStaffLoginOpen(false);
+        $('#btnStaffLogin').focus();
+      };
+      $('#btnStaffLogin').addEventListener('keydown', onEscape);
+      $('#loginForm').addEventListener('keydown', onEscape);
     }
+  }
+
+  /* ≤620px 에서 로그인 칸은 상단바 아래 디스클로저로 내려가 있다 (styles.css 의
+     같은 대역). 그보다 넘는 폭에서는 토글이 `display: none` 이라 눌릴 수 없고 폼은
+     항상 펼쳐져 있다 — 그래서 이 상태는 CSS 가 읽는 속성 둘(`aria-expanded` · `data-open`)
+     로만 둔다. 폭을 JS 가 재지 않게 하려는 것이다 — 재면 리사이즈마다 둘이 어긋난다. */
+  function setStaffLoginOpen(open) {
+    var toggle = $('#btnStaffLogin');
+    var form = $('#loginForm');
+    if (!toggle || !form) return;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    form.setAttribute('data-open', open ? 'true' : 'false');
+    if (open) $('#loginUser').focus();
   }
 
   function doLogin(e) {
@@ -1564,6 +1593,14 @@
     $('#reportCancel').addEventListener('click', closeReportDialog);
     document.addEventListener('keydown', reportModalKeydown);
     $('#reportPrivacy').textContent = REPORT_PRIVACY_NOTICE;
+
+    /* 열린 직원 로그인 패널은 바깥을 누르면 접힌다. 위임으로 받는 이유는
+       `#sessionBar` 가 로그인·로그아웃마다 다시 그려져 안의 요소가 교체되기 때문이다. */
+    document.addEventListener('pointerdown', function (event) {
+      var bar = $('#sessionBar');
+      if (!bar || bar.contains(event.target)) return;
+      setStaffLoginOpen(false);
+    });
 
     /* 선택 상태가 `is-on` 클래스뿐이었다 — 화면에는 보이지만 접근성 트리에는 없다.
        aria-pressed 로 같은 사실을 노출한다. 값은 클래스와 한 곳에서 함께 바꾼다. */

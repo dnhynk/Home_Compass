@@ -1104,20 +1104,38 @@ strong { font-weight: 650; }
   background: var(--accent-yellow-tint); color: #6B4E00; font-size: 10.5px; font-weight: 700;
 }
 .btn-xs { height: 30px; padding: 0 11px; font-size: 12px; }
+/* ≤620px 전용 토글. 그 위에서는 칸이 바에 그대로 있으므로 열 것이 없다. */
+.session-toggle { display: none; }
 
 @media (max-width: 860px) {
   .session-form input { width: 88px; }
 }
 /* 상단바 접힘 2단(≤810px)에서도 621~653px 대역은 브랜드가 4px 모자랐다.
    여기서 더 줄일 수 있는 것은 로그인 칸뿐이다 — 자리표시자만 짧아지고
-   입력은 그대로 된다. 620px 의 `display: none` 은 **올리지 않는다**:
-   그 아래에서는 직원 로그인이 이미 불가능하고(칸이 없다), 대역을 넓히면
-   그 결함이 커진다. 별건으로 보고한다. */
+   입력은 그대로 된다. */
 @media (max-width: 810px) {
   .session-form input { width: 76px; }
 }
+/* 620px 아래로는 76px 칸 둘을 더 줄일 수 없고, 그대로 두면 부족분을
+   `.brand`(min-width:0) 가 먹어 제품 이름이 지워진다. 그렇다고 칸을 `display: none`
+   으로 지우면 **휴대폰에서 상담원이 로그인할 수 없다** — 상담원 확장(F7)은
+   이 상단바가 유일한 입구다. 그래서 **자리만 비우고 칸은 남긴다** — 폼을
+   상단바 아래 디스클로저로 내리고, 바에는 같은 라벨의 토글 하나만 세운다.
+   토글은 지우기 전 제출 버튼과 같은 클래스·같은 라벨이므로 이 대역의 상단바
+   폭 계산은 변하지 않는다 (측정: 320px·390px 가로 스크롤 0 유지).
+   패널은 `.topbar`(position: sticky) 에 맞물려 바 아래로 떨어진다. 폭을 `100%`
+   기준으로 잡는 것은 `100vw` 가 세로 스크롤바를 포함해 오버랩하기 때문이다. */
 @media (max-width: 620px) {
-  .session-form input { display: none; }
+  .session-toggle { display: inline-flex; }
+  .session-form {
+    position: absolute; top: calc(100% - 6px); right: clamp(16px, 3vw, 34px); z-index: 70;
+    flex-direction: column; align-items: stretch; gap: 8px;
+    width: min(256px, calc(100% - 32px)); padding: 12px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-md); box-shadow: 0 18px 40px -16px rgba(27,25,21,.45);
+  }
+  .session-form[data-open="false"] { display: none; }
+  .session-form input { width: auto; height: 34px; }
 }
 
 /* ── 로컬 판정 경로 상태 배너 (SPEC 6.2 오프라인 정의 #3 · D-11) ──

@@ -116,6 +116,38 @@ def check_reviewer_accounts(path: Path) -> Result:
     return passed("reviewer accounts", f"guidance present ({len(guidance)} chars)")
 
 
+def _pdf_images(path: Path) -> int:
+    """PDF 에 박힌 이미지 수. 부록의 증거 화면이 들어갔는지 세는 데 쓴다."""
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise RuntimeError("install docs/competition/requirements.txt") from exc
+    return sum(len(page.images) for page in PdfReader(str(path)).pages)
+
+
+def check_evidence_images() -> Result:
+    """제출 PDF 가 **증거 화면을 싣고 있는가.**
+
+    ★ 이 검사가 없으면 빠진 것이 조용하다. `output/evidence/` 는 `.gitignore` 대상이라
+    새로 받은 저장소에서는 비어 있고, 그때 생성기는 **빈 부록을 내는 대신 부록을 통째로
+    생략한다**(그것 자체는 옳은 동작이다 — 제목만 있는 빈 페이지를 막으려고 그렇게 고쳤다).
+    그래서 운영자가 `capture_evidence.py` 를 건너뛰면 심사위원이 받는 PDF 에서 화면이
+    소리 없이 사라지고, 쪽수도 제목도 그대로라 기존 검사에 걸리지 않는다.
+    """
+    try:
+        planning = _pdf_images(PLANNING_PDF)
+        feature = _pdf_images(FEATURE_PDF)
+    except Exception as exc:
+        return failed("evidence screenshots", str(exc))
+    if planning == 0 or feature == 0:
+        return pending(
+            "evidence screenshots",
+            f"PDF 에 증거 화면이 없다 (기획서 {planning}장 · 기능명세서 {feature}장). "
+            "서버를 띄운 뒤 docs/competition/capture_evidence.py 를 돌리고 PDF 를 다시 만든다",
+        )
+    return passed("evidence screenshots", f"기획서 {planning}장 · 기능명세서 {feature}장")
+
+
 def _pdf_text(path: Path) -> tuple[int, str]:
     try:
         from pypdf import PdfReader
@@ -368,7 +400,7 @@ def main(argv: list[str] | None = None) -> int:
         ["MVP 구현 범위", "주요 기능 목록", "사용자 이용 흐름", "AI 및 데이터 처리 방식", "MVP 검증 방법"],
         4,
     )
-    results += [check_deck(), check_deployment_config(), check_source_zip()]
+    results += [check_evidence_images(), check_deck(), check_deployment_config(), check_source_zip()]
     results += check_public_url(args.url)
 
     for result in results:

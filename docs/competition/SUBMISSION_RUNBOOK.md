@@ -72,6 +72,27 @@ python docs\competition\build_submission_pdfs.py --strict
 `--strict` 는 네 칸 중 하나라도 자리표시자(`__운영자_` 로 시작)면 **거부한다.**
 `scripts\submission_preflight.py` 도 같은 것을 다시 본다.
 
+### 증거 화면 — PDF 를 만들기 **전에** 뽑는다
+
+두 PDF 의 부록은 실제 화면 캡처를 싣는다. 그 이미지는 `output\evidence\` 에 있고
+**그 디렉터리는 `.gitignore` 대상이라 새로 받은 저장소에서는 비어 있다.** 비어 있으면
+생성기는 빈 부록을 내는 대신 **부록을 통째로 생략한다** — 쪽수도 제목도 그대로여서
+**빠진 것을 눈으로 알아채기 어렵다.**
+
+서버를 띄운 채로 돌린다.
+
+```powershell
+# 창 하나: 서버
+python scripts\start_server.py
+
+# 창 둘: 캡처 → PDF 재생성
+python docs\competition\capture_evidence.py
+python docs\competition\build_submission_pdfs.py --strict
+```
+
+`submission_preflight.py` 의 `evidence screenshots` 항목이 이것을 확인한다 — 이미지가
+0장이면 `PENDING` 이다.
+
 ## 2. 배포 전 프로덕션 컨테이너 리허설
 
 Render에 올리기 전에 같은 이미지·같은 환경변수로 로컬에서 한 번 띄운다. Render는 배포 실패를

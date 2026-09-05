@@ -3469,6 +3469,8 @@ X_UNITS = {
         "Risk/score": "점 (0~100 척도)",
         "ProfileRequest/age": "세",
         "ProfileRequest/householdSize": "명",
+        "ChatResponse/retried": "회 (성공 응답 전 재시도 횟수, 재시도하지 않으면 생략)",
+        "ChatResponse/attempts": "회 (템플릿으로 전환하기 전 제공자 호출 시도 횟수, 정상 응답이면 생략)",
         # 5단계 검토 화면 (SPEC 4.4). ★ 아래 셋은 **코드포인트**다 — 바이트도 UTF-16
         # 코드유닛도 아니다 (SPEC 4.2.1). 이 표에 단위를 적어 두는 것이 [화면이 자기
         # 언어의 문자열 인덱스로 자르면 어긋난다]를 계약이 말하는 유일한 자리다.

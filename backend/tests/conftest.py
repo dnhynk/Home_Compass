@@ -5,6 +5,8 @@ import shutil
 import sys
 import tempfile
 
+import pytest
+
 # Make `src/` importable without an editable install.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -54,3 +56,14 @@ from home_compass.store.seed import seed_all  # noqa: E402
 
 with store_from_env() as _session_store:
     seed_all(_session_store)
+
+
+@pytest.fixture(autouse=True)
+def offline_providers_by_default(monkeypatch):
+    """Tests use deterministic providers unless they explicitly inject a mock key.
+
+    A developer's .env and keys loaded by another test must never turn the test
+    suite into paid API calls or make its result depend on network access.
+    """
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")

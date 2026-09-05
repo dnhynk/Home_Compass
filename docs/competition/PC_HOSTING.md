@@ -39,6 +39,41 @@ Invoke-RestMethod http://127.0.0.1:18174/api/health
 외부 네트워크 검사는 GitHub Actions의 **Public deployment check**를 수동 실행하고 실제 HTTPS 주소를 입력한다.
 이 검사는 로그인 정보나 LLM API 키가 필요 없고, LLM을 호출하지 않는다. 주소와 호스트명은 실행 로그에서 마스킹한다.
 
+### 가용 시간 자동 감시 — Secret 하나로 켠다
+
+같은 워크플로가 **20분마다 예약 실행**된다. 저장소 Settings → Secrets and variables →
+Actions 에 `PUBLIC_URL` 을 실제 HTTPS 주소로 넣으면 켜진다. 넣지 않으면 예약 실행은
+아무것도 하지 않고 지나간다.
+
+필수 가용 시간(09-07 11:00 ~ 09-11 23:59 KST) **밖에서는 건너뛴다.** 창 밖의 실패는
+결격과 무관하고, 그것으로 알림을 울리면 진짜 신호가 묻히기 때문이다.
+
+검사가 실패하면 GitHub 이 저장소 소유자에게 워크플로 실패 알림을 보낸다. 그것이
+**PC가 죽은 것을 늦게 아는 일**을 막는 장치다.
+
+> ⚠️ **보증이 아니라 안전망이다.** GitHub 예약 실행은 best-effort 라 지연되거나
+> 건너뛸 수 있다. 사람이 하루 두 번 직접 여는 것을 대체하지 않는다.
+
+### 재부팅 뒤 스스로 돌아오게 하려면
+
+Watchdog 작업의 Principal 이 `Interactive` 라 **Windows 에 로그인한 상태에서만** 복구된다.
+정전이나 강제 재시작 뒤 PC가 켜져도 로그인 화면에 멈춰 있으면 그 시점부터 결격이다.
+
+심사 기간 동안만 자동 로그인을 켜 두면 그 구멍이 닫힌다 (`netplwiz` → 비밀번호 입력
+해제). **물리적 접근이 있는 사람이 PC를 쓸 수 있게 되므로** 그 대가를 감수할지는
+운영자가 판단한다. 09-12 이후 되돌린다.
+
+확인해 둘 것 (2026-09-05 실측):
+
+```powershell
+# Windows Update 가 창 안에서 재시작하지 않는가 — 일시중지 만료일을 본다
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' |
+  Select-Object PauseUpdatesExpiryTime
+
+# AC 전원에서 절전으로 내려가지 않는가 — 색인이 0 이어야 한다
+powercfg /query SCHEME_CURRENT SUB_SLEEP STANDBYIDLE
+```
+
 ## 심사 기간
 
 필수 가용 시간은 **2026-09-07 11:00 ~ 2026-09-11 23:59 KST**다.

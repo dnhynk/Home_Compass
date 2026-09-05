@@ -389,9 +389,54 @@
       "ChatResponse": {
         "additionalProperties": false,
         "properties": {
+          "attempts": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempts"
+          },
+          "degradedFrom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Degradedfrom"
+          },
+          "degradedReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Degradedreason"
+          },
           "mode": {
             "title": "Mode",
             "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
           },
           "provider": {
             "title": "Provider",
@@ -400,6 +445,18 @@
           "reply": {
             "title": "Reply",
             "type": "string"
+          },
+          "retried": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retried"
           },
           "toolCalls": {
             "items": {
@@ -3977,6 +4034,8 @@
       "AffordabilityBreakdown/existingDebt": "원",
       "AffordabilityBreakdown/livingCost": "원",
       "AffordabilityBreakdown/netIncome": "원",
+      "ChatResponse/attempts": "회 (템플릿으로 전환하기 전 제공자 호출 시도 횟수, 정상 응답이면 생략)",
+      "ChatResponse/retried": "회 (성공 응답 전 재시도 횟수, 재시도하지 않으면 생략)",
       "DataGradeReason/provenanceIndex": "단위 없음 — `provenance` 배열의 0-기반 인덱스다. 사실에 걸리지 않는 사유(`freshness_not_evaluated`)는 `null` 이다.",
       "ImpactResponse/changedCount": "건 (판정이 달라진 프로필 수)",
       "ImpactResponse/profileCount": "건 (회귀 프로필 수)",

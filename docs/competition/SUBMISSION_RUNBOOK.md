@@ -214,16 +214,15 @@ python -c "import secrets; print(secrets.token_urlsafe(24))"
 
 ### 라이브 AI 상담 — 키는 **생성 화면에서** 넣는다
 
-`render.yaml`이 `OPENAI_API_KEY`와 `OPENAI_MODEL`을 `sync: false`로 선언하므로 Blueprint
-생성 화면에 두 칸이 함께 뜬다. **거기서 넣는다.** 만들고 나서 대시보드로 추가하면 그것은
+`render.yaml`이 `OPENAI_API_KEY`를 `sync: false`로 선언하므로 Blueprint
+생성 화면에서 키를 받는다. **거기서 넣는다.** 만들고 나서 대시보드로 추가하면 그것은
 재배포이고, 영구 디스크가 붙은 서비스는 무중단 배포가 안 된다 — 세션이 끊기고 짧은
 중단이 생긴다. 가용 시간 안에서는 그 중단을 감당할 수 없다.
 
-> **`OPENAI_MODEL`을 비우지 않는 편이 안전하다.** 비우면 `config.DEFAULT_OPENAI_MODEL`
-> (`gpt-5.4-mini`)을 쓰는데, **그 id가 계정에서 거부되면 호출이 실패하고 응답이 조용히
-> 템플릿 모드로 내려간다.** 화면의 칩은 「LLM 라이브 모드」 대신 오프라인을 가리키고,
-> 심사위원은 생성형 AI가 동작하지 않는 서비스를 본다. 본인 계정에서 실제로 쓸 수 있는
-> 모델 id를 직접 적는다.
+`OPENAI_MODEL`은 사용자 지정 **`gpt-5.6-luna`**로 Blueprint에 고정했다.
+2026-09-05 제출 계정으로 실제 상담 도구 호출을 검증했다. Luna의 Chat Completions
+도구 호출에는 `reasoning_effort=none`이 필요하므로 상담 코드가 명시한다.
+키 유무만으로는 라이브 동작이 보장되지 않으므로 배포 후 `/api/chat` 응답까지 다시 검사한다.
 
 키가 없어도 모든 핵심 판정과 템플릿 상담은 동작한다. 넣지 않기로 하면 4단계의
 `live LLM` 항목이 `PENDING`으로 남고 그것이 맞는 상태다.

@@ -1,5 +1,13 @@
 name: Public deployment check
 
+# 수동 실행과 **가용 시간 중 자동 감시**를 겸한다.
+#
+# 왜 자동이 필요한가. 배포가 사용자 PC + Tailscale Funnel 이라 정전·인터넷 장애·재부팅
+# 뒤 로그인 대기로 조용히 죽을 수 있고, 규정상 URL 접근 불가는 **결격**이다
+# (2026-09-07 11:00 ~ 09-11 23:59 KST). 죽은 것을 늦게 아는 것이 가장 나쁘다.
+#
+# ★ **이것은 보증이 아니라 안전망이다.** GitHub 예약 실행은 best-effort 라 지연되거나
+#   건너뛸 수 있다. 사람이 하루 두 번 눈으로 보는 것을 대체하지 않는다.
 on:
   workflow_dispatch:
     inputs:
@@ -7,6 +15,9 @@ on:
         description: Public HTTPS origin to verify from a GitHub-hosted runner
         required: true
         type: string
+  schedule:
+    # 20분마다. 창 밖에서는 아래 가드가 즉시 통과시킨다.
+    - cron: "*/20 * * * *"
 
 permissions:
   contents: read
@@ -15,21 +26,46 @@ jobs:
   external-access:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # 수동 실행은 입력값을, 예약 실행은 저장소 Secret 을 쓴다.
+      # Secret 이 없으면 예약 실행은 아무것도 하지 않고 지나간다.
+      TARGET_URL: ${{ github.event.inputs.url || secrets.PUBLIC_URL }}
+      EVENT_NAME: ${{ github.event_name }}
     steps:
       - name: Check anonymous access from outside the hosting network
         run: |
           python - <<'PY'
           import json
           import os
-          from pathlib import Path
           import ssl
+          import sys
           import time
           import urllib.error
           import urllib.parse
           import urllib.request
+          from datetime import datetime, timezone
 
-          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
-          base = event['inputs']['url'].strip().rstrip('/')
+          event_name = os.environ.get('EVENT_NAME', '')
+          raw = (os.environ.get('TARGET_URL') or '').strip()
+
+          # 필수 가용 시간 (KST) 을 UTC 로 옮긴 값. 이 밖에서는 예약 실행이 아무것도 하지 않는다 —
+          # 창 밖의 실패는 결격과 무관하고, 그것으로 알림을 울리면 진짜 신호가 묻힌다.
+          WINDOW_START = datetime(2026, 9, 7, 2, 0, tzinfo=timezone.utc)    # 09-07 11:00 KST
+          WINDOW_END = datetime(2026, 9, 11, 15, 0, tzinfo=timezone.utc)    # 09-11 24:00 KST
+
+          if event_name == 'schedule':
+              now = datetime.now(timezone.utc)
+              if not (WINDOW_START <= now <= WINDOW_END):
+                  print('SKIP outside the required availability window', flush=True)
+                  sys.exit(0)
+              if not raw:
+                  print('SKIP no PUBLIC_URL secret configured', flush=True)
+                  sys.exit(0)
+
+          if not raw:
+              sys.exit('TARGET_URL is empty')
+
+          base = raw.rstrip('/')
           parts = urllib.parse.urlsplit(base)
           assert parts.scheme == 'https' and parts.hostname
           assert not parts.username and not parts.password

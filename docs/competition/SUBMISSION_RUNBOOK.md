@@ -3,6 +3,10 @@
 이 문서는 저장소 밖의 권한이 필요한 마지막 작업만 운영자가 수행하도록 만든 체크리스트다.
 코드·문서·배포 구성의 이상은 `scripts/submission_preflight.py`가 먼저 차단한다.
 
+**2026-09-05 운영 선택:** 실제 제출 서비스는 사용자 PC + Tailscale Funnel로 배포했다.
+서버 임대료가 없는 운영 경로는 [PC_HOSTING.md](PC_HOSTING.md)를 따른다.
+아래 Render 절차는 선택 가능한 유료 대안이다. 해커톤이 Render 또는 유료 서버를 요구하는 것은 아니다.
+
 ## 마감과 가용 시간
 
 - 예선 제출 마감: **2026-09-07 10:00 KST**
@@ -193,7 +197,7 @@ docker logs home-compass-rehearsal 2>&1 | Select-String -Pattern '\[인증\]'
 docker logs home-compass-rehearsal 2>&1 | Select-String -Pattern '\[설정\]'   # 출력이 없어야 한다
 ```
 
-## 3. Render에 공개 배포
+## 3. Render에 공개 배포 (선택 가능한 유료 대안)
 
 저장소 최종 커밋을 운영자의 GitHub/GitLab 원격에 올린 뒤 Render Dashboard에서 이 저장소의
 `render.yaml`로 **New Blueprint Instance**를 만든다. 구성은 현재 Render 공식 Blueprint
@@ -239,7 +243,7 @@ python -c "import secrets; print(secrets.token_urlsafe(24))"
 
 ## 4. 외부 URL 최종 검사
 
-Render가 발급한 `https://...onrender.com` URL을 시크릿/로그아웃 브라우저와 다른 네트워크
+실제로 배포한 공개 HTTPS URL을 시크릿/로그아웃 브라우저와 다른 네트워크
 (예: 휴대전화 LTE/5G)에서 각각 연다. 이어서 자동 검사를 실행한다.
 
 ```powershell

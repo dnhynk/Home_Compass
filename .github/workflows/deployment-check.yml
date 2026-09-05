@@ -1,0 +1,78 @@
+name: Public deployment check
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Public HTTPS origin to verify from a GitHub-hosted runner
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  external-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check anonymous access from outside the hosting network
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import ssl
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          base = event['inputs']['url'].strip().rstrip('/')
+          parts = urllib.parse.urlsplit(base)
+          assert parts.scheme == 'https' and parts.hostname
+          assert not parts.username and not parts.password
+          assert not parts.query and not parts.fragment and not parts.path
+          print('::add-mask::' + base, flush=True)
+          print('::add-mask::' + parts.hostname, flush=True)
+          context = ssl.create_default_context()
+
+          def request(path, payload=None):
+              data = None if payload is None else json.dumps(payload).encode()
+              headers = {'User-Agent': 'HomeCompass-submission-audit'}
+              if data is not None:
+                  headers['Content-Type'] = 'application/json'
+              req = urllib.request.Request(base + path, data=data, headers=headers)
+              try:
+                  with urllib.request.urlopen(req, context=context, timeout=30) as response:
+                      return response.status, response.read()
+              except urllib.error.HTTPError as error:
+                  return error.code, error.read()
+
+          started = time.monotonic()
+          status, body = request('/')
+          assert status == 200 and b'Home_Compass' in body
+          print('PASS external HTTPS homepage', flush=True)
+          status, body = request('/api/health')
+          assert status == 200 and json.loads(body)['status'] == 'ok'
+          print('PASS external health', flush=True)
+          sample = {'age':28,'annualIncomeKRW':42000000,'monthlyNetIncomeKRW':3000000,
+                    'liquidAssetsKRW':40000000,'existingDebtMonthlyKRW':300000,'householdSize':1,
+                    'regionCode':'11440','isHomeless':True,'isNewlywed':False,
+                    'isSMEEmployee':True,'preferredType':'any'}
+          status, body = request('/api/analyze', sample)
+          result = json.loads(body)
+          assert status == 200
+          assert result['affordability']['maxMonthlyHousingCostKRW'] == 860000
+          assert result['affordability']['recommendedMonthlyHousingCostKRW'] == 730000
+          assert 'internal' not in result
+          assert {'scenarios','policies','risk','provenance','dataGrade'} <= result.keys()
+          print('PASS external anonymous analysis and evidence', flush=True)
+          status, _ = request('/admin/')
+          assert status == 200
+          status, _ = request('/api/admin/drafts')
+          assert status in (401, 403)
+          print('PASS admin page available; anonymous staff access denied', flush=True)
+          print('PASS all external checks; seconds=' + str(round(time.monotonic()-started, 2)))
+          PY

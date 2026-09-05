@@ -895,6 +895,11 @@ class ChatResponse(_Strict):
     toolCalls: list[ChatToolCall]
     mode: str
     provider: str
+    model: str | None = None
+    retried: int | None = Field(default=None, ge=1)
+    degradedFrom: str | None = None
+    degradedReason: str | None = None
+    attempts: int | None = Field(default=None, ge=1)
 
 
 # --------------------------------------------------------------------------
@@ -2709,7 +2714,7 @@ def chat_endpoint(payload: ChatRequest) -> dict:
         log_llm_chat(mode=mode, outcome="failure",
                      latency_ms=(time.perf_counter() - started) * 1000)
         raise
-    log_llm_chat(mode=mode, outcome="success",
+    log_llm_chat(mode=mode, outcome="failure" if reply.get("degradedFrom") else "success",
                  latency_ms=(time.perf_counter() - started) * 1000)
     return reply
 

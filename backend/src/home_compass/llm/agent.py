@@ -508,6 +508,9 @@ def _openai_chat(
 
     client = OpenAI(timeout=LLM_TIMEOUT_SECONDS, max_retries=0)
     model = openai_model()
+    # Luna's Chat Completions function tools require reasoning to be disabled.
+    # Verified with the submission account on 2026-09-05 (otherwise HTTP 400).
+    request_options = {"reasoning_effort": "none"} if model.startswith("gpt-5.6-luna") else {}
     tools = to_openai_tools(regions)
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -518,7 +521,7 @@ def _openai_chat(
 
     for _ in range(MAX_TOOL_ITERATIONS):
         response = client.chat.completions.create(
-            model=model, messages=messages, tools=tools, tool_choice="auto"
+            model=model, messages=messages, tools=tools, tool_choice="auto", **request_options
         )
         choice = response.choices[0].message
         requested = choice.tool_calls or []
@@ -689,6 +692,21 @@ _PROVIDER_HANDLERS = {
 }
 
 
+def _public_failure_reason(exc: Exception | None) -> str:
+    """Describe an outage without publishing provider bodies, credentials or prompts."""
+    status = getattr(exc, "status_code", None)
+    if type(status) is int:
+        if status in (401, 403):
+            return "AI 서비스 인증 또는 접근 권한을 확인해야 합니다."
+        if status in (400, 404, 422):
+            return "AI 모델 또는 요청 설정을 확인해야 합니다."
+        if status == 429:
+            return "AI 서비스 사용 한도에 도달했습니다."
+        if 500 <= status <= 599:
+            return "AI 서비스에 일시적인 장애가 발생했습니다."
+    return "AI 서비스 응답을 받지 못했습니다. 잠시 후 다시 시도해 주세요."
+
+
 def chat(
     message: str,
     profile: dict | None = None,
@@ -758,7 +776,7 @@ def chat(
     # is surfaced both in the reply text and as a machine-readable field so the
     # UI can say *why* it is showing template output instead of just flipping
     # a badge the operator has to guess about.
-    reason = f"{type(last_exc).__name__}: {last_exc}".strip()[:300]
+    reason = _public_failure_reason(last_exc)
     fallback = _offline_chat(
         message, profile, constants=constants, regions=regions, policies=policies, now=now
     )

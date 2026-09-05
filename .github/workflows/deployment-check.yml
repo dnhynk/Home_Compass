@@ -17,19 +17,19 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Check anonymous access from outside the hosting network
-        env:
-          DEPLOYMENT_URL: ${{ inputs.url }}
         run: |
           python - <<'PY'
           import json
           import os
+          from pathlib import Path
           import ssl
           import time
           import urllib.error
           import urllib.parse
           import urllib.request
 
-          base = os.environ['DEPLOYMENT_URL'].strip().rstrip('/')
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          base = event['inputs']['url'].strip().rstrip('/')
           parts = urllib.parse.urlsplit(base)
           assert parts.scheme == 'https' and parts.hostname
           assert not parts.username and not parts.password

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "builder": "build_ppt.mjs",
+  "builderSha256": "8abc302600bd8add9163b2681a18ddee319b55106198a9b86b16a608f0bf1fb9",
+  "deck": "기술설명서_Home_Compass.pptx",
+  "deckSha256": "49b7d57a499f864c2175091042d7cd0538d1388003cf28417f503eb8afc395f7",
+  "deckTextSha256": "e14ed6588c5c142137392f87a2cce8d1ad0a2ff59f22cd5bceafe0e1e78e5055",
+  "slideCount": 19,
+  "slideSizeEmu": [
+    12191695,
+    6858000
+  ]
+}

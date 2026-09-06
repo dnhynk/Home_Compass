@@ -33,6 +33,8 @@ EXAMPLE_PROFILE = COMPETITION_DIR / "submission_profile.example.json"
 PLANNING_PDF = OUTPUT_DIR / "pdf" / "2026_금융_AI_Challenge_기획서_Home_Compass.pdf"
 FEATURE_PDF = OUTPUT_DIR / "pdf" / "2026_금융_AI_Challenge_기능명세서_Home_Compass.pdf"
 DECK = COMPETITION_DIR / "기술설명서_Home_Compass.pptx"
+DECK_BUILDER = COMPETITION_DIR / "build_ppt.mjs"
+DECK_MANIFEST = COMPETITION_DIR / "technical_deck_manifest.json"
 SOURCE_ZIP = OUTPUT_DIR / "submission" / "Home_Compass_source.zip"
 #: 운영자가 채워야 하는 자리는 전부 이 접두어로 시작한다. **정확한 문자열이 아니라
 #: 접두어로 거른다** — 자리가 늘 때마다 이 검사를 고쳐야 하면 다음 자리는 안 걸린다.
@@ -65,6 +67,8 @@ def check_required_files() -> Result:
         REPO_ROOT / "scripts" / "start_server.py",
         COMPETITION_DIR / "SUBMISSION_RUNBOOK.md",
         COMPETITION_DIR / "build_submission_pdfs.py",
+        DECK_BUILDER,
+        DECK_MANIFEST,
         COMPETITION_DIR / "capture_evidence.py",
         PLANNING_PDF,
         FEATURE_PDF,
@@ -179,21 +183,52 @@ def check_pdf(path: Path, label: str, headings: list[str], minimum_pages: int) -
 
 
 def check_deck() -> Result:
-    if not DECK.is_file():
-        return failed("presentation deck", "PPTX missing")
+    missing = [path.name for path in (DECK_BUILDER, DECK_MANIFEST, DECK) if not path.is_file()]
+    if missing:
+        return failed("presentation deck", f"missing={missing}")
     try:
         from pptx import Presentation
         deck = Presentation(str(DECK))
-        text = "\n".join(
-            shape.text for slide in deck.slides for shape in slide.shapes
-            if hasattr(shape, "text")
-        )
+        ordered_text = []
+        plain_text = []
+        for slide_number, slide in enumerate(deck.slides, start=1):
+            for shape in slide.shapes:
+                if not shape.has_text_frame:
+                    continue
+                for paragraph in shape.text_frame.paragraphs:
+                    value = "".join(run.text for run in paragraph.runs)
+                    if value.strip():
+                        ordered_text.append(f"{slide_number:02d}|{value}")
+                        plain_text.append(value)
+        text = "\n".join(plain_text)
+        manifest = json.loads(DECK_MANIFEST.read_text(encoding="utf-8"))
+        text_digest = hashlib.sha256(
+            json.dumps(
+                ordered_text, ensure_ascii=False, separators=(",", ":")
+            ).encode("utf-8")
+        ).hexdigest()
+        expected = {
+            "builder": DECK_BUILDER.name,
+            "builderSha256": hashlib.sha256(DECK_BUILDER.read_bytes()).hexdigest(),
+            "deck": DECK.name,
+            "deckSha256": hashlib.sha256(DECK.read_bytes()).hexdigest(),
+            "deckTextSha256": text_digest,
+            "slideCount": len(deck.slides),
+            "slideSizeEmu": [deck.slide_width, deck.slide_height],
+        }
     except Exception as exc:
         return failed("presentation deck", str(exc))
+    drift = [key for key, value in expected.items() if manifest.get(key) != value]
     stale = [phrase for phrase in ("KB 사업 연계", "KB국민은행", "KB 주택금융") if phrase in text]
-    if len(deck.slides) != 19 or stale:
-        return failed("presentation deck", f"slides={len(deck.slides)}, stale={stale}")
-    return passed("presentation deck", "19 slides, previous-contest brand removed")
+    if len(deck.slides) != 19 or stale or drift:
+        return failed(
+            "presentation deck",
+            f"slides={len(deck.slides)}, stale={stale}, manifest drift={drift}",
+        )
+    return passed(
+        "presentation deck",
+        "19 slides, source/deck manifest matches, previous-contest brand removed",
+    )
 
 
 def check_deployment_config() -> Result:

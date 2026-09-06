@@ -342,9 +342,10 @@ strong { font-weight: 650; }
   font-variant-numeric: tabular-nums;
 }
 .input-wrap input::placeholder {
-  color: #A9A397; font-weight: 450; opacity: 1;
+  color: #A9A397; font-size: 14px; font-weight: 400; letter-spacing: 0; opacity: 1;
 }
 .input-wrap.money input { text-align: right; padding-right: 6px; }
+.input-wrap.money input:placeholder-shown { text-align: left; padding-left: 12px; }
 .input-wrap select {
   appearance: none; -webkit-appearance: none;
   padding-right: 34px; cursor: pointer;

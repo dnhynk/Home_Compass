@@ -558,8 +558,8 @@ class TestTheScreenNeverFabricatesAMissingNumber:
         assert token not in STATUS_JS, f"화면이 존재할 수 없는 판정을 그린다: {token}"
 
     def test_the_screen_says_it_did_not_judge(self):
-        assert "overdueNote" in STATUS_JS, "판정하지 않았다는 사실이 화면에 안 실린다"
-        assert "판정하지 않습니다" in STATUS_JS
+        assert "처리 기한이 설정되지 않아" in STATUS_JS
+        assert "지연 여부는 표시하지 않습니다" in STATUS_JS
 
     def test_the_badge_never_adds_the_two_queues_together(self):
         """★ 6-A 워커가 짚은 것 — 더하면 그 수는 밀린 일이 아니라 누적 카운터가 된다."""
@@ -586,15 +586,9 @@ class TestTheScreenNeverFabricatesAMissingNumber:
         """
         assert token not in STATUS_JS, f"화면이 판정을 그린다: {token}"
 
-    def test_the_screen_names_the_three_undecided_thresholds(self):
-        """★ 위 금지가 [아무 말도 안 하는 화면] 으로 통과되지 않게 한다.
-
-        셋을 이름으로 적어야 검토자가 **왜** 판정이 없는지 알 수 있다. 적지 않으면
-        화면은 그냥 숫자만 늘어놓은 것이 되고, 그 상태는 판정을 그린 것과 마찬가지로
-        [정하지 않은 것을 정한 척] 하는 쪽으로 읽힐 여지를 남긴다.
-        """
-        for reference in ("#33", "#39", "7.3"):
-            assert reference in STATUS_JS, f"미정 근거가 화면에 없다: {reference}"
+    def test_the_screen_explains_what_the_reviewer_can_check(self):
+        for explanation in ("최신 공고와 함께 확인", "추출하지 못한 조건", "처리 기한이 설정되지 않아"):
+            assert explanation in STATUS_JS
 
     def test_the_stylesheet_reserves_colour_for_a_broken_log_not_for_a_verdict(self):
         """색이 판정으로 읽히는 것을 막는다 — 붉은 카드는 [지표가 나쁘다] 가 아니라

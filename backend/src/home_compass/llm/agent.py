@@ -24,7 +24,7 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 
 from ..engines import analyze, find_region
-from ..common import DISCLAIMER, money, safe_int
+from ..common import money, safe_int
 from ..config import (
     PROVIDER_ANTHROPIC,
     PROVIDER_OFFLINE,
@@ -49,12 +49,17 @@ SYSTEM_PROMPT = """당신은 'Home_Compass'의 청년 주거 금융 상담 에�
 절대 규칙:
 1. 금액, 비율, 점수 등 모든 숫자는 반드시 제공된 도구(tool)를 호출해서 얻으십시오.
    당신이 직접 계산하거나 추정한 숫자를 답변에 쓰면 안 됩니다.
-2. 도구가 돌려준 rationale(근거) 문장을 인용해 왜 그런 결론인지 설명하십시오.
+2. 도구가 돌려준 rationale(근거)에 따라 사용자에게 필요한 이유를 쉬운 말로 설명하십시오.
 3. 실제 금융상품의 금리·한도를 지어내지 마십시오. 도구가 준 값만 사용하고,
-   그 값이 프로토타입 예시임을 답변 말미에 한 번 밝히십시오.
+   출처가 확인되지 않은 상품 조건을 안내할 때만 참고값이며 신청 전 기관 확인이 필요하다고 짧게 덧붙이십시오.
 4. 모르면 모른다고 답하십시오.
 
-답변은 한국어로, 3~6문장 정도로 간결하게 작성하고 핵심 숫자를 먼저 제시하십시오."""
+답변은 한국어로 3~6문장 정도로 작성하고, 질문에 대한 답과 핵심 금액부터 제시하십시오.
+사용자가 궁금해한 선택지와 다음에 확인할 점에 집중하십시오. 첫 인사를 매번 반복하지 마십시오.
+엔진 번호(E1~E4), 함수명, 도구 호출, 내부 점검 과정이나 개발 규칙을 답변에 드러내지 마십시오.
+"값을 지어내지 않습니다", "엔진이 계산했습니다"처럼 자신을 설명하거나 구현을 홍보하는 문장을 쓰지 마십시오.
+도구 결과의 영문 상태값은 쉬운 한국어로 풀어 쓰고, 숫자 목록을 전부 나열하지 마십시오.
+출처가 확인되지 않은 참고값이라는 주의사항은 유지하되, "프로토타입", "시연용", "시드값" 같은 개발 용어는 쓰지 마십시오."""
 
 
 # --------------------------------------------------------------------------
@@ -79,7 +84,7 @@ def tool_specs(regions: Sequence[dict]) -> list:
         {
             "name": "assess_affordability",
             "description": (
-                "E1 주거지불능력 엔진. 사용자의 소득·부채·가구원수로 감당 가능한 월 주거비 "
+                "사용자의 소득·부채·가구원수로 감당 가능한 월 주거비 "
                 "상한과 권장액, 안전/주의/위험 밴드를 계산한다. "
                 "'얼마짜리 집에 살 수 있나', '월세 얼마까지 괜찮나' 류 질문에 반드시 사용."
             ),
@@ -102,7 +107,7 @@ def tool_specs(regions: Sequence[dict]) -> list:
         {
             "name": "check_eligibility",
             "description": (
-                "E2 정책·상품 적격성 룰엔진. 청년 주거 지원 제도별로 "
+                "청년 주거 지원 제도별로 "
                 "eligible/conditional/ineligible 판정과 판정 사유 배열을 돌려준다. "
                 "'무슨 지원을 받을 수 있나', '버팀목 대출 되나' 류 질문에 사용."
             ),
@@ -125,7 +130,7 @@ def tool_specs(regions: Sequence[dict]) -> list:
         {
             "name": "compare_tco",
             "description": (
-                "E3 전월세 총비용 비교 엔진. 전세/반전세/월세 시나리오별 5년 총비용(TCO), "
+                "전세/반전세/월세 시나리오별 5년 총비용(TCO), "
                 "현재가치(NPV), 월 환산비용, 적합도 점수를 돌려준다. "
                 "'전세가 나은가 월세가 나은가' 류 질문에 반드시 사용."
             ),
@@ -145,7 +150,7 @@ def tool_specs(regions: Sequence[dict]) -> list:
         {
             "name": "scan_risk",
             "description": (
-                "E4 전세보증금 리스크 스캐너. 전세가율·보증보험 가입 가능성·대출 비중 등을 "
+                "전세가율·보증보험 가입 가능성·대출 비중 등을 "
                 "종합해 0~100 위험 점수와 위험 요인 목록을 돌려준다. "
                 "'전세 사기 위험 없나', '보증금 떼일 위험' 류 질문에 사용."
             ),
@@ -346,7 +351,7 @@ def _offline_reply(message: str, result: dict, intent: str) -> str:
     risk = result["risk"]
     region = result["meta"]["region"]["name"]
 
-    lines = [f"[오프라인 모드] '{message.strip()[:60]}' 질문에 결정론적 엔진 결과로 답변드립니다.", ""]
+    lines = []
 
     if intent == "compare_tco":
         best = scenarios[0]
@@ -354,7 +359,7 @@ def _offline_reply(message: str, result: dict, intent: str) -> str:
         lines.append(
             f"{region} 기준 적합도 1위는 '{best['label']}'입니다. "
             f"5년 총비용 {money(best['tco5yKRW'])}, 월 환산 "
-            f"{money(best['monthlyEquivalentCostKRW'])}, 판정은 {best['verdict']}입니다."
+            f"{money(best['monthlyEquivalentCostKRW'])}입니다."
         )
         # Only worth a sentence when the two actually differ — otherwise it
         # reads as the same scenario repeated twice.
@@ -368,42 +373,36 @@ def _offline_reply(message: str, result: dict, intent: str) -> str:
         if best["verdict"] != "affordable":
             lines.append(
                 f"다만 권장 주거비 {money(result['affordability']['recommendedMonthlyHousingCostKRW'])}"
-                f"를 기준으로 보면 여유 있는 선택은 아닙니다(판정: {best['verdict']})."
+                f"를 기준으로 보면 부담이 있을 수 있습니다."
             )
         lines.extend(f"· {r}" for r in best["rationale"][:3])
     elif intent == "scan_risk":
         lines.append(
-            f"{region} 기준 보증금 위험 점수는 {risk['score']}점({risk['band']})입니다."
+            f"{region} 기준 보증금 위험 점수는 {risk['score']}점입니다."
         )
         for factor in risk["factors"][:3]:
-            lines.append(f"· {factor['name']} {factor['valuePct']}% ({factor['impact']}) — {factor['note']}")
+            value = f" {factor['valuePct']}%" if factor['valuePct'] is not None else ''
+            lines.append(f"· {factor['name']}{value} — {factor['note']}")
     elif intent == "check_eligibility":
         eligible = [p for p in policies if p["status"] == "eligible"]
         conditional = [p for p in policies if p["status"] == "conditional"]
         lines.append(
-            f"검토한 {len(policies)}개 제도 중 적격 {len(eligible)}건, 조건부 {len(conditional)}건입니다."
+            f"입력한 조건에 맞는 제도가 {len(eligible)}건, 추가 확인이 필요한 제도가 {len(conditional)}건 있습니다."
         )
         for policy in (eligible + conditional)[:3]:
             lines.append(
-                f"· [{policy['status']}] {policy['name']} (한도 {money(policy['maxAmountKRW'])}, "
-                f"출처 {policy['source']}) — {policy['reasons'][0]}"
+                f"· {policy['name']} (한도 {money(policy['maxAmountKRW'])}) — {policy['reasons'][0]}"
             )
+        lines.append("한도와 신청 조건은 참고 정보입니다. 신청 전 해당 기관의 최신 공고를 확인하세요.")
     else:
         # 슈바베지수는 더 이상 affordability 에 없다 (F-1, SPEC 5.2.1) — 시나리오별
         # 측정값이므로 최상위 단일값을 인용할 수 없다. 밴드와 금액만 인용한다.
         lines.append(
             f"감당 가능한 월 주거비 상한은 {money(affordability['maxMonthlyHousingCostKRW'])}, "
-            f"권장액은 {money(affordability['recommendedMonthlyHousingCostKRW'])}이며 "
-            f"밴드는 {affordability['band']}입니다."
+            f"권장액은 {money(affordability['recommendedMonthlyHousingCostKRW'])}입니다."
         )
         lines.extend(f"· {r}" for r in affordability["rationale"][:3])
 
-    lines.append("")
-    lines.append(
-        "※ LLM API 키가 설정되지 않아 템플릿 모드로 응답했습니다. "
-        "숫자는 모두 실제 엔진이 계산한 값입니다."
-    )
-    lines.append(f"※ {DISCLAIMER}")
     return "\n".join(lines)
 
 
@@ -485,9 +484,7 @@ def _prior_turns(history: list) -> list:
 
 
 def _iteration_cap_reply(tool_calls: list) -> str:
-    return "도구 호출이 너무 많아 요약으로 답변드립니다.\n" + "\n".join(
-        f"· {c['tool']}: {c['resultSummary']}" for c in tool_calls
-    )
+    return "한 번에 답변을 정리하지 못했습니다. 예산, 지원 제도, 전월세 비교 중 하나씩 질문해 주세요."
 
 
 # --------------------------------------------------------------------------
@@ -772,17 +769,11 @@ def chat(
         except Exception as exc:  # noqa: BLE001 — graceful degradation is required
             last_exc = exc
 
-    # Still failing after the retry. Degrade — but never silently: the reason
-    # is surfaced both in the reply text and as a machine-readable field so the
-    # UI can say *why* it is showing template output instead of just flipping
-    # a badge the operator has to guess about.
+    # Preserve outage metadata for monitoring. The UI identifies basic guidance
+    # separately, so the reply itself can stay focused on the housing question.
     reason = _public_failure_reason(last_exc)
     fallback = _offline_chat(
         message, profile, constants=constants, regions=regions, policies=policies, now=now
-    )
-    fallback["reply"] = (
-        f"[{provider} 호출이 {LLM_MAX_ATTEMPTS}회 모두 실패해 결정론적 엔진 결과로 답변드립니다. "
-        f"사유: {reason}]\n\n" + fallback["reply"]
     )
     fallback["degradedFrom"] = provider
     fallback["degradedReason"] = reason

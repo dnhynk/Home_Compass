@@ -287,8 +287,8 @@ class TestTheScreenActuallyBoots:
     def test_all_seven_two_metrics_are_on_the_screen(self, observed_screen):
         """SPEC 7.2 가 이름으로 요구한 다섯 + 7.3 의 대기 큐 + 신고 + 로그."""
         text = observed_screen["metrics"]
-        for label in ("배치 성공률", "데이터 신선도", "LLM 호출", "추출 스키마 실패율",
-                      "승인 대기", "현장 신고", "파일 로그"):
+        for label in ("시세 수집 성공률", "자료 갱신 시점", "AI 상담 응답", "정책 조건 추출", "조건 추출 실패율",
+                      "승인 대기", "현장 신고", "처리 기록"):
             assert label in text, f"7.2 지표가 화면에 없다: {label}"
         assert len(observed_screen["cards"]) == 8
 
@@ -300,7 +300,7 @@ class TestTheScreenActuallyBoots:
 class TestNothingObservedIsNotDrawnAsZero:
     def test_the_empty_screen_says_so_in_words(self, empty_screen):
         text = empty_screen["metrics"]
-        assert "아직 안 돎" in text, "배치 이력이 없는데 화면이 그 사실을 말하지 않는다"
+        assert "실행 기록 없음" in text, "배치 이력이 없는데 화면이 그 사실을 말하지 않는다"
         assert "호출 없음" in text
         assert "추출 이력 없음" in text
         assert "취득 이력 없음" in text
@@ -333,19 +333,19 @@ class TestNothingObservedIsNotDrawnAsZero:
 class TestTheScreenSaysWhatItDidNotJudge:
     def test_the_queue_card_carries_the_overdue_note(self, observed_screen):
         text = observed_screen["metrics"]
-        assert "SLA N값이 미정" in text
-        assert "판정하지 않는다" in text
+        assert "처리 기한이 설정되지 않아" in text
+        assert "지연 여부는 표시하지 않습니다" in text
 
     def test_the_freshness_card_says_the_threshold_is_undecided(self, observed_screen):
-        assert "신선도 임계가 미정" in observed_screen["metrics"]
+        assert "최신 공고와 함께 확인" in observed_screen["metrics"]
 
     def test_the_extraction_card_says_there_is_no_pass_line(self, observed_screen):
-        assert "합격선을 두지 않는다" in observed_screen["metrics"]
+        assert "추출하지 못한 조건" in observed_screen["metrics"]
 
-    def test_the_foot_names_all_three_undecided_thresholds(self, observed_screen):
-        foot = observed_screen["foot"]
-        assert "#33" in foot and "#39" in foot and "7.3" in foot
-        assert "판정하지 않습니다" in foot
+    def test_visible_metrics_do_not_expose_internal_specification_labels(self, observed_screen):
+        text = observed_screen["metrics"] + observed_screen["foot"] + observed_screen["summary"]
+        for internal_label in ("SPEC", "계약 결정", "#33", "#39", "SLA N", "외부 APM"):
+            assert internal_label not in text
 
 
 # ==========================================================================
@@ -361,7 +361,7 @@ class TestTheBadgeKeepsTheTwoQueuesApart:
 
     def test_the_badge_says_the_report_count_accumulates(self, observed_screen):
         assert "누적" in observed_screen["badge"]
-        assert "누적" in observed_screen["badgeTitle"]
+        assert "지금까지 접수된" in observed_screen["badgeTitle"]
 
     def test_the_badge_shows_the_longest_wait_but_no_overdue_count(self, observed_screen):
         badge = observed_screen["badge"]
@@ -409,15 +409,15 @@ class TestANegativeAgeIsNamedNotClamped:
 # ==========================================================================
 
 class TestTheScreenAdmitsWhenItsOwnNumbersAreShort:
-    def test_a_clean_log_says_the_request_body_is_not_written(self, observed_screen):
-        assert "요청 본문을 적지 않습니다" in observed_screen["metrics"]
+    def test_a_clean_log_reports_successful_recording(self, observed_screen):
+        assert "처리 기록을 정상적으로 저장" in observed_screen["metrics"]
 
     def test_a_leaking_log_says_the_denominator_is_short(self):
         status = observed_status()
         status["log"].update({"unreadableLines": 3, "writeFailures": 2})
         screen = render(status)
-        assert "기록이 새고 있습니다" in screen["metrics"]
-        assert "분모가 실제 호출 수보다 작습니다" in screen["metrics"]
+        assert "저장하지 못한 기록" in screen["metrics"]
+        assert "실제 처리 건수와 다를 수 있습니다" in screen["metrics"]
 
 
 # ==========================================================================
@@ -428,5 +428,6 @@ def test_a_failed_status_request_is_not_drawn_as_an_empty_screen():
     """★ 비어 있는 지표 화면은 [문제 없음] 으로 읽힌다 (SPEC 6.2 침묵 폴백 금지)."""
     screen = run_screen(dict(BASE_RESPONSES))       # `/api/admin/status` 만 없다
     assert screen["metrics"] == "", "지표를 못 읽었는데 카드가 그려졌다"
-    assert "지표를 불러오지 못했습니다" in screen["summary"]
-    assert "0 이라는 뜻이 아닙니다" in screen["foot"]
+    assert "처리 현황을 불러오지 못했습니다" in screen["summary"]
+    assert "연결 상태를 확인하고 새로고침" in screen["foot"]
+    assert "/api/" not in screen["summary"]

@@ -318,7 +318,9 @@ strong { font-weight: 650; }
   font-size: 11px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
 }
-.field + .field, .field-row + .field, .field + .field-row { margin-top: 14px; }
+.fieldset > .field + .field,
+.fieldset > .field-row + .field,
+.fieldset > .field + .field-row { margin-top: 14px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .field label, .label-static {
@@ -470,14 +472,6 @@ strong { font-weight: 650; }
   color: rgba(255,255,255,.76);
 }
 .hero-body strong { color: #fff; }
-.hero-metrics {
-  margin-top: clamp(24px, 3vw, 36px);
-  display: flex; flex-wrap: wrap; gap: clamp(20px, 3.5vw, 54px);
-  padding-top: 22px; border-top: 1px solid rgba(255,255,255,.13);
-}
-.hero-metrics > div { display: flex; flex-direction: column; gap: 3px; }
-.hm-num { font-size: clamp(24px, 2.4vw, 32px); font-weight: 750; letter-spacing: -.04em; line-height: 1; }
-.hm-lbl { font-size: 11.5px; color: rgba(255,255,255,.6); font-weight: 500; letter-spacing: 0; }
 
 .engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(188px, 1fr)); gap: 12px; }
 .engine-card {
@@ -489,14 +483,9 @@ strong { font-weight: 650; }
   border-color: var(--accent-yellow); transform: translateY(-2px);
   box-shadow: var(--shadow-1);
 }
-.engine-no {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 30px; height: 22px; padding: 0 8px; border-radius: 6px;
-  background: var(--accent-yellow-tint); color: #8A6200;
-  font-size: 11px; font-weight: 750; letter-spacing: .06em; margin-bottom: 11px;
-}
 .engine-card h3 { font-size: 15px; font-weight: 700; letter-spacing: -.025em; }
 .engine-card p { margin-top: 6px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+
 
 /* ============================================================
    SKELETON
@@ -929,15 +918,6 @@ strong { font-weight: 650; }
 .msg-user .msg-bubble {
   background: var(--ink-1); color: #fff; border-top-right-radius: 4px;
 }
-.msg-tools { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
-.tool-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 10.5px; font-weight: 650; letter-spacing: .01em;
-  background: var(--surface); border: 1px solid var(--line);
-  color: var(--ink-2); border-radius: 6px; padding: 3px 8px;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-}
-.tool-chip::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--s1); }
 .typing { display: inline-flex; gap: 4px; padding: 4px 0; }
 .typing i {
   width: 6px; height: 6px; border-radius: 50%; background: var(--ink-4);
@@ -1153,51 +1133,6 @@ strong { font-weight: 650; }
   background: rgba(27,25,21,.06);
 }
 .local-banner .banner-fix { display: inline-block; margin-left: 4px; }
-
-/* ── 데이터 등급 (SPEC 2.4) ──────────────────────────────── */
-.grade-note, .grade-foot { font-size: 12.5px; color: var(--ink-2); line-height: 1.65; }
-.grade-foot { margin-top: 14px; color: var(--ink-3); font-size: 11.5px; }
-.grade-absent {
-  padding: 14px 16px; border-radius: var(--r-md);
-  background: var(--plane); border: 1px dashed var(--line-strong);
-  font-size: 12.5px; color: var(--ink-2); line-height: 1.65;
-}
-/* 원인 유형의 구분은 **제목의 칩**이 진다 — 이 파일 머리말의 규약 그대로
-   「색에는 아이콘과 라벨이 항상 동반한다」. 카드 옆면에 색 띠를 두는 방식은
-   색만으로 의미를 나르게 되고, 제목이 이미 유형을 글로 말하고 있어 중복이기도 하다. */
-.grade-group {
-  margin-top: 14px; padding: 13px 15px;
-  background: var(--plane); border: 1px solid var(--line-soft); border-radius: var(--r-md);
-}
-.grade-group h3 {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-  font-size: 13.5px; font-weight: 700; color: var(--ink-1);
-}
-.grade-count {
-  padding: 1px 7px; border-radius: 999px;
-  background: var(--plane-sunk); color: var(--ink-2); font-size: 11px; font-weight: 650;
-}
-.grade-owner { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--ink-3); }
-.grade-why { margin-top: 4px; font-size: 11.5px; color: var(--ink-3); }
-.grade-facts { list-style: none; margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
-.grade-facts li {
-  display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) auto;
-  gap: 8px; align-items: baseline;
-  padding-top: 5px; border-top: 1px solid var(--line-soft);
-  font-size: 11.5px;
-}
-.grade-facts li:first-child { border-top: 0; padding-top: 0; }
-.grade-fact { color: var(--ink-1); min-width: 0; overflow-wrap: anywhere; }
-.grade-origin { color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; }
-.grade-targets code {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10.5px; padding: 1px 5px; border-radius: 4px;
-  background: var(--plane-sunk); color: var(--ink-2);
-}
-@media (max-width: 720px) {
-  .grade-facts li { grid-template-columns: 1fr; gap: 2px; }
-  .grade-owner { margin-left: 0; }
-}
 
 /* ── 내부 정보 (SPEC 6.1) ────────────────────────────────── */
 .card-internal { border-color: var(--line-strong); background: var(--accent-yellow-wash); }

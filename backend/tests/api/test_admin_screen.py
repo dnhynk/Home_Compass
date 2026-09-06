@@ -301,12 +301,13 @@ class TestAFailedDraftShowsItsReasonAndCannotBeDecided:
         assert block is not None, "syncDecisionButtons 가 없다"
         assert button in block.group(0), f"{button} 이 차단을 따르지 않는다"
 
-    def test_the_screen_still_shows_the_raw_code(self):
-        """옮긴 말만 남기면 개발자가 재현할 수 없다 — 원래 코드도 함께 보인다."""
+    def test_the_screen_explains_failure_without_developer_codes(self):
         source = APP_JS.read_text(encoding="utf-8")
         block = re.search(r"function renderFailure\(\w+\)\s*\{.*?\n  \}", source, re.S)
         assert block is not None
-        assert re.search(r"\.code\b", block.group(0)), "사유의 원래 코드를 화면에 싣지 않는다"
+        assert "rejectionLabel(item)" in block.group(0)
+        assert "failure-code" not in block.group(0)
+        assert "failure-pointer" not in block.group(0)
 
 
 # --- ③ 손으로 쓴 사본이 조용히 낡지 않는다 ---------------------------------
@@ -419,25 +420,22 @@ class TestTheDraftStatusVocabularyOnScreenMatchesTheServer:
             "사유 표를 상태 어휘로 검사했는데 통과했다 — 검사기가 블록 이름을 안 본다")
 
 
-# --- ⑤ 옮긴 말만 남기지 않는다 — 상태에도 원래 코드가 함께 선다 -----------------
-#
-# ③ 이 사유에 대해 고정한 것과 같은 규율이다. 번역만 남기면 개발자가 재현할 수 없다.
+# --- ⑤ 검토 화면에는 사용자가 읽을 수 있는 상태를 표시한다 -------------------
 
-class TestTheScreenShowsBothTheKoreanAndTheRawStatus:
-    def test_the_queue_row_carries_both(self):
+class TestTheScreenShowsReadableStatus:
+    def test_the_queue_row_uses_the_readable_status(self):
         source = APP_JS.read_text(encoding="utf-8")
         block = re.search(r"function renderQueue\(\)\s*\{.*?\n  \}", source, re.S)
         assert block is not None, "renderQueue 가 없다"
         assert "statusLabel(draft.status)" in block.group(0), "큐가 상태를 옮기지 않는다"
-        assert "statusCode(draft.status)" in block.group(0), (
-            "큐가 원래 상태 코드를 함께 싣지 않는다 — 번역만 남으면 재현할 수 없다")
+        assert "statusCode(draft.status)" not in block.group(0)
 
-    def test_the_review_header_carries_both(self):
+    def test_the_review_header_uses_the_readable_status(self):
         source = APP_JS.read_text(encoding="utf-8")
         assert re.search(
-            r"addMeta\(meta, '초안 상태', statusLabel\(draft\.status\), draft\.status\)",
+            r"addMeta\(meta, '초안 상태', statusLabel\(draft\.status\)\)",
             source,
-        ), "검토창 머리말이 옮긴 말과 원래 코드를 함께 싣지 않는다"
+        ), "검토창 머리말에 읽을 수 있는 상태가 없다"
 
     def test_an_unknown_status_falls_back_to_the_raw_code(self):
         """★ 서버가 어휘를 늘렸는데 파수병이 아직 안 돈 사이에도 화면이 지어내지 않는다."""

@@ -1347,34 +1347,11 @@
     });
   }
 
-  var SAMPLE = {
-    age: 28, annualIncome: 4200, monthlyNetIncome: 300,
-    liquidAssets: 4000, existingDebt: 30, householdSize: '1',
-    isHomeless: true, isSMEEmployee: true, isNewlywed: false, preferredType: 'any'
-  };
-  function fillSample() {
-    ['age', 'annualIncome', 'monthlyNetIncome', 'liquidAssets', 'existingDebt'].forEach(function (id) {
-      document.getElementById(id).value = SAMPLE[id];
-    });
-    $('#householdSize').value = SAMPLE.householdSize;
-    $('#isHomeless').checked = SAMPLE.isHomeless;
-    $('#isSMEEmployee').checked = SAMPLE.isSMEEmployee;
-    $('#isNewlywed').checked = SAMPLE.isNewlywed;
-    $$('#preferredType button').forEach(function (b) {
-      b.setAttribute('aria-checked', String(b.getAttribute('data-value') === SAMPLE.preferredType));
-    });
-    syncPreferredTypeTabStops();
-    if (STATE.regions.length) $('#regionCode').value = STATE.regions[0].code;
-    syncMoneyEcho();
-    updateRegionHelp();
-    toast('예시 프로필을 채웠습니다. <b>주거비 진단 시작</b>을 눌러보세요.');
-  }
-
   /* ── 세션 (SPEC 6.1 · 6.3 · D-9) ──────────────────────────────────────────
      로그인은 **같은 화면**에서 켠다. 판정 화면을 역할별로 포크하지 않는다.
      로그인이 하는 일은 응답에 `internal` 이 실리게 하는 것뿐이고, 그 판단은
      API 가 한다 — 화면은 필드 유무만 본다. */
-  var ROLE_LABEL = { counselor: '상담원', rule_manager: '규칙관리자' };
+  var ROLE_LABEL = { counselor: '상담원', rule_manager: '관리자' };
 
   function renderSessionBar() {
     var bar = $('#sessionBar');
@@ -1387,62 +1364,90 @@
       $('#btnLogout').addEventListener('click', doLogout);
     } else {
       bar.innerHTML =
-        '<button type="button" class="btn btn-ghost btn-xs session-toggle" id="btnStaffLogin"' +
-        ' aria-expanded="false" aria-controls="loginForm">직원 로그인</button>' +
-        '<form class="session-form" id="loginForm" data-open="false">' +
-        '<label class="sr-only" for="loginUser">아이디</label>' +
-        '<input type="text" id="loginUser" value="counsler" placeholder="상담원 아이디" autocomplete="username">' +
-        '<label class="sr-only" for="loginPass">비밀번호</label>' +
-        '<input type="password" id="loginPass" placeholder="비밀번호" autocomplete="current-password">' +
-        '<button type="submit" class="btn btn-ghost btn-xs">직원 로그인</button></form>';
-      $('#loginForm').addEventListener('submit', doLogin);
-      $('#btnStaffLogin').addEventListener('click', function () {
-        setStaffLoginOpen($('#btnStaffLogin').getAttribute('aria-expanded') !== 'true');
-      });
-      /* Escape 는 패널 안에서만 받는다. 문서 전역으로 걸면 이상 신고
-         대화상자의 Escape 와 같은 키를 두 곳이 나누어 갖게 된다. */
-      var onEscape = function (e) {
-        if (e.key !== 'Escape') return;
-        if ($('#btnStaffLogin').getAttribute('aria-expanded') !== 'true') return;
-        setStaffLoginOpen(false);
-        $('#btnStaffLogin').focus();
-      };
-      $('#btnStaffLogin').addEventListener('keydown', onEscape);
-      $('#loginForm').addEventListener('keydown', onEscape);
+        '<button type="button" class="btn btn-ghost btn-xs" id="btnLogin"' +
+        ' aria-haspopup="dialog" aria-controls="loginModal">로그인</button>';
+      $('#btnLogin').addEventListener('click', openLoginDialog);
     }
   }
 
-  /* ≤620px 에서 로그인 칸은 상단바 아래 디스클로저로 내려가 있다 (styles.css 의
-     같은 대역). 그보다 넘는 폭에서는 토글이 `display: none` 이라 눌릴 수 없고 폼은
-     항상 펼쳐져 있다 — 그래서 이 상태는 CSS 가 읽는 속성 둘(`aria-expanded` · `data-open`)
-     로만 둔다. 폭을 JS 가 재지 않게 하려는 것이다 — 재면 리사이즈마다 둘이 어긋난다. */
-  function setStaffLoginOpen(open) {
-    var toggle = $('#btnStaffLogin');
-    var form = $('#loginForm');
-    if (!toggle || !form) return;
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    form.setAttribute('data-open', open ? 'true' : 'false');
-    if (open) $('#loginUser').focus();
+  var loginCloseTimer = null;
+
+  function openLoginDialog() {
+    var modal = $('#loginModal');
+    if (!modal) return;
+    clearTimeout(loginCloseTimer);
+    STATE.loginOpener = document.activeElement;
+    modal.removeAttribute('data-closing');
+    modal.hidden = false;
+    document.body.classList.add('login-open');
+    $('#loginNote').textContent = '';
+    requestAnimationFrame(function () { $('#loginUser').focus(); });
+  }
+
+  function closeLoginDialog(restoreFocus) {
+    var modal = $('#loginModal');
+    if (!modal || modal.hidden || modal.getAttribute('data-closing') === 'true') return;
+    modal.setAttribute('data-closing', 'true');
+    clearTimeout(loginCloseTimer);
+    loginCloseTimer = setTimeout(function () {
+      var opener = STATE.loginOpener;
+      modal.hidden = true;
+      modal.removeAttribute('data-closing');
+      document.body.classList.remove('login-open');
+      $('#loginPass').value = '';
+      STATE.loginOpener = null;
+      if (restoreFocus !== false && opener && document.contains(opener) && opener.focus) opener.focus();
+    }, 150);
+  }
+
+  function loginModalKeydown(e) {
+    var modal = $('#loginModal');
+    if (!modal || modal.hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeLoginDialog(true); return; }
+    if (e.key !== 'Tab') return;
+    var stops = $$('#loginModal button, #loginModal input')
+      .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
+    if (!stops.length) return;
+    var first = stops[0];
+    var last = stops[stops.length - 1];
+    var here = document.activeElement;
+    if (e.shiftKey && (here === first || !modal.contains(here))) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && (here === last || !modal.contains(here))) {
+      e.preventDefault(); first.focus();
+    }
   }
 
   function doLogin(e) {
     e.preventDefault();
     var username = $('#loginUser').value.trim();
     var password = $('#loginPass').value;
-    if (!username || !password) { toast('아이디와 비밀번호를 입력해 주세요.'); return; }
+    var note = $('#loginNote');
+    if (!username || !password) {
+      note.textContent = '아이디와 비밀번호를 입력해 주세요.';
+      (username ? $('#loginPass') : $('#loginUser')).focus();
+      return;
+    }
+    note.textContent = '';
+    $('#loginSubmit').disabled = true;
     apiFetch('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username: username, password: password })
     }).then(function (s) {
+      $('#loginSubmit').disabled = false;
+      closeLoginDialog(false);
       STATE.session = s;
       renderSessionBar();
       /* 신고 버튼은 세션이 켜지는 순간 나타나야 한다 — 다시 진단할 때까지 기다리면
          상담원은 [이 화면에는 없다]로 읽는다. */
       renderRegionReport();
       if (STATE.lastResult) renderPolicies(STATE.lastResult.policies || []);
-      toast('로그인했습니다. 다시 진단하면 상담용 상세 조건도 확인할 수 있습니다.');
+      toast('로그인했습니다.');
     }).catch(function (err) {
-      toast('로그인하지 못했습니다: ' + esc((err && err.message) || '알 수 없는 오류'));
+      $('#loginSubmit').disabled = false;
+      note.textContent = '로그인하지 못했습니다. 아이디와 비밀번호를 확인해 주세요.';
+      $('#loginPass').focus();
+      $('#loginPass').select();
     });
   }
 
@@ -1475,7 +1480,7 @@
   function printSummary() {
     if (!STATE.lastResult) { toast('먼저 진단을 실행해 주세요.'); return; }
     if (!STATE.lastResult.internal) {
-      toast('직원 계정으로 로그인하고 다시 진단하면 요약본을 출력할 수 있습니다.');
+      toast('로그인 후 다시 진단해 주세요. 요약본은 상담원 권한에서 사용할 수 있습니다.');
       return;
     }
     window.print();
@@ -1492,7 +1497,6 @@
 
   function wire() {
     $('#profileForm').addEventListener('submit', analyze);
-    $('#btnSample').addEventListener('click', fillSample);
     $('#btnPrint').addEventListener('click', printSummary);
     $('#regionCode').addEventListener('change', updateRegionHelp);
     $$('.money-echo').forEach(function (node) {
@@ -1531,13 +1535,12 @@
     document.addEventListener('keydown', reportModalKeydown);
     $('#reportPrivacy').textContent = REPORT_PRIVACY_NOTICE;
 
-    /* 열린 직원 로그인 패널은 바깥을 누르면 접힌다. 위임으로 받는 이유는
-       `#sessionBar` 가 로그인·로그아웃마다 다시 그려져 안의 요소가 교체되기 때문이다. */
-    document.addEventListener('pointerdown', function (event) {
-      var bar = $('#sessionBar');
-      if (!bar || bar.contains(event.target)) return;
-      setStaffLoginOpen(false);
+    $('#loginForm').addEventListener('submit', doLogin);
+    $('#loginCancel').addEventListener('click', function () { closeLoginDialog(true); });
+    $('#loginModal').addEventListener('pointerdown', function (event) {
+      if (event.target === $('#loginModal')) closeLoginDialog(true);
     });
+    document.addEventListener('keydown', loginModalKeydown);
 
     /* 선택 상태가 `is-on` 클래스뿐이었다 — 화면에는 보이지만 접근성 트리에는 없다.
        aria-pressed 로 같은 사실을 노출한다. 값은 클래스와 한 곳에서 함께 바꾼다. */

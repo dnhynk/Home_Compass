@@ -36,10 +36,8 @@
       <span class="conn" id="connBadge" title="서비스 연결 상태">
         <span id="connText">연결 확인 중</span>
       </span>
-      <!-- 직원 로그인. 판정 화면을 역할별로 포크하지 않는다 (SPEC 6.1 · D-9) —
-           로그인이 하는 일은 응답에 internal 필드가 실리게 하는 것뿐이다. -->
+      <!-- 로그인 뒤 서버가 돌려준 역할에 따라 권한 기능을 연다 (SPEC 6.1 · D-9). -->
       <div class="session" id="sessionBar"></div>
-      <button type="button" class="btn btn-ghost" id="btnSample">예시 프로필 채우기</button>
     </div>
   </div>
 </header>
@@ -410,6 +408,29 @@
 
 <div class="viz-tip" id="vizTip" role="tooltip" hidden></div>
 <div class="toast" id="toast" role="status" hidden></div>
+
+<!-- ══════════════ 로그인 ══════════════ -->
+<div class="login-modal" id="loginModal" role="dialog" aria-modal="true"
+     aria-labelledby="loginTitle" hidden>
+  <form class="login-panel" id="loginForm" novalidate>
+    <div class="login-head">
+      <div>
+        <h2 class="login-title" id="loginTitle">로그인</h2>
+        <p class="login-sub">계정 정보를 입력해 주세요.</p>
+      </div>
+      <button type="button" class="login-close" id="loginCancel" aria-label="로그인 창 닫기">×</button>
+    </div>
+
+    <label class="login-label" for="loginUser">아이디</label>
+    <input class="login-input" type="text" id="loginUser" autocomplete="username">
+
+    <label class="login-label" for="loginPass">비밀번호</label>
+    <input class="login-input" type="password" id="loginPass" autocomplete="current-password">
+
+    <p class="login-note" id="loginNote" role="status"></p>
+    <button type="submit" class="btn btn-primary login-submit" id="loginSubmit">로그인</button>
+  </form>
+</div>
 
 <!-- ══════════════ 이상 신고 (SPEC 6.4 · 7.1) ══════════════
      ★ **대상을 자유 텍스트로 받지 않는다.** 아래 「항목」은 입력칸이 아니라 목록이고,

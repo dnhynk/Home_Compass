@@ -406,7 +406,7 @@ def check_public_url(raw_url: str | None) -> list[Result]:
     return [
         passed("public URL homepage", f"{base}/ -> Home_Compass HTML"),
         passed("public URL health", f"{base}/api/health -> ok"),
-        passed("public URL analysis", "sample profile -> 860,000 / 730,000 KRW and complete evidence"),
+        passed("public URL analysis", "validation profile -> 860,000 / 730,000 KRW and complete evidence"),
         # ★ 마지막에 부른다. 위 셋이 깨지면 라이브 여부를 물을 것도 없고, 그때는 호출을
         #   아끼는 편이 낫다 — 이 한 줄이 실제 LLM 요금을 쓰는 유일한 검사다.
         check_live_llm(base, sample),

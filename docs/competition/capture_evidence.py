@@ -41,7 +41,6 @@ def main() -> int:
         page.wait_for_timeout(500)
         page.screenshot(path=out / "home_compass_onboarding.png")
 
-        page.click("#btnSample")
         page.click("#btnAnalyze")
         page.wait_for_selector("#dashboard:not([hidden])", timeout=15_000)
         page.locator("#toast").wait_for(state="hidden", timeout=7_000)

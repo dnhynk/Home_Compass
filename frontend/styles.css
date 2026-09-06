@@ -562,8 +562,8 @@ strong { font-weight: 650; }
   display: block; font-size: 12.5px; color: var(--ink-1); margin-bottom: 4px;
 }
 .schwabe-rows { list-style: none; display: flex; flex-direction: column; gap: 7px; }
-.schwabe-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, 1.4fr) auto;
+.schwabe-row, .schwabe-scale, .schwabe-reference-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, 1.4fr) 46px;
   gap: 10px; align-items: center;
 }
 /* 클램프 2줄은 1440px 의 이름 칸에서만 성립했다. 1100~1280px(노트북)과
@@ -579,23 +579,27 @@ strong { font-weight: 650; }
 .schwabe-val { font-size: 13px; font-weight: 700; letter-spacing: -.02em; text-align: right; }
 .schwabe-na { font-size: 11.5px; color: var(--ink-4); }
 .schwabe-axis {
-  position: relative; height: 42px; margin-top: 2px;
-  border-top: 1px solid var(--line-soft);
+  grid-column: 2; display: flex; justify-content: space-between;
+  height: 18px; margin-top: 2px; padding-top: 4px;
+  border-top: 1px solid var(--line-soft); font-size: 10.5px; color: var(--ink-4);
 }
-.schwabe-axis > span {
-  position: absolute; top: 4px; transform: translateX(-50%);
-  font-size: 10.5px; color: var(--ink-4); white-space: nowrap;
+.schwabe-ref-line { stroke-width: 1.5; vector-effect: non-scaling-stroke; pointer-events: none; }
+.schwabe-ref-line-rec { stroke: var(--good-ink); }
+.schwabe-ref-line-max { stroke: var(--caution-ink); }
+.schwabe-references {
+  grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 5px 16px;
+  min-width: 0; margin-top: -1px;
 }
-.schwabe-axis > span:first-child { transform: none; }
-.schwabe-axis .schwabe-axis-end { transform: translateX(-100%); }
-.schwabe-mark { top: -7px !important; }
-.schwabe-mark i {
-  display: block; width: 1px; height: 12px; margin: 0 auto;
-  background: var(--axis);
+.schwabe-ref {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10.5px; color: var(--ink-3); white-space: nowrap;
 }
-.schwabe-mark b { display: block; font-size: 10px; font-weight: 650; color: var(--ink-3); }
-.schwabe-mark-rec b { color: var(--good-ink); }
-.schwabe-mark-max b { color: var(--caution-ink); transform: translateY(12px); }
+.schwabe-ref i { width: 2px; height: 12px; border-radius: 1px; flex: none; }
+.schwabe-ref b { font-weight: 700; }
+.schwabe-ref-rec i { background: var(--good-ink); }
+.schwabe-ref-rec b { color: var(--good-ink); }
+.schwabe-ref-max i { background: var(--caution-ink); }
+.schwabe-ref-max b { color: var(--caution-ink); }
 .schwabe-note, .schwabe-empty {
   font-size: 11.5px; color: var(--ink-3); line-height: 1.6;
 }

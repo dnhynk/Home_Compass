@@ -109,7 +109,7 @@ def validate_profile(profile: dict[str, object], strict: bool) -> None:
             "reviewer_accounts_provided requires reviewer_account_instructions in the ignored "
             f"{DEFAULT_PROFILE.name} file."
         )
-    # ★ 심사 계정을 제공하기로 했으면 그 안내도 운영자가 채워야 하는 자리다. 자리표시자인
+    # ★ 관리자 계정을 제공하기로 했으면 그 안내도 운영자가 채워야 하는 자리다. 자리표시자인
     #   채로 나가면 심사위원이 F7-F10 을 재현할 수 없는데 표에는 「완료」로 적힌다.
     keys = ["team_name", "member_names"]
     if profile["reviewer_accounts_provided"]:
@@ -410,22 +410,22 @@ def planning_story(profile: dict[str, object], evidence_dir: Path):
 def feature_story(profile: dict[str, object], evidence_dir: Path):
     reviewer_accounts_provided = bool(profile["reviewer_accounts_provided"])
     reviewer_account_instructions = escape(str(profile["reviewer_account_instructions"])).replace("\n", "<br/>")
-    staff_status = "완료·심사 계정 제공" if reviewer_accounts_provided else "완료·공개 심사 미제공"
+    staff_status = "완료·관리자 계정 제공" if reviewer_accounts_provided else "완료·관리자 계정 미제공"
     if reviewer_accounts_provided:
         staff_flow = (
-            "<b>6) 직원·관리자 검증:</b> 아래 심사 계정 안내에 따라 로그인한 뒤 상담원 화면의 적용 조건·시세 확인 시점과 "
+            "<b>6) 직원·관리자 검증:</b> 아래 관리자 계정 안내에 따라 로그인한 뒤 상담원 화면의 적용 조건·시세 확인 시점과 "
             "/admin/의 원문 근거·판정 영향도·감사이력을 확인합니다."
         )
         account_verification = [
-            bullet("<b>절차 E - 상담원:</b> 심사용 상담원 계정으로 로그인 → 같은 샘플 진단 실행 → 지원 제도별 신청 조건·시세 확인 시점과 출력 기능을 확인합니다."),
-            bullet("<b>절차 F - 정책 운영:</b> 심사용 규칙관리자 계정으로 /admin/ 접속 → 대기 초안의 원문 span과 영향도 → 상태·감사이력을 확인합니다."),
-            bullet(f"<b>심사 계정 안내:</b> {reviewer_account_instructions}"),
+            bullet("<b>절차 E - 상담원:</b> 상담원 계정으로 로그인 → 같은 샘플 진단 실행 → 지원 제도별 신청 조건·시세 확인 시점과 출력 기능을 확인합니다."),
+            bullet("<b>절차 F - 정책 운영:</b> 관리자 계정으로 /admin/ 접속 → 대기 초안의 원문 span과 영향도 → 상태·감사이력을 확인합니다."),
+            bullet(f"<b>관리자 계정 안내:</b> {reviewer_account_instructions}"),
         ]
-        validation_scope = "익명 시민 F1-F6과 심사 계정이 필요한 F7-F10을 아래 절차로 검증할 수 있습니다."
+        validation_scope = "익명 시민 F1-F6과 상담원·관리자 계정이 필요한 F7-F10을 아래 절차로 검증할 수 있습니다."
     else:
         staff_flow = (
             "<b>6) 공개 심사 범위:</b> 배포물은 시민 F1-F6을 계정 없이 검증할 수 있습니다. F7-F10은 구현됐지만 "
-            "심사 계정을 제공하지 않으므로 공개 심사 필수 경로에서 제외합니다."
+            "관리자 계정을 제공하지 않으므로 공개 심사 필수 경로에서 제외합니다."
         )
         account_verification = [
             bullet("<b>계정 및 범위:</b> 시민 F1-F6은 계정 불필요. F7-F10은 구현 완료이나 심사 자격증명을 제공하지 않아 공개 심사 재현 범위에 포함하지 않습니다."),

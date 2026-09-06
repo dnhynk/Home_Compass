@@ -718,7 +718,6 @@
   function renderDetail(detail) {
     var draft = detail.draft;
     $('reviewTitle').textContent = draft.policyId;
-    $('reviewEyebrow').textContent = '검토 대상';
 
     var chip = $('changeTypeChip');
     var isNew = detail.changeType === 'new';

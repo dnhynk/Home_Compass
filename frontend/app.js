@@ -869,6 +869,17 @@
       card.classList.add('reveal');
     });
     bindTips(dash);
+    /* Re-running a diagnosis while the page is near the chat or last result used
+       to preserve that old window offset. The newly rendered dashboard then
+       appeared to begin with its bottom cards. Wait for the visible layout and
+       place the first result directly below the sticky header every time. */
+    requestAnimationFrame(function () {
+      var root = document.documentElement;
+      var previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      dash.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
+      root.style.scrollBehavior = previousScrollBehavior;
+    });
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -1196,7 +1207,8 @@
     li.className = 'msg msg-bot';
     li.id = 'typingRow';
     li.innerHTML = '<span class="msg-avatar">Home Compass</span><div class="msg-bubble">' +
-      '<span class="typing">답변을 정리하고 있습니다</span></div>';
+      '<span class="typing"><i aria-hidden="true"></i><i aria-hidden="true"></i>' +
+      '<i aria-hidden="true"></i><span class="sr-only">답변 작성 중</span></span></div>';
     log.appendChild(li);
     log.scrollTop = log.scrollHeight;
     return li;

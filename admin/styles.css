@@ -163,12 +163,6 @@ code { font-family: var(--mono); font-size: .92em; }
 .card { padding: 22px; margin-bottom: 18px; }
 
 .panel-head { margin-bottom: 16px; }
-/* 구역 표찰. 간헐 업무자가 화면 어디에 있는지 아는 유일한 단서라서 **읽혀야 한다** —
-   `--accent-yellow-deep` 은 흰 바탕 2.41:1 로 못 읽힌다(실측). */
-.eyebrow {
-  font-size: 11.5px; font-weight: 650; letter-spacing: 0;
-  color: var(--ink-3); margin-bottom: 6px;
-}
 .panel-title, .card-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
 .panel-sub, .card-lead { font-size: 13.5px; color: var(--ink-3); margin-top: 6px; }
 .card-lead { margin-bottom: 14px; }

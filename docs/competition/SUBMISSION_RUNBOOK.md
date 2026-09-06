@@ -38,17 +38,16 @@ notepad docs\competition\submission_profile.local.json
 | `reviewer_accounts_provided` | 심사위원에게 직원 계정을 줄 것인가 (현재 결정: `true`) |
 | `reviewer_account_instructions` | 그 계정의 아이디와 비밀번호, 그리고 어디로 들어가는지 |
 
-> **개인 참가라면 `team_name` 에 무엇을 넣나.** 공식 양식의 「팀명」 칸은 등록된 이름과
-> 같아야 한다고만 적는다. 개인으로 신청했으면 Daker 제출 화면이 보여주는 이름(보통 본인
-> 실명)을 그대로 옮긴다. **서비스 이름 `Home_Compass` 를 넣지 않는다** — 그것은 등록명이
-> 아니다. 확실하지 않으면 Daker 제출 화면을 열어 눈으로 확인하고 옮겨 적는다.
+> **개인 참가라면 `team_name` 에 무엇을 넣나.** Daker 제출 화면이 보여주는 등록명을
+> 그대로 옮긴다. 이번 제출은 데이터 데이커 닉네임 `dnhynk`, 구성원 실명 `김동현`이다.
+> 서비스 이름 `Home_Compass`는 이 칸에 넣지 않는다.
 
-### 심사 계정 — 3단계보다 **먼저 하지 않는다**
+### 심사 계정 — 배포 설정과 PDF를 같은 값으로 맞춘다
 
-계정 안내에는 실제 비밀번호가 들어간다. 그 값은 3단계에서 Render에 입력할 때 정해지므로
-**순서를 지킨다.**
+계정 안내에는 실제 비밀번호가 들어간다. 선택한 배포 경로의 비공개 설정과
+`reviewer_account_instructions`가 글자 단위로 같아야 한다.
 
-1. 3단계에서 Render Blueprint에 두 비밀번호를 입력한다.
+1. PC 배포는 `output/pc-host/runtime.local.json`, Render 대안은 Blueprint에 두 비밀번호를 입력한다.
 2. **같은 값**을 `reviewer_account_instructions` 에 적는다.
 3. 그 다음 PDF를 다시 만든다.
 
@@ -281,9 +280,11 @@ PDF를 열어 첫 표의 팀명·구성원 실명을 마지막으로 확인한�
 
 ## 6. 가용 시간 모니터링
 
-필수 가용 시간 동안 Render의 Health/Events를 오전·오후 각 1회 확인한다. 장애가 발생하면
-코드 변경보다 먼저 최근 Events, `/api/health`, 영구 디스크 마운트, 환경변수 누락을 본다.
-서비스가 정상화된 뒤 `submission_preflight.py --strict --url ...`을 다시 실행한다.
+필수 가용 시간 동안 공개 URL과 `/api/health`를 오전·오후 각 1회 직접 확인한다. GitHub의
+`Public deployment check`는 `PUBLIC_URL` 저장소 Secret을 사용해 20분마다 외부 접속을
+확인한다. 장애가 발생하면 PC 전원·인터넷·Windows 로그인, `HomeCompass-Submission-Watchdog`,
+로컬 `127.0.0.1:18174/api/health`, Tailscale Funnel 순서로 확인한다. 서비스가 정상화된 뒤
+`submission_preflight.py --strict --url ...`을 다시 실행한다.
 
 ## 7. 본선 진출 시
 

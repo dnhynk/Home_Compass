@@ -9,7 +9,7 @@ Tailscale Funnel은 무료 Personal 요금제에도 제공된다. OpenAI API 이
 ## 실행 구성
 
 - `output/pc-host/release/`: 검증한 Git 커밋의 운영 복사본.
-- `output/pc-host/runtime.local.json`: 모델·API 키·두 심사 계정 비밀번호. Git 및 제출 ZIP 제외.
+- `output/pc-host/runtime.local.json`: 모델·API 키·상담원·관리자 계정 비밀번호. Git 및 제출 ZIP 제외.
 - `output/pc-host/data/`: 영구 SQLite, 시간별 백업, 관측 기록.
 - `output/pc-host/supervisor.py`: 단일 감독 프로세스. 운영 환경과 시드를 검증하고 단일 Uvicorn 서버를 실행한다.
 - `HomeCompass-Submission-Watchdog`: Windows 로그인 시 감독 프로세스를 실행한다. 분 단위 트리거와 중복 실행 방지로 감독 프로세스 중단도 복구한다.

@@ -42,7 +42,7 @@ notepad docs\competition\submission_profile.local.json
 > 그대로 옮긴다. 이번 제출은 데이터 데이커 닉네임 `dnhynk`, 구성원 실명 `김동현`이다.
 > 서비스 이름 `Home_Compass`는 이 칸에 넣지 않는다.
 
-### 심사 계정 — 배포 설정과 PDF를 같은 값으로 맞춘다
+### 관리자 계정 — 배포 설정과 PDF를 같은 값으로 맞춘다
 
 계정 안내에는 실제 비밀번호가 들어간다. 선택한 배포 경로의 비공개 설정과
 `reviewer_account_instructions`가 글자 단위로 같아야 한다.

@@ -70,8 +70,8 @@ def humanize_markup(text: str) -> str:
         "<b>왜 이것이 금융 AI의 핵심인가:</b>": "<b>금융 AI의 통제 지점</b>",
         "서비스는 금융상품 승인·판매·투자자문이 아니라 근거 있는 사전 의사결정을 돕습니다.":
             "서비스의 범위는 근거 있는 사전 의사결정 지원입니다. 금융상품 승인, 판매, 투자자문은 제공하지 않습니다.",
-        "완료·심사 계정 제공": "완료 (심사 계정 제공)",
-        "완료·공개 심사 미제공": "완료 (공개 심사 미제공)",
+        "완료·관리자 계정 제공": "완료 (관리자 계정 제공)",
+        "완료·관리자 계정 미제공": "완료 (관리자 계정 미제공)",
         "즉시 효력 · LLM 호출 없음": "판정에 즉시 반영되며 LLM은 호출하지 않음",
         "엔진 반환값을 근거로 설명 · 실패 시 폴백": "엔진 반환값을 설명하며 실패하면 템플릿 사용",
         "초안만 생성 · span/스키마 실패 시 차단": "초안만 생성하며 span 또는 스키마 실패 시 차단",
@@ -80,10 +80,10 @@ def humanize_markup(text: str) -> str:
         "<b>절차 B - 설명 가능성:</b>": "<b>절차 B: 설명 가능성</b>",
         "<b>절차 C - AI 상담:</b>": "<b>절차 C: AI 상담</b>",
         "<b>절차 D - 실패 안전:</b>": "<b>절차 D: 실패 안전</b>",
-        "<b>절차 E - 상담원:</b> 심사용 상담원 계정으로 로그인 → 같은 샘플 진단 실행 → 지원 제도별 신청 조건·시세 확인 시점과 출력 기능을 확인합니다.":
-            "<b>절차 E: 상담원</b> 심사용 상담원 계정으로 로그인하고 같은 샘플 진단을 실행합니다. 지원 제도별 신청 조건, 시세 확인 시점, 출력 기능을 확인합니다.",
-        "<b>절차 F - 정책 운영:</b> 심사용 규칙관리자 계정으로 /admin/ 접속 → 대기 초안의 원문 span과 영향도 → 상태·감사이력을 확인합니다.":
-            "<b>절차 F: 정책 운영</b> 심사용 규칙관리자 계정으로 /admin/에 접속합니다. 대기 초안의 원문 span과 영향도를 확인한 다음 상태와 감사이력을 점검합니다.",
+        "<b>절차 E - 상담원:</b> 상담원 계정으로 로그인 → 같은 샘플 진단 실행 → 지원 제도별 신청 조건·시세 확인 시점과 출력 기능을 확인합니다.":
+            "<b>절차 E: 상담원</b> 상담원 계정으로 로그인하고 같은 샘플 진단을 실행합니다. 지원 제도별 신청 조건, 시세 확인 시점, 출력 기능을 확인합니다.",
+        "<b>절차 F - 정책 운영:</b> 관리자 계정으로 /admin/ 접속 → 대기 초안의 원문 span과 영향도 → 상태·감사이력을 확인합니다.":
+            "<b>절차 F: 정책 운영</b> 관리자 계정으로 /admin/에 접속합니다. 대기 초안의 원문 span과 영향도를 확인한 다음 상태와 감사이력을 점검합니다.",
         "[그림 1] 접속 직후 -": "[그림 1] 접속 직후:",
         "[그림 1] 접속 직후 화면 -": "[그림 1] 접속 직후 화면:",
         "[그림 2] 익명 진단 결과 -": "[그림 2] 익명 진단 결과:",
@@ -173,12 +173,12 @@ def bullet(text: str) -> Paragraph:
 def section_heading(number: str, title: str) -> Table:
     return Table(
         [[para(number, "section_num"), para(humanize_markup(title), "section")]],
-        colWidths=[13 * mm, 161 * mm],
+        colWidths=[6 * mm, 168 * mm],
         style=TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
             ("LINEBELOW", (0, 0), (-1, -1), 0.85, NAVY),
             ("LEFTPADDING", (0, 0), (0, 0), 0),
-            ("RIGHTPADDING", (0, 0), (0, 0), 3),
+            ("RIGHTPADDING", (0, 0), (0, 0), 0),
             ("LEFTPADDING", (1, 0), (1, 0), 0),
             ("RIGHTPADDING", (1, 0), (1, 0), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 2),
@@ -202,7 +202,7 @@ def section_block(number: str, title: str, items: list, note: str | None = None)
     return [first, *body[1:], Spacer(1, 3.8 * mm)]
 
 
-def identity_header(attachment: str, title: str, profile: dict[str, object]):
+def identity_header(_attachment: str, title: str, profile: dict[str, object]):
     member_names = str(profile["member_names"])
     member_style = "placeholder" if "__운영자_" in member_names else "body"
     identity = Table(
@@ -222,8 +222,6 @@ def identity_header(attachment: str, title: str, profile: dict[str, object]):
         ]),
     )
     return [
-        para(f"첨부 {attachment}", "kicker"),
-        Spacer(1, 2 * mm),
         para(title, "title"),
         Spacer(1, 3 * mm),
         HRFlowable(width="100%", thickness=2.2, color=ACCENT, spaceBefore=0, spaceAfter=5 * mm),

@@ -1379,7 +1379,7 @@
         ' aria-expanded="false" aria-controls="loginForm">직원 로그인</button>' +
         '<form class="session-form" id="loginForm" data-open="false">' +
         '<label class="sr-only" for="loginUser">아이디</label>' +
-        '<input type="text" id="loginUser" placeholder="상담원 아이디" autocomplete="username">' +
+        '<input type="text" id="loginUser" value="counsler" placeholder="상담원 아이디" autocomplete="username">' +
         '<label class="sr-only" for="loginPass">비밀번호</label>' +
         '<input type="password" id="loginPass" placeholder="비밀번호" autocomplete="current-password">' +
         '<button type="submit" class="btn btn-ghost btn-xs">직원 로그인</button></form>';

@@ -1019,9 +1019,10 @@
     //   실리는 네 값이 전부 국토교통부 아파트 실거래가에서 나온 것**이 됐고, 그때부터
     //   '예시' 는 거짓이다. 검증 상태(verified / stale / unverified)는 이 줄이 말하지
     //   않는다 — STEP 06 의 등급 사유가 항목별로 말한다. 여기서는 **출처만** 적는다.
-    $('#regionHelp').innerHTML = '국토교통부 실거래가 기준 — 전세 중위 <strong>' + esc(fmtKR(r.jeonseMedianKRW)) +
+    $('#regionHelp').innerHTML = '전세 중위 <strong>' + esc(fmtKR(r.jeonseMedianKRW)) +
       '</strong> · 월세 <strong>' + esc(fmtKR(r.monthlyDepositKRW)) + ' / ' + esc(fmtKR(r.monthlyRentKRW)) +
-      '</strong> · 전세가율 ' + esc(pct(r.jeonseRatioPct));
+      '</strong> · 전세가율 ' + esc(pct(r.jeonseRatioPct)) +
+      '<span class="field-source">국토교통부 실거래가 기준</span>';
     renderRegionReport();
   }
 

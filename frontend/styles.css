@@ -365,6 +365,7 @@ strong { font-weight: 650; }
   color: var(--ink-3); flex: none;
 }
 .field-help { margin-top: 5px; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+.field-source { display: block; margin-top: 2px; color: var(--ink-4); font-size: 10.5px; }
 /* 오류는 동작이 일어난 자리에 적는다 — 토스트는 사라지고 어느 칸인지 남지 않는다.
    색만으로 알리지 않도록 앞에 「!」 표식을 둔다. --critical-ink 는 흰 면·plane 위
    모두 AA 다. */

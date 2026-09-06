@@ -234,8 +234,7 @@
       .filter(function (v) { return v != null; });
 
     if (!measured.length) {
-      return '<p class="schwabe-empty">월 실수령액이 0이라 <b>주거비 ÷ 소득</b>을 잴 수 없습니다. ' +
-        '0%로 대신 표시하지 않습니다 — 「주거비가 없다」와 「소득이 없어 잴 수 없다」는 다른 사실입니다.</p>';
+      return '<p class="schwabe-empty">월 실수령액이 0원이어서 소득 대비 주거비 비율을 계산할 수 없습니다.</p>';
     }
 
     var dataMax = Math.max.apply(null, measured);
@@ -282,8 +281,7 @@
     return '<ul class="schwabe-rows">' + rows + '</ul>' +
       '<div class="schwabe-axis"><span style="left:0%">0%</span>' + marks +
       '<span class="schwabe-axis-end" style="left:100%">' + esc(pct(domain, 0)) + '</span></div>' +
-      '<p class="schwabe-note">기준선 둘(권장액·상한)은 <b>측정값이 아니라 규칙값</b>입니다. ' +
-      '막대는 각 시나리오의 <b>실제 월 환산 주거비 ÷ 월 실수령액</b>이며 상한이 없습니다.</p>';
+      '<p class="schwabe-note">막대는 예상 주거비가 월 실수령액에서 차지하는 비중입니다. 권장액·상한과 비교해 보세요.</p>';
   }
 
   /**
@@ -468,9 +466,6 @@
     $('#allocLegend').innerHTML = legendHTML(segs, b.netIncome);
     $('#allocTotal').textContent = '월 실수령 ' + fmtKR(b.netIncome) + ' 기준';
 
-    $('#affordRationale').innerHTML = (a.rationale || []).map(function (t) {
-      return '<li>' + esc(t) + '</li>';
-    }).join('');
   }
 
   function renderScenarios(list) {
@@ -529,9 +524,9 @@
     $('#policyList').innerHTML = filtered.map(function (p) {
       var meta = POLICY_META[p.status] || POLICY_META.conditional;
       var side = '';
-      if (p.maxAmountKRW) side += '<span class="policy-num"><small>최대 한도</small>' + esc(fmtKR(p.maxAmountKRW)) + '</span>';
+      if (p.maxAmountKRW) side += '<span class="policy-num"><small>참고 한도</small>' + esc(fmtKR(p.maxAmountKRW)) + '</span>';
       if (p.rateRangePct && p.rateRangePct.length === 2) {
-        side += '<span class="policy-num"><small>금리(예시)</small>' +
+        side += '<span class="policy-num"><small>참고 금리</small>' +
           esc(num(p.rateRangePct[0]).toFixed(2)) + '~' + esc(num(p.rateRangePct[1]).toFixed(2)) + '%</span>';
       }
       return '<li class="policy" data-status="' + esc(p.status) + '">' +
@@ -551,8 +546,7 @@
             return '<li data-met="false"><span class="sr-only">미충족 사유 — </span>' +
               esc(r) + '</li>';
           }).join('') + '</ul>' +
-          '<p class="policy-src"><b>출처</b> ' + esc(p.source || '—') +
-            (p.disclaimer ? ' · ' + esc(p.disclaimer) : '') + '</p>' +
+          '<p class="policy-src"><b>출처</b> ' + esc(p.source || '확인 필요') + '</p>' +
           /* SPEC 6.4 — 제도 **항목별**로 신고한다. 어느 항목인지는 대화상자가 목록으로
              묻는다. 익명이면 이 자리가 빈 문자열이다. */
           reportButtonHTML('policy', p.id, p.name) +
@@ -745,115 +739,6 @@
     }).join('');
   }
 
-  /* ── dataGrade (SPEC 2.4 · 10.2 6단계) ────────────────────────────────────
-     ★ 원인 유형별로 **구분해서** 그린다. `stale`(신선도) · `unverified`(검증) ·
-       `pending_review`(승인 적체)는 대응 주체가 다르다 — 앞의 둘은 배치, 뒤의 하나는
-       규칙관리자다. 한 글자로 뭉치면 그 구분이 사라진다.
-     ★ 응답에 `dataGrade` 가 **없으면 화면에 그렇게 적는다.** 프론트가 계보를 지어내
-       등급을 만들지 않는다 — 백엔드 숫자에 프론트 생성물의 계보를 붙이는 것이
-       D-11 이 없애려는 두 번째 판정 경로다 (코디네이터 결정 2026-08-15 (1)).
-     ★ `pending_review` 는 5단계 승인 대기 큐에서 오므로 지금은 나올 수 없다.
-       유형을 **다룰 수 있게만** 두고 없는 것을 있는 척 그리지 않는다. */
-  var GRADE_META = {
-    A: { cls: 'chip-good', label: '등급 A', note: '판정에 쓰인 사실이 전부 검증됐고 신선도 기준 이내입니다.' },
-    B: { cls: 'chip-caution', label: '등급 B', note: '일부 사실이 낡았거나 검토 대기 중인 변경이 있습니다.' },
-    C: { cls: 'chip-critical', label: '등급 C', note: '출처를 확인하지 못한 사실이 판정에 포함됐습니다.' }
-  };
-  /* 색에는 아이콘과 라벨이 항상 동반한다 (styles.css 머리말의 규약). 그래서 유형 구분을
-     칩으로 낸다 — 색만 나르는 표식(카드 옆 색 띠 따위)을 쓰지 않는다. */
-  var GRADE_REASON_META = {
-    unverified: { label: '검증 안 됨', cls: 'chip-critical', icon: 'alert',
-                  owner: '수집 배치', why: '출처를 확인하지 못한 사실입니다.' },
-    stale: { label: '신선도 초과', cls: 'chip-caution', icon: 'alert',
-             owner: '수집 배치', why: '관측 시점이 신선도 기준을 넘었습니다.' },
-    pending_review: { label: '승인 적체', cls: 'chip-caution', icon: 'alert',
-                      owner: '규칙관리자', why: '이 정책에 검토 대기 중인 변경이 있습니다.' },
-    /* ★ 대응 주체가 **배치도 규칙관리자도 아니다.** SPEC 2.4 가 사유를 원인 유형별로
-       나눈 이유가 대응 주체가 다르기 때문이고, 이것은 임계를 정하는 사람이 푼다.
-       「미상」으로 적으면 그 구분이 처음부터 없었던 것이 된다. */
-    freshness_not_evaluated: { label: '신선도 미판정', cls: 'chip-neutral', icon: 'minus',
-                               owner: '코디네이터 (신선도 임계 확정)',
-                               why: '이 판정은 신선도를 검사하지 않았습니다.' }
-  };
-
-  /* `dataGrade` 는 있는데 `grade` 가 `null` 인 상태. **「계보 없음」과 다른 사실이다** —
-     하나는 서버가 계보를 안 실은 것이고, 하나는 계보는 있는데 등급의 조건 하나(신선도)가
-     확정되지 않은 것이다. 뭉치면 화면이 [서버가 뭔가 빠뜨렸다]로 읽는다. */
-  var UNGRADED_META = {
-    cls: 'chip-neutral', label: '등급 산정 불가',
-    note: '등급의 조건 하나가 확정되지 않아 등급을 매기지 못했습니다. ' +
-          '「문제 없음」이 아닙니다 — 아래 사유가 무엇이 확정되지 않았는지를 말합니다.'
-  };
-
-  function renderDataGrade(res) {
-    var card = $('#cardGrade');
-    var grade = res.dataGrade;
-    if (!grade) {
-      card.hidden = false;
-      $('#gradeChip').outerHTML = '<span class="chip chip-lg chip-neutral" id="gradeChip">' +
-        iconSVG('minus') + '등급 없음</span>';
-      $('#gradeBody').innerHTML =
-        '<p class="grade-absent"><b>이 응답에는 계보가 실려 있지 않습니다.</b> ' +
-        '데이터 등급(SPEC 2.4)과 계보 목록(D-13)은 판정을 만든 쪽이 함께 실어야 하는 값입니다. ' +
-        '화면이 대신 만들어 붙이지 않습니다 — 다른 데이터로 계산한 등급은 이 숫자의 등급이 아니기 때문입니다.</p>';
-      return;
-    }
-
-    var meta = grade.grade ? (GRADE_META[grade.grade] || GRADE_META.C) : UNGRADED_META;
-    card.hidden = false;
-    $('#gradeChip').outerHTML = '<span class="chip chip-lg ' + meta.cls + '" id="gradeChip">' +
-      iconSVG(grade.grade === 'A' ? 'check' : (grade.grade ? 'alert' : 'minus')) +
-      esc(meta.label) + '</span>';
-
-    var provenance = res.provenance || [];
-    var reasons = grade.reasons || [];
-    var buckets = {};
-    reasons.forEach(function (r) {
-      var type = r.type || 'unclassified';
-      (buckets[type] = buckets[type] || []).push(r);
-    });
-
-    var order = ['unverified', 'stale', 'pending_review', 'freshness_not_evaluated'];
-    Object.keys(buckets).forEach(function (t) { if (order.indexOf(t) === -1) order.push(t); });
-
-    var groups = order.filter(function (t) { return buckets[t] && buckets[t].length; }).map(function (type) {
-      var m = GRADE_REASON_META[type] ||
-        { label: '분류되지 않은 사유', cls: 'chip-neutral', icon: 'minus',
-          owner: '미상', why: '응답이 원인 유형을 담지 않았습니다.' };
-      var items = buckets[type].map(function (r) {
-        var item = (r.provenanceIndex != null && provenance[r.provenanceIndex]) || null;
-        /* 사실에 걸리지 않는 사유는 가리킬 항목도 출처도 없다 (`freshness_not_evaluated`).
-           「사실 이름 없음 / 출처 미기재」로 그리면 **없는 것을 누락으로** 보이게 한다 —
-           그것은 설계이지 빠뜨린 것이 아니다. 그런 사유는 자기 문장을 낸다. */
-        if (!item && !r.fact) {
-          return '<li class="grade-reason-note">' + esc(r.message || '') + '</li>';
-        }
-        var targets = (item && item.targets) || [];
-        var fact = r.fact || (item && item.fact) || '(사실 이름 없음)';
-        var prov = item && (item.provenance || item);
-        var origin = prov && prov.source_name ? prov.source_name : '출처 미기재';
-        return '<li><span class="grade-fact">' + esc(fact) + '</span>' +
-          '<span class="grade-origin">' + esc(origin) + '</span>' +
-          (targets.length
-            ? '<span class="grade-targets">' + targets.map(function (t) {
-                return '<code>' + esc(t) + '</code>';
-              }).join(' ') + '</span>'
-            : '') + '</li>';
-      }).join('');
-      return '<section class="grade-group" data-type="' + esc(type) + '">' +
-        '<h3>' + chipHTML(m, 'chip-sm') +
-        '<span class="grade-count">' + buckets[type].length + '건</span>' +
-        '<span class="grade-owner">대응 주체 — ' + esc(m.owner) + '</span></h3>' +
-        '<p class="grade-why">' + esc(m.why) + '</p>' +
-        '<ul class="grade-facts">' + items + '</ul></section>';
-    }).join('');
-
-    $('#gradeBody').innerHTML = '<p class="grade-note">' + esc(meta.note) + '</p>' +
-      (groups || '<p class="grade-note">등급을 낮춘 사유가 없습니다.</p>') +
-      '<p class="grade-foot">오른쪽 <code>/…</code> 는 그 계보가 걸린 응답 위치(JSON Pointer)입니다. ' +
-      '규범적 선택(<code>our_choice</code>)은 신선도 개념이 없어 등급 산정에서 빠지고 계보 목록에만 남습니다.</p>';
-  }
-
   /* ── 상담원 확장 (SPEC 6.1 · D-9) — **필드 유무로** 갈린다 ────────────────
      역할로 분기하지 않는다. 익명 응답에는 `internal` 키가 아예 없고(4단계가 그것을
      권한 테스트로 고정했다), 인증된 요청에만 채워진다. 화면이 버튼을 숨기는 것은
@@ -864,42 +749,53 @@
     if (!internal) { card.hidden = true; $('#internalBody').innerHTML = ''; return; }
     card.hidden = false;
 
+    function policyName(id) {
+      var policy = (res.policies || []).filter(function (p) { return p.id === id; })[0];
+      return policy ? policy.name : '지원 제도';
+    }
     var versions = (internal.ruleVersions || []).map(function (v) {
-      return '<tr><td>' + esc(v.policyId) + '</td><td><code>' + esc(v.ruleVersionId) + '</code></td>' +
-        '<td>' + esc(v.origin) + '</td>' +
+      return '<tr><td>' + esc(policyName(v.policyId)) + '</td>' +
+        '<td>' + esc(({seed: '등록된 조건', approved: '검토 승인'})[v.origin] || '확인 필요') + '</td>' +
         '<td>' + esc(v.effectiveFrom || '시행일 미상') + ' → ' + esc(v.effectiveTo || '무기한') + '</td></tr>';
     }).join('');
 
     var fresh = internal.dataFreshness || {};
     var freshness = '<dl class="internal-freshness">' +
-      '<div><dt>지역 코드</dt><dd>' + esc(fresh.regionCode || '—') + '</dd></div>' +
-      '<div><dt>검증 상태</dt><dd>' + esc(fresh.verification || '—') + '</dd></div>' +
+      '<div><dt>지역</dt><dd>' + esc((findRegion(fresh.regionCode) || {}).name || '확인 필요') + '</dd></div>' +
+      '<div><dt>출처 확인</dt><dd>' + esc(({verified: '확인됨', unverified: '미확인', our_choice: '계산 기준'})[fresh.verification] || '확인 필요') + '</dd></div>' +
       '<div><dt>관측 시점</dt><dd>' + esc(fresh.observedAt || '없음') + '</dd></div>' +
       '<div><dt>취득 시각</dt><dd>' + esc(fresh.fetchedAt || '없음') + '</dd></div></dl>';
 
     var thresholds = (internal.ineligiblePolicies || []).map(function (p) {
+      var names = {ageMin: '최소 연령', ageMax: '최대 연령', annualIncomeMaxKRW: '연소득 상한',
+        assetMaxKRW: '자산 상한', requireHomeless: '무주택 요건', requireNewlywed: '신혼부부 요건',
+        requireSME: '중소기업 재직 요건', regionPrefixes: '적용 지역 코드'};
       var pairs = Object.keys(p.criteria || {}).sort().map(function (k) {
-        return '<span class="crit"><b>' + esc(k) + '</b> ' + esc(JSON.stringify(p.criteria[k])) + '</span>';
+        var value = p.criteria[k];
+        var display = value === true ? '필요' : value === false ? '해당 없음' :
+          value == null ? '확인 필요' : /KRW$/.test(k) ? fmtKR(value) :
+          Array.isArray(value) ? value.join(', ') : String(value);
+        return '<span class="crit"><b>' + esc(names[k] || '추가 조건') + '</b> ' + esc(display) + '</span>';
       }).join('');
-      return '<li><span class="internal-pid">' + esc(p.policyId) + '</span>' +
+      return '<li><span class="internal-pid">' + esc(policyName(p.policyId)) + '</span>' +
         '<span class="chip chip-sm ' + ((POLICY_META[p.status] || POLICY_META.conditional).cls) + '">' +
         esc((POLICY_META[p.status] || POLICY_META.conditional).label) + '</span>' +
         '<div class="internal-crit">' + (pairs || '<span class="crit">요건 없음</span>') + '</div></li>';
     }).join('');
 
     $('#internalBody').innerHTML =
-      '<h3>판정에 참여한 승인 규칙</h3>' +
+      '<h3>진단에 사용한 지원 제도</h3>' +
       '<div class="table-scroll"><table class="internal-table"><thead><tr>' +
-      '<th>정책</th><th>규칙 버전</th><th>승인 출처</th><th>유효기간</th></tr></thead><tbody>' +
-      (versions || '<tr><td colspan="4">없음</td></tr>') + '</tbody></table></div>' +
-      '<h3>이 판정에 쓰인 시세의 신선도</h3>' + freshness +
-      '<h3>부적격·조건부 정책의 문턱</h3>' +
+      '<th>지원 제도</th><th>확인 상태</th><th>유효기간</th></tr></thead><tbody>' +
+      (versions || '<tr><td colspan="3">없음</td></tr>') + '</tbody></table></div>' +
+      '<h3>시세 확인 시점</h3>' + freshness +
+      '<h3>추가 확인이 필요한 신청 조건</h3>' +
       '<ul class="internal-thresholds">' + (thresholds || '<li>해당 없음</li>') + '</ul>';
   }
 
   function sourceLabel() {
-    if (STATE.lastSource === 'local') return '브라우저 로컬 판정 경로(백엔드 미연결)';
-    return '백엔드 엔진 응답';
+    if (STATE.lastSource === 'local') return '저장된 자료로 계산';
+    return '';
   }
 
   function renderSummary(res) {
@@ -907,8 +803,7 @@
     var m = res.meta || {};
     var when = m.generatedAt ? new Date(m.generatedAt) : null;
     var stamp = when && !isNaN(when.getTime()) ? when.toLocaleString('ko-KR') : '—';
-    $('#summaryMeta').textContent = '엔진 v' + (m.engineVersion || '—') + ' · 생성 ' + stamp +
-      ' · ' + sourceLabel() + (m.disclaimer ? ' · ' + m.disclaimer : '');
+    $('#summaryMeta').textContent = '진단 시각 ' + stamp + (sourceLabel() ? ' · ' + sourceLabel() : '');
   }
 
   function renderAll(res, profile) {
@@ -919,7 +814,6 @@
     renderScenarios(res.scenarios || []);
     renderPolicies(res.policies || []);
     renderRisk(res.risk || { score: 0, band: 'low', factors: [] });
-    renderDataGrade(res);
     renderInternal(res);
     renderSummary(res);
 
@@ -998,19 +892,11 @@
     banner.hidden = false;
     if (!st.ready) {
       banner.setAttribute('data-kind', 'disabled');
-      banner.innerHTML = '<b>로컬 판정 경로가 꺼져 있습니다.</b> 생성물이 없어 이 브라우저에서는 ' +
-        '판정 숫자를 만들 수 없습니다 — 기본값으로 대신 계산하지 않습니다(SPEC D-11). 없는 것: ' +
-        st.missing.map(function (m) {
-          return '<code>' + esc(m.file) + '</code>(' + esc(m.label) + ')';
-        }).join(' · ') +
-        '. <span class="banner-fix">복구: <code>python scripts/gen_contracts.py</code></span>';
+      banner.textContent = '진단에 필요한 자료를 불러오지 못했습니다. 연결 상태를 확인하고 새로고침해 주세요.';
       return;
     }
     banner.setAttribute('data-kind', 'local');
-    banner.innerHTML = '<b>백엔드에 연결하지 못해 이 화면의 숫자는 브라우저 안에서 계산됐습니다.</b> ' +
-      '상수·정책 규칙·지역 시세는 <code>frontend/generated/</code> 생성물에서 왔고, ' +
-      '백엔드 엔진과 같은 값을 내는지는 <code>test_frontend_local_engine_equivalence.py</code> 가 붙들고 있습니다. ' +
-      '다만 <b>시세는 이 커밋이 아는 예시값</b>이며 수집 배치가 넣은 실데이터가 아닙니다.';
+    banner.textContent = '연결이 끊겨 기기에 저장된 자료로 계산했습니다. 최신 정보가 반영되지 않았을 수 있습니다.';
   }
 
   function checkHealth() {
@@ -1020,15 +906,15 @@
          reported "템플릿 응답". Anything other than "offline" is a live provider. */
       var provider = h && h.llm ? String(h.llm) : 'offline';
       STATE.llmMode = provider !== 'offline' ? 'live' : 'offline';
-      if (STATE.llmMode === 'live') setConnection('live', '백엔드 연결 · AI 라이브');
-      else setConnection('offline', '백엔드 연결 · 템플릿 응답');
+      if (STATE.llmMode === 'live') setConnection('live', '연결됨');
+      else setConnection('offline', '기본 안내 이용 가능');
       setChatModeChip(STATE.llmMode);
       renderLocalPathBanner();
       return true;
     }).catch(function () {
       var st = localStatus();
-      if (st.ready) setConnection('local', '백엔드 미연결 · 로컬 판정 경로');
-      else setConnection('disabled', '백엔드 미연결 · 로컬 판정 불가');
+      if (st.ready) setConnection('local', '연결 끊김 · 저장된 자료 사용');
+      else setConnection('disabled', '연결 확인 필요');
       setChatModeChip('offline');
       renderLocalPathBanner();
       return false;
@@ -1063,9 +949,8 @@
       if (!list.length) {
         sel.innerHTML = '<option value="">지역 데이터 없음</option>';
         sel.disabled = true;
-        $('#heroRegionCount').textContent = '0개';
         $('#regionHelp').textContent =
-          '지역 시세를 얻을 수 없습니다. 백엔드가 꺼져 있고 생성물도 없습니다 — 임의 값으로 대신하지 않습니다.';
+          '지역 시세를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
         return list;
       }
       sel.disabled = false;
@@ -1073,7 +958,6 @@
         return '<option value="' + esc(r.code) + '">' + esc(r.name) + '</option>';
       }).join('');
       sel.value = list[0].code;
-      $('#heroRegionCount').textContent = list.length + '개';
       updateRegionHelp();
       return list;
     });
@@ -1165,8 +1049,8 @@
       return;
     }
     if (!profile.regionCode) {
-      setFieldError('regionCode', '지역 시세를 얻을 수 없어 판정할 수 없습니다. 백엔드를 켜거나 생성물을 재생성하세요.');
-      toast('지역 시세를 얻을 수 없어 판정할 수 없습니다. 백엔드를 켜거나 생성물을 재생성하세요.');
+      setFieldError('regionCode', '지역 시세를 불러오지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.');
+      toast('지역 시세를 불러오지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.');
       $('#regionCode').focus();
       return;
     }
@@ -1185,7 +1069,7 @@
         catch (err) {
           $('#skeleton').hidden = true;
           $('#onboarding').hidden = false;
-          toast('결과를 그리는 중 오류가 발생했습니다: ' + esc(err.message));
+          toast('결과를 표시하지 못했습니다. 다시 진단해 주세요.');
         }
         btn.classList.remove('is-busy');
         btn.disabled = false;
@@ -1196,7 +1080,7 @@
       .then(function (res) {
         if (!res || !res.affordability) throw new Error('malformed');
         if (STATE.connection === 'local' || STATE.connection === 'disabled') {
-          setConnection('offline', '백엔드 연결 · 템플릿 응답');
+          setConnection('offline', '연결됨');
         }
         STATE.lastSource = 'backend';
         renderLocalPathBanner();
@@ -1211,30 +1095,28 @@
           : ((err && err.message) || '네트워크 오류');
         var st = localStatus();
         if (!st.ready) {
-          setConnection('disabled', '백엔드 미연결 · 로컬 판정 불가');
+          setConnection('disabled', '연결 확인 필요');
           setChatModeChip('offline');
           renderLocalPathBanner();
           $('#skeleton').hidden = true;
           $('#onboarding').hidden = false;
-          toast('백엔드에 연결하지 못했고(' + esc(why) + ') <b>생성물이 없어 로컬 판정도 할 수 없습니다.</b> ' +
-                '기본값으로 대신 계산하지 않습니다.');
+          toast('지금은 진단을 불러올 수 없습니다. 연결 상태를 확인하고 다시 시도해 주세요.');
           finish(null);
           return;
         }
-        setConnection('local', '백엔드 미연결 · 로컬 판정 경로');
+        setConnection('local', '연결 끊김 · 저장된 자료 사용');
         setChatModeChip('offline');
         renderLocalPathBanner();
-        toast('백엔드에 연결하지 못해(' + esc(why) + ') <b>브라우저 로컬 판정 경로</b>로 계산했습니다. ' +
-              '상수·규칙·시세는 생성물에서 왔습니다.');
+        toast('연결이 끊겨 저장된 자료로 계산했습니다. 최신 정보가 반영되지 않았을 수 있습니다.');
         var local;
         try {
           local = localAnalyze(profile);
         } catch (localErr) {
-          setConnection('disabled', '백엔드 미연결 · 로컬 판정 불가');
+          setConnection('disabled', '연결 확인 필요');
           renderLocalPathBanner();
           $('#skeleton').hidden = true;
           $('#onboarding').hidden = false;
-          toast('로컬 판정도 실패했습니다: ' + esc(localErr.message));
+          toast('진단을 완료하지 못했습니다. 연결이 복구된 뒤 다시 시도해 주세요.');
           finish(null);
           return;
         }
@@ -1249,23 +1131,22 @@
   function setChatModeChip(mode) {
     var chip = $('#chatModeChip');
     if (!chip) return;
-    if (mode === 'live') { chip.className = 'chip chip-sm chip-good'; chip.textContent = 'LLM 라이브 모드'; }
-    else { chip.className = 'chip chip-sm chip-neutral'; chip.textContent = '결정론적 템플릿 모드'; }
+    chip.hidden = mode === 'live';
+    chip.className = 'chip chip-sm chip-neutral';
+    chip.textContent = mode === 'live' ? '' : '기본 안내';
+    chip.title = mode === 'live' ? '' : 'AI 상담에 연결되지 않아 진단 결과에 대한 기본 안내를 제공합니다.';
   }
 
-  function pushMsg(role, text, tools) {
+  function chatTextHTML(text) {
+    return esc(humanizeEnums(text)).replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function pushMsg(role, text) {
     var log = $('#chatLog');
     var li = document.createElement('li');
     li.className = 'msg ' + (role === 'user' ? 'msg-user' : 'msg-bot');
-    var toolHTML = '';
-    if (tools && tools.length) {
-      toolHTML = '<div class="msg-tools">' + tools.map(function (t) {
-        return '<span class="tool-chip" title="' + esc(t.resultSummary || '') + '">' + esc(t.tool) + '()</span>';
-      }).join('') + '</div>';
-    }
     li.innerHTML = '<span class="msg-avatar">' + (role === 'user' ? 'ME' : 'AI') + '</span>' +
-      '<div><div class="msg-bubble">' + esc(role === 'user' ? text : humanizeEnums(text)) + '</div>' +
-      toolHTML + '</div>';
+      '<div><div class="msg-bubble">' + (role === 'user' ? esc(text) : chatTextHTML(text)) + '</div></div>';
     log.appendChild(li);
     log.scrollTop = log.scrollHeight;
     return li;
@@ -1289,8 +1170,7 @@
     var q = String(message || '');
     if (!res) {
       return {
-        reply: '먼저 왼쪽에서 프로필을 입력하고 「주거비 진단 시작」을 눌러주세요. ' +
-          '진단 결과가 있어야 계산된 숫자를 근거로 답변할 수 있습니다. 지어낸 수치로는 답하지 않습니다.',
+        reply: '내 상황을 입력하고 「주거비 진단 시작」을 눌러주세요. 진단 결과를 함께 살펴볼게요.',
         toolCalls: [], mode: 'offline'
       };
     }
@@ -1322,9 +1202,8 @@
         return '· ' + s.label + ': ' + pctOrDash(s.schwabeIndexPct);
       }).join('\n');
       reply = '월 주거비 상한은 ' + fmtKR(a.maxMonthlyHousingCostKRW) + ', 권장액은 ' +
-        fmtKR(a.recommendedMonthlyHousingCostKRW) + '입니다(지불능력 판정 ' +
-        BAND_META[a.band].label + ').\n\n' + (a.rationale || []).slice(0, 2).join('\n') +
-        (shares ? '\n\n시나리오별 슈바베지수(실제 월 주거비 ÷ 월 실수령액)는\n' + shares : '') +
+        fmtKR(a.recommendedMonthlyHousingCostKRW) + '입니다.\n생활비와 기존 대출 상환액, 비상자금을 남겨 둔 예산입니다.' +
+        (shares && /슈바베|비율|비중/.test(q) ? '\n\n소득에서 주거비가 차지하는 비중은\n' + shares : '') +
         '\n\n여기서 말하는 주거비는 월세뿐 아니라 관리비와 대출이자를 모두 합친 금액입니다.';
     } else if (/대출|정책|제도|지원|받을 수|자격|신청/.test(q)) {
       var ok = (res.policies || []).filter(function (x) { return x.status === 'eligible'; });
@@ -1337,7 +1216,7 @@
         }).join('\n') +
         (cond.length ? '\n\n추가 확인이 필요한 조건부 제도가 ' + cond.length + '건 있습니다: ' +
           cond.slice(0, 3).map(function (x) { return x.name; }).join(', ') : '') +
-        '\n\n각 판정의 사유는 위 「제도 매칭」 카드에서 항목별로 확인하실 수 있습니다. 표시된 금리·한도는 시연용 예시 수치입니다.';
+        '\n\n신청 조건은 「내 조건에 맞는 지원 제도」에서 확인할 수 있습니다. 금리·한도는 참고값이므로 신청 전 해당 기관의 최신 공고를 확인하세요.';
     } else if (/위험|사기|리스크|보증|안전|떼이/.test(q)) {
       tools = [{ tool: 'scan_deposit_risk', args: {}, resultSummary: '위험점수 ' + (risk.score || 0) }];
       reply = '보증금 리스크 점수는 ' + (risk.score || 0) + '점 / 100 (' +
@@ -1345,11 +1224,11 @@
         (risk.factors || []).slice(0, 3).map(function (f) {
           return '· ' + f.name + ' ' + (f.valuePct != null ? pct(f.valuePct) : '') + ' — ' + f.note;
         }).join('\n') +
-        '\n\n가장 확실한 대응은 전세보증금 반환보증 가입입니다. 계약 전 등기부등본의 선순위 채권과 임대인 체납 여부를 반드시 확인하세요.';
+        '\n\n계약 전 전세보증금 반환보증 가입 요건을 확인하세요. 계약 전 등기부등본의 선순위 채권과 임대인 체납 여부를 반드시 확인하세요.';
     } else {
       tools = [{ tool: 'summarize_analysis', args: {}, resultSummary: '엔진 결과 요약' }];
       reply = res.summary + '\n\n더 구체적으로는 “전세랑 월세 중 뭐가 나아?”, “내가 받을 수 있는 대출 알려줘”, ' +
-        '“전세 사기 위험은 어때?” 처럼 물어보시면 계산된 숫자로 답변드립니다.';
+        '“전세 사기 위험은 어때?” 처럼 물어보세요.';
     }
     return { reply: reply, toolCalls: tools, mode: 'offline' };
   }
@@ -1370,7 +1249,7 @@
 
     var finish = function (data) {
       if (typing && typing.parentNode) typing.parentNode.removeChild(typing);
-      pushMsg('bot', data.reply, data.toolCalls);
+      pushMsg('bot', data.reply);
       STATE.chatHistory.push({ role: 'assistant', content: data.reply });
       setChatModeChip(data.mode === 'live' ? 'live' : 'offline');
       STATE.chatBusy = false;
@@ -1391,7 +1270,6 @@
           : ((err && err.message) || '네트워크 오류');
         setTimeout(function () {
           var local = localChatReply(text);
-          local.reply = '[서버 응답을 받지 못해(' + why + ') 브라우저 내장 엔진으로 답변드립니다.]\n\n' + local.reply;
           finish(local);
         }, 380);
       });
@@ -1512,7 +1390,7 @@
          상담원은 [이 화면에는 없다]로 읽는다. */
       renderRegionReport();
       if (STATE.lastResult) renderPolicies(STATE.lastResult.policies || []);
-      toast('로그인했습니다. 다시 진단하면 <b>내부 정보</b>가 함께 실립니다.');
+      toast('로그인했습니다. 다시 진단하면 상담용 상세 조건도 확인할 수 있습니다.');
     }).catch(function (err) {
       toast('로그인하지 못했습니다: ' + esc((err && err.message) || '알 수 없는 오류'));
     });
@@ -1547,7 +1425,7 @@
   function printSummary() {
     if (!STATE.lastResult) { toast('먼저 진단을 실행해 주세요.'); return; }
     if (!STATE.lastResult.internal) {
-      toast('이 응답에는 내부 정보가 실려 있지 않습니다. 요약본은 직원 로그인 상태에서만 만들어집니다.');
+      toast('직원 계정으로 로그인하고 다시 진단하면 요약본을 출력할 수 있습니다.');
       return;
     }
     window.print();
@@ -1638,10 +1516,7 @@
     renderLocalPathBanner();
     syncMoneyEcho();
     pushMsg('bot',
-      '안녕하세요. Home_Compass입니다.\n' +
-      '왼쪽에 상황을 입력하고 진단을 실행하면, 계산된 숫자를 근거로 답변해 드립니다. ' +
-      '저는 값을 만들어내지 않고 4개 판정 엔진이 계산한 결과만 인용합니다.',
-      [{ tool: 'ready', args: {}, resultSummary: '엔진 대기' }]);
+      '안녕하세요. 주거비 예산이나 전월세 선택 중 궁금한 점을 알려주세요.');
     checkHealth();
     loadSession();
     loadRegions();
@@ -1658,7 +1533,7 @@
     localChatReply: localChatReply,
     schwabeChartHTML: schwabeChartHTML, stackedBarSVG: stackedBarSVG,
     tcoChartHTML: tcoChartHTML, riskMeterSVG: riskMeterSVG, fitRingSVG: fitRingSVG,
-    renderDataGrade: renderDataGrade, renderInternal: renderInternal,
+    renderInternal: renderInternal,
     renderPolicies: renderPolicies,
     canReport: canReport, reportableFields: reportableFields,
     reportButtonHTML: reportButtonHTML, REPORT_PRIVACY_NOTICE: REPORT_PRIVACY_NOTICE,

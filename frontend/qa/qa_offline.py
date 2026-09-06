@@ -120,7 +120,7 @@ def run_viewport(browser, vp, w, h, results):
           banner is not None and banner["hidden"] is False and banner["text"] != "",
           "banner kind=%s" % (banner or {}).get("kind"))
     check(results, "%s: 연결 배지가 백엔드 부재를 말한다" % vp,
-          "백엔드 미연결" in (conn or ""), repr(conn))
+          "연결 끊김" in (conn or ""), repr(conn))
 
     ready = bool(banner and banner.get("kind") == "local")
     check(results, "%s: 생성물이 있어 로컬 판정 경로가 켜져 있다 (D-11 #2)" % vp, ready,

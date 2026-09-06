@@ -108,19 +108,19 @@
   //  같은 파일의 `SAID_LABEL.explicit_null` 이 이미 쓰고 있는 규약이고, 이 표가
   //  「없음」(null)과 「모름」(not_found)을 가르는 자리라서 어휘가 어긋나면 안 된다.
   function show(value, present) {
-    if (present === false) { return '(없는 필드)'; }
-    if (value === null) { return '「없음」(null)'; }
-    if (value === undefined) { return '(없는 필드)'; }
+    if (present === false) { return '항목 없음'; }
+    if (value === null) { return '없음'; }
+    if (value === undefined) { return '항목 없음'; }
     if (typeof value === 'object') { return JSON.stringify(value); }
     return String(value);
   }
 
   var SAID_LABEL = {
-    value: '값을 실었다',
-    explicit_null: '「없음」(null)을 명시',
-    not_found: '「모름」(not_found)',
-    silent: '말하지 않았다',
-    not_applicable: '말할 수 없는 필드'
+    value: '확인됨',
+    explicit_null: '없음으로 변경',
+    not_found: '원문에서 확인 못함',
+    silent: '변경 내용 없음',
+    not_applicable: '기존 내용 유지'
   };
 
   var SAID_CHIP = {
@@ -158,7 +158,7 @@
     if (state.role) {
       clear(badge);
       badge.appendChild(el('span', null, state.username + ' · '));
-      badge.appendChild(el('strong', null, state.role));
+      badge.appendChild(el('strong', null, state.role === 'rule_manager' ? '규칙 관리자' : '상담원'));
       badge.hidden = false;
       logout.hidden = false;
     } else {
@@ -177,8 +177,7 @@
     if (!isManager && state.role) {
       // ★ 화면이 버튼을 숨기는 것으로 권한을 지키지 않는다 (SPEC 6.1). 상담원이 여기
       //   도달하면 사실대로 적는다 — API 가 이미 거부하고 있다는 것까지.
-      note('로그인은 됐지만 역할이 ' + state.role + ' 입니다. 규칙 승인·반려는 '
-        + 'rule_manager 만 할 수 있고, 그 검사는 화면이 아니라 API 가 합니다 (SPEC 6.1).');
+      note('규칙 관리자 계정으로 로그인해 주세요. 현재 계정은 상담원 계정입니다.');
     }
   }
 
@@ -202,21 +201,21 @@
   //   당한 부류다 — 그래서 `test_admin_screen.py` 가 서버의 `ALL_CODES` 와 정확히 같은지
   //   매번 대조한다.
   var REJECTION_LABEL = {
-    envelope_invalid: '모델 응답의 봉투가 규격과 다릅니다',
-    schema_violation: '추출 결과가 규칙 스키마를 어겼습니다',
+    envelope_invalid: '신청 조건을 읽을 수 없습니다',
+    schema_violation: '신청 조건의 형식이 맞지 않습니다',
     policy_id_mismatch: '다른 제도의 결과가 돌아왔습니다',
-    not_found_unknown_pointer: '없다고 보고한 자리가 이 초안에 없는 항목입니다',
-    not_found_value_present: '없다고 보고해 놓고 값이 실려 있습니다',
-    span_missing: '값을 실었는데 근거 구간이 없습니다',
+    not_found_unknown_pointer: '확인할 항목이 초안에 없습니다',
+    not_found_value_present: '확인하지 못한 항목에 값이 입력돼 있습니다',
+    span_missing: '신청 조건의 근거가 없습니다',
     span_duplicate: '한 항목에 근거 구간이 둘 이상 붙었습니다',
     span_unexpected_field: '근거를 요구하지 않는 항목에 근거가 붙었습니다',
-    span_for_not_found_field: '없다고 보고한 항목에 근거가 붙었습니다',
+    span_for_not_found_field: '확인하지 못한 항목에 근거가 연결돼 있습니다',
     span_empty_quote: '근거 인용이 비어 있습니다',
     span_not_in_text: '근거 인용을 원문에서 찾지 못했습니다',
     span_offset_mismatch: '근거 구간의 위치가 인용과 어긋납니다',
-    llm_unavailable: '추출 모델을 호출할 수 없었습니다',
-    llm_call_failed: '추출 모델 호출이 실패했습니다',
-    span_store_rejected: '검증은 통과했으나 저장소가 근거 구간을 거부했습니다'
+    llm_unavailable: '자동 추출을 이용할 수 없습니다',
+    llm_call_failed: '자동 추출을 완료하지 못했습니다',
+    span_store_rejected: '근거를 저장하지 못했습니다'
   };
 
   // ------------------------------------------------------------------
@@ -242,11 +241,6 @@
   //  어휘를 늘렸는데 파수병이 아직 안 돈 그 사이에도 화면이 거짓말하지 않게 한다.
   function statusLabel(status) {
     return DRAFT_STATUS_LABEL[status] || status;
-  }
-
-  //: 옮긴 말 옆에 **원래 코드를 함께** 세운다. 번역만 남기면 개발자가 재현할 수 없다.
-  function statusCode(status) {
-    return el('code', 'raw-code', status);
   }
 
   //: 사유 문자열의 형태는 `코드: 자세히` 이고, 여럿이면 ` / ` 로 이어진다
@@ -281,7 +275,7 @@
     var items = parseFailureReason(text);
     if (items.length === 0) { return '실패 사유가 기록되지 않았습니다.'; }
     return items.map(function (item) {
-      return rejectionLabel(item) + (item.pointer ? ' · ' + item.pointer : '');
+      return rejectionLabel(item);
     }).join(' / ');
   }
 
@@ -339,7 +333,6 @@
       // 옮긴 말 + 원래 코드 + 생성 시각. 상태를 코드로만 적으면 간헐 업무자가 읽지 못하고,
       // 옮긴 말만 적으면 개발자가 재현하지 못한다.
       var meta = el('span', 'queue-meta', statusLabel(draft.status));
-      meta.appendChild(statusCode(draft.status));
       meta.appendChild(document.createTextNode(' · ' + shortTime(draft.createdAt)));
       open.appendChild(meta);
       // 실패 초안은 **큐에서부터** 사유를 보인다. 열어 봐야 아는 것으로 두면 대기 큐가
@@ -515,8 +508,8 @@
 
   function verificationLine(counts) {
     var names = Object.keys(counts || {});
-    if (names.length === 0) { return '계보가 비어 있습니다.'; }
-    return names.map(function (name) { return name + ' ' + counts[name]; }).join(' · ');
+    if (names.length === 0) { return '출처 확인 기록 없음'; }
+    return names.map(function (name) { return ({verified: '확인됨', unverified: '미확인', our_choice: '계산 기준'})[name] + ' ' + counts[name]; }).join(' · ');
   }
 
   function latencyLine(latency) {
@@ -537,14 +530,14 @@
         channel.calls + '회 호출 · 성공 ' + channel.succeeded + ' · 실패 ' + channel.failed,
         latencyLine(channel.latency)
       ],
-      note: '출처 ' + channel.source
+      note: ''
     });
   }
 
   function codesLine(codes) {
     var names = Object.keys(codes || {});
     if (names.length === 0) { return '거부 사유 기록이 없습니다.'; }
-    return names.map(function (name) { return name + ' ' + codes[name]; }).join(' · ');
+    return names.map(function (name) { return (REJECTION_LABEL[name] || '기타 사유') + ' ' + codes[name]; }).join(' · ');
   }
 
   function renderStatus(status) {
@@ -553,45 +546,45 @@
 
     var batch = status.batch;
     grid.appendChild(metricCard({
-      label: '배치 성공률 (시세 수집)',
+      label: '시세 수집 성공률',
       value: metricNumber(batch.successRatePct, '%'),
-      missing: '아직 안 돎',
+      missing: '실행 기록 없음',
       subs: [
         batch.runs + '회 실행 · 성공 ' + batch.succeeded + ' · 실패 ' + batch.failed,
         batch.lastRunAt
-          ? '마지막 실행 ' + shortTime(batch.lastRunAt) + ' · ' + batch.lastOutcome
-          : '실행 기록이 없습니다 — 성공률이 낮은 것이 아니라 한 번도 돌지 않았습니다.'
+          ? '마지막 실행 ' + shortTime(batch.lastRunAt) + ' · ' + ({success: '성공', failure: '실패', succeeded: '성공', failed: '실패'})[batch.lastOutcome]
+          : '아직 실행 기록이 없습니다.'
       ],
-      note: '분모 — ' + batch.denominator
+      note: ''
     }));
 
     var fresh = status.freshness;
     grid.appendChild(metricCard({
-      label: '데이터 신선도 (가장 오래된 취득)',
+      label: '자료 갱신 시점',
       value: dayText(fresh.oldestAgeDays, '일 전'),
       missing: '취득 이력 없음',
       subs: [
-        '지역 ' + fresh.regions + '개 · 계보 ' + verificationLine(fresh.verification),
+        '지역 ' + fresh.regions + '개 · 출처 ' + verificationLine(fresh.verification),
         fresh.oldestFetchedAt
-          ? '가장 오래된 fetched_at ' + shortTime(fresh.oldestFetchedAt)
-          : '수집 배치가 아직 값을 넣지 않았습니다.'
+          ? '가장 오래된 수집 일시 ' + shortTime(fresh.oldestFetchedAt)
+          : '아직 수집된 자료가 없습니다.'
       ],
-      note: fresh.note
+      note: '자료가 현재도 유효한지는 최신 공고와 함께 확인하세요.'
     }));
 
-    grid.appendChild(llmCard('LLM 호출 — 상담 채팅', status.llm.chat));
-    grid.appendChild(llmCard('LLM 호출 — 규칙 추출', status.llm.extraction));
+    grid.appendChild(llmCard('AI 상담 응답', status.llm.chat));
+    grid.appendChild(llmCard('정책 조건 추출', status.llm.extraction));
 
     var extraction = status.extraction;
     grid.appendChild(metricCard({
-      label: '추출 스키마 실패율',
+      label: '조건 추출 실패율',
       value: metricNumber(extraction.failureRatePct, '%'),
       missing: '추출 이력 없음',
       subs: [
         extraction.drafts + '건 중 ' + extraction.failed + '건이 검증에서 거부됐습니다.',
         codesLine(extraction.codes)
       ],
-      note: extraction.note
+      note: '추출하지 못한 조건은 초안에서 확인할 수 있습니다.'
     }));
 
     var queue = status.queue;
@@ -605,7 +598,7 @@
           : '최장 대기 ' + dayText(queue.longestWaitDays, '일')
             + ' (' + shortTime(queue.oldestPendingAt) + ' 생성)'
       ],
-      note: queue.overdueNote
+      note: '처리 기한이 설정되지 않아 지연 여부는 표시하지 않습니다.'
     }));
 
     var reports = status.reports;
@@ -619,7 +612,7 @@
           ? '올라온 신고가 없습니다.'
           : '가장 오래된 것이 ' + dayText(reports.longestOpenDays, '일') + ' 됐습니다.'
       ],
-      note: reports.note
+      note: ''
     }));
 
     // 파일 로그 자체의 상태. **지표가 아니라 지표를 믿을 수 있는가에 대한 답이다** —
@@ -627,27 +620,24 @@
     var log = status.log;
     var leaking = log.unreadableLines > 0 || log.writeFailures > 0;
     grid.appendChild(metricCard({
-      label: '파일 로그 (SPEC 7.2)',
+      label: '처리 기록',
       value: log.records,
       unit: '줄',
       leaking: leaking,
       subs: [
-        log.exists ? '파일 ' + log.path : '아직 파일이 만들어지지 않았습니다: ' + log.path,
+        log.exists ? '처리 기록이 있습니다.' : '아직 처리 기록이 없습니다.',
         leaking
           ? '해석 실패 ' + log.unreadableLines + '줄 · 쓰기 실패 ' + log.writeFailures + '회'
           : '해석 실패 0줄 · 쓰기 실패 0회'
       ],
       note: leaking
-        ? '기록이 새고 있습니다. 위 「LLM 호출 — 상담 채팅」의 분모가 실제 호출 수보다 작습니다.'
-        : '요청 본문을 적지 않습니다 (SPEC 7.1). 오류 경로도 예외 타입 이름만 남깁니다.'
+        ? '저장하지 못한 기록이 있어 실제 처리 건수와 다를 수 있습니다.'
+        : '처리 기록을 정상적으로 저장하고 있습니다.'
     }));
 
-    $('statusSummary').textContent = '기준 시각 ' + shortTime(status.generatedAt) +
-      ' · 출처는 저장소의 감사기록과 파일 로그뿐입니다 (외부 APM 없음).';
+    $('statusSummary').textContent = '기준 시각 ' + shortTime(status.generatedAt);
     $('statusFoot').textContent =
-      '이 화면은 판정하지 않습니다 — 추출 합격선(계약 결정 #33) · 신선도 임계(결정 #39) · ' +
-      '대기 큐 SLA N(SPEC 7.3) 이 전부 미정이므로 통과/불통과를 말할 근거가 없습니다. ' +
-      '관측된 수와 그 수가 무엇을 세었는지만 싣습니다.';
+      '기간별 처리 건수와 대기 중인 작업을 확인할 수 있습니다.';
 
     renderQueueBadge(status);
   }
@@ -665,8 +655,7 @@
     badge.appendChild(document.createTextNode('신고 '));
     badge.appendChild(el('strong', null, status.reports.open + '건'));
     badge.appendChild(document.createTextNode(' (누적)'));
-    badge.title = '승인 대기와 신고를 더하지 않습니다 — 신고는 큐를 떠나는 경로가 없어 '
-      + '누적됩니다. 기한을 넘긴 건이 몇 건인지는 N값이 미정이라 표시하지 않습니다 (SPEC 7.3).';
+    badge.title = '검토를 기다리는 초안과 지금까지 접수된 신고 건수입니다.';
     badge.hidden = false;
   }
 
@@ -679,8 +668,8 @@
       // 비어 있는 지표 화면은 [문제 없음] 으로 읽힌다.
       $('statusPanel').hidden = false;
       clear($('metricGrid'));
-      $('statusSummary').textContent = '지표를 불러오지 못했습니다 — [' + error.code + '] ' + error.message;
-      $('statusFoot').textContent = '이 화면의 숫자가 없는 것은 지표가 0 이라는 뜻이 아닙니다.';
+      $('statusSummary').textContent = '처리 현황을 불러오지 못했습니다. ' + error.message;
+      $('statusFoot').textContent = '연결 상태를 확인하고 새로고침해 주세요.';
     });
   }
 
@@ -735,19 +724,14 @@
     var isNew = detail.changeType === 'new';
     chip.className = 'chip chip-lg ' + (isNew ? 'is-new' : 'is-change');
     chip.textContent = isNew
-      ? '① 신규 제도 신설 — 전체 검토'
-      : '② 요건 변경 — 변경 필드 + 영향 사례';
+      ? '신규 제도'
+      : '신청 조건 변경';
 
     var meta = $('reviewMeta');
     clear(meta);
     addMeta(meta, '초안 ID', draft.id);
-    addMeta(meta, '초안 상태', statusLabel(draft.status), draft.status);
+    addMeta(meta, '초안 상태', statusLabel(draft.status));
     addMeta(meta, '생성', shortTime(draft.createdAt));
-    addMeta(meta, '현행 규칙 버전', detail.current ? detail.current.ruleVersionId : '없음 (첫 승인)');
-    addMeta(meta, '원문', draft.policySourceId);
-    if (detail.source) {
-      addMeta(meta, '원문 길이', detail.source.length + ' 코드포인트');
-    }
 
     // 계약 결정 #17 — 출처표시가 **화면까지** 전달되어야 한다.
     var attribution = $('attribution');
@@ -764,7 +748,7 @@
       }
       attribution.hidden = false;
     } else {
-      attribution.textContent = '출처표시가 원문에 없습니다. 적재 경로(ingest)가 이용조건을 기록하지 않았다는 뜻입니다.';
+      attribution.textContent = '원문의 이용 조건을 확인하지 못했습니다.';
       attribution.hidden = false;
     }
 
@@ -794,23 +778,18 @@
     items.forEach(function (item) {
       var row = el('li', 'failure-item');
       row.appendChild(el('span', 'failure-label', rejectionLabel(item)));
-      // ★ 옮긴 말과 **원래 코드를 함께** 보인다 — 번역만 남기면 개발자가 재현할 수 없다.
-      if (item.code) { row.appendChild(el('code', 'failure-code', item.code)); }
-      if (item.pointer) { row.appendChild(el('code', 'failure-pointer', item.pointer)); }
-      // ★ 자세히는 **자유 텍스트**이고 원문 조각이 실릴 수 있다 (계약 결정 #41 과 같은 부류).
-      //   `el()` 은 `textContent` 만 쓰므로 평문으로 들어가고, 긴 인용은 CSS 가 접는다.
-      //   **자르지는 않는다** — 조용히 자르면 [이게 전부다] 로 읽힌다.
-      row.appendChild(el('p', 'failure-detail', item.detail));
+      var field = (detail.fields || []).filter(function (candidate) {
+        return candidate.path === item.pointer;
+      })[0];
+      if (field) { row.appendChild(el('p', 'failure-detail', '확인할 항목: ' + field.label)); }
       list.appendChild(row);
     });
   }
 
-  //: `code` 는 옮긴 말 옆에 세우는 **원래 값**이다. 안 주면 안 선다.
-  function addMeta(parent, label, value, code) {
+  function addMeta(parent, label, value) {
     var wrap = document.createElement('div');
     wrap.appendChild(el('dt', null, label));
     var dd = el('dd', null, value);
-    if (code) { dd.appendChild(statusCode(code)); }
     wrap.appendChild(dd);
     parent.appendChild(wrap);
   }
@@ -821,6 +800,7 @@
     clear(body);
 
     detail.fields.forEach(function (field) {
+      if (field.path === '/disclaimer') { return; }
       var row = document.createElement('tr');
       var classes = [];
       if (field.origin === 'inherited') { classes.push('is-inherited'); }
@@ -830,7 +810,6 @@
 
       var name = document.createElement('td');
       name.appendChild(el('span', 'f-label', field.label));
-      name.appendChild(el('code', 'f-path', field.path));
       row.appendChild(name);
 
       var before = document.createElement('td');
@@ -848,7 +827,12 @@
       var badge = el('span', 'chip ' + (SAID_CHIP[field.draftSaid] || ''),
         SAID_LABEL[field.draftSaid] || field.draftSaid);
       said.appendChild(badge);
-      if (field.note) { said.appendChild(el('span', 'f-note', field.note)); }
+      if (field.note) { said.appendChild(el('span', 'f-note', {
+        not_applicable: '이 항목은 기존 내용을 유지합니다.',
+        silent: '변경 내용이 없어 이전 조건이 유지됩니다. 폐지 여부는 공고문을 확인하세요.',
+        not_found: '원문에서 확인하지 못해 이전 값을 유지합니다.',
+        explicit_null: '승인하면 이전 값이 삭제됩니다.'
+      }[field.draftSaid] || field.note)); }
       row.appendChild(said);
 
       var evidence = document.createElement('td');
@@ -869,9 +853,9 @@
         }
         row.addEventListener('click', function () { focusField(field.path, row); });
       } else if (field.evidenceExpected) {
-        evidence.appendChild(el('span', 'f-nospan', '⚠ 근거 구간이 없습니다 — 값을 실었는데 근거가 붙지 않았습니다.'));
+        evidence.appendChild(el('span', 'f-nospan', '⚠ 이 조건의 근거를 확인해 주세요.'));
       } else if (field.draftSaid === 'not_found') {
-        evidence.appendChild(el('span', 'f-nospan', '근거 없음이 정상입니다 (원문에 없다고 보고).'));
+        evidence.appendChild(el('span', 'f-nospan', '원문에서 확인하지 못했습니다.'));
       } else {
         evidence.appendChild(el('span', 'f-nospan', '—'));
       }
@@ -955,12 +939,26 @@
   function renderLimits(limitations) {
     var list = $('limitList');
     clear(list);
-    (limitations || []).forEach(function (line) {
+    [
+      '초안에 변경 내용이 없는 조건은 이전 값을 유지합니다. 폐지된 조건이 있는지 공고문을 확인하세요.',
+      '금리와 추가 확인 항목은 전체 목록이 교체됩니다. 빈 목록을 승인하면 이전 항목이 삭제됩니다.',
+      '일괄 승인 전에도 각 초안의 변경 내용과 근거를 검토해 주세요.',
+      '승인하기 전에 공고문이 현재도 유효한지 확인해 주세요.'
+    ].forEach(function (line) {
       list.appendChild(el('li', null, line));
     });
   }
 
   // --- 4.4 ② — 승인 영향 --------------------------------------------
+  var PROFILE_LABEL = {
+    baseline: '기본 조건', zero_income: '소득 없음', very_high_income: '높은 소득',
+    age_boundary_min: '신청 연령 하한', age_boundary_max: '신청 연령 상한',
+    age_over_max: '신청 연령 초과', unknown_region: '지원하지 않는 지역',
+    non_metro: '비수도권 거주', non_metro_no_guarantee: '비수도권 · 반환보증 가입 어려움',
+    metro_gyeonggi: '경기도 거주', max_jeonse_region: '전세 시세가 높은 지역',
+    household_four: '4인 가구'
+  };
+
   function renderImpact(impact) {
     var body = $('impactBody');
     clear(body);
@@ -969,21 +967,22 @@
     chip.className = 'chip ' + (impact.changedCount > 0 ? 'is-change' : 'is-good');
     chip.textContent = impact.profileCount + '건 중 ' + impact.changedCount + '건의 판정이 달라집니다';
 
-    impact.profiles.forEach(function (entry) {
+    impact.profiles.forEach(function (entry, profileIndex) {
       var row = document.createElement('tr');
       if (entry.changed) { row.className = 'is-changed'; }
 
       var who = document.createElement('td');
-      who.appendChild(el('strong', null, entry.id));
-      who.appendChild(el('span', 'impact-axis', entry.axis));
+      who.appendChild(el('strong', null, '예시 ' + (profileIndex + 1)));
+      who.appendChild(el('span', 'impact-axis', PROFILE_LABEL[entry.id] || '조건 비교'));
       row.appendChild(who);
 
       var verdict = document.createElement('td');
       if (entry.errorBefore || entry.errorAfter) {
         verdict.appendChild(el('span', 'f-nospan', '판정 불가 — ' + (entry.errorAfter || entry.errorBefore)));
       } else {
-        var was = entry.policyBefore ? entry.policyBefore.status : '없음';
-        var now = entry.policyAfter ? entry.policyAfter.status : '없음';
+        var policyLabels = {eligible: '신청 가능', conditional: '추가 확인 필요', ineligible: '조건 미충족'};
+        var was = entry.policyBefore ? policyLabels[entry.policyBefore.status] : '없음';
+        var now = entry.policyAfter ? policyLabels[entry.policyAfter.status] : '없음';
         verdict.appendChild(el('span', 'f-val was', was));
         verdict.appendChild(el('span', 'impact-arrow', '→'));
         verdict.appendChild(el('strong', 'f-val', now));
@@ -1131,10 +1130,10 @@
   function connect() {
     return request('GET', '/api/health').then(function (payload) {
       $('connDot').className = 'conn-dot ok';
-      $('connText').textContent = '연결됨 · LLM ' + payload.llm;
+      $('connText').textContent = '연결됨';
     }).catch(function () {
       $('connDot').className = 'conn-dot bad';
-      $('connText').textContent = '백엔드에 연결하지 못했습니다';
+      $('connText').textContent = '연결 상태를 확인해 주세요';
     });
   }
 

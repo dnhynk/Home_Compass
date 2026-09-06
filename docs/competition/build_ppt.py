@@ -343,18 +343,6 @@ def slide_01_cover(prs):
            ("3분 만에 숫자로 답하고, 그 결정을 실행할 정책·금융상품까지 연결하는", 17, False, WHITE, 4),
            ("청년 주거 금융 의사결정 에이전트", 17, True, YELLOW, 4)], line_spacing=1.28)
 
-    rect(slide, 1.10, 5.72, 5.1, 0.9, fill=RGBColor(0x38, 0x38, 0x38), line=None,
-         radius=0.10, align=PP_ALIGN.LEFT, insets=(0.24, 0.14, 0.20, 0.12),
-         anchor=MSO_ANCHOR.MIDDLE,
-         items=[("과제 주제", 9.5, True, YELLOW),
-                ("「현직자 Pick」 No.1 — 청년 주거 금융 도우미", 12, True, WHITE, 3)])
-    rect(slide, 6.42, 5.72, 3.0, 0.9, fill=RGBColor(0x38, 0x38, 0x38), line=None,
-         radius=0.10, align=PP_ALIGN.LEFT, insets=(0.24, 0.14, 0.20, 0.12),
-         anchor=MSO_ANCHOR.MIDDLE,
-         items=[("제출 구분", 9.5, True, YELLOW),
-                ("작동형 웹서비스 · 기술설명", 12, True, WHITE, 3)])
-    txbox(slide, 1.10, 6.82, 6.0, 0.3,
-          [("2026 금융 AI Challenge 제출본", 10.5, False, GRAY_LT)])
     return slide
 
 
@@ -492,8 +480,8 @@ def slide_04_overview(prs):
 
 def slide_05_diff(prs):
     slide = new_slide(
-        prs, 5, "핵심 차별점 — 우리는 추천하지 않고 판정합니다",
-        "“청년 전세대출 추천 챗봇”과 구조적으로 다른 네 가지 설계 결정",
+        prs, 5, "핵심 차별점 — 추천하지 않고 판정합니다",
+        "“단순 청년 전세대출 추천 챗봇”과 구조적으로 다른 네 가지 설계 결정",
         eyebrow="DIFFERENTIATION",
     )
     diffs = [
@@ -506,9 +494,9 @@ def slide_05_diff(prs):
         ("D3", "모든 판정에 근거 동반",
          ["엔진 함수는 예외 없이", "rationale: list[str] 반환.",
           "화면·답변·API 응답 어디서나", "판정 이유를 추적할 수", "있습니다. (XAI)"]),
-        ("D4", "환각 차단 + 벤더 비종속",
-         ["LLM은 자연어 인터페이스일 뿐,", "숫자는 결정론적 엔진이",
-          "100% 계산합니다.", "프로바이더는 교체 가능하고", "키가 없어도 동작합니다."]),
+        ("D4", "판정 분리 + 벤더 비종속",
+         ["LLM은 자연어 인터페이스이고,", "핵심 판정 수치는",
+          "결정론적 엔진이 계산합니다.", "프로바이더는 교체 가능하고", "키가 없어도 동작합니다."]),
     ]
     cw = (CONTENT_W - 3 * 0.30) / 4
     for i, (tag, title, lines) in enumerate(diffs):
@@ -1004,16 +992,16 @@ def slide_11_e4(prs):
 
 
 def slide_12_llm(prs):
-    slide = new_slide(prs, 12, "A1 · LLM 프로바이더 추상화와 환각 차단 설계",
-                      "LLM은 말을 하고, 숫자는 엔진이 만듭니다 — 그리고 그 LLM은 언제든 교체할 수 있습니다.",
+    slide = new_slide(prs, 12, "A1 · LLM 프로바이더 추상화와 판정 분리",
+                      "LLM은 엔진 결과를 설명하고 핵심 판정 수치는 엔진이 계산합니다.",
                       eyebrow="LLM ABSTRACTION & GUARDRAIL")
 
     # --- request flow -----------------------------------------------------
     steps = [("사용자 질문", "“전세랑 월세 중\n뭐가 나아?”"),
              ("추상화 계층", "프로바이더 선택 ·\n도구 스키마 변환"),
              ("도구 호출", "E1~E4 결정론적\n엔진 함수 호출"),
-             ("엔진 반환", "숫자 + rationale\n(재계산 불가)"),
-             ("답변 생성", "반환값만 인용해\n문장 구성")]
+             ("엔진 반환", "숫자 + rationale\n(판정 정본)"),
+             ("답변 생성", "도구 결과를 바탕으로\n문장 구성")]
     sw = (CONTENT_W - 4 * 0.42) / 5
     for i, (t, d) in enumerate(steps):
         x = CONTENT_X + i * (sw + 0.42)
@@ -1061,16 +1049,16 @@ def slide_12_llm(prs):
                 ("키가 하나도 없어도 3순위 폴백으로 핵심 판정 기능은 100% 동작합니다. (graceful degradation)",
                  10.5, False, DARK_2, 4)])
 
-    # --- hallucination guardrails ----------------------------------------
+    # --- response guardrails ---------------------------------------------
     txbox(slide, CONTENT_X, 5.12, 9.5, 0.28,
-          [("② 환각 차단 3중 장치 — 프로바이더가 무엇이든 숫자는 바뀌지 않습니다", 11.5, True, DARK)])
+          [("② 답변 오류 위험을 줄이는 3중 장치", 11.5, True, DARK)])
     guards = [
-        ("G1  숫자 생성 권한 분리",
-         ["금액·비율·점수는 엔진 반환값만 사용하고,", "모델이 산출한 수치는 답변에 싣지 않습니다."]),
-        ("G2  근거 문자열 강제 동반",
-         ["모든 엔진이 rationale을 반환하고,", "답변은 그 문자열을 근거로 구성됩니다."]),
-        ("G3  프로바이더 무관 재현성",
-         ["1·2·3순위 어느 경로로 답해도", "판정 수치는 완전히 동일합니다."]),
+        ("G1  핵심 수치 계산 분리",
+         ["금액·비율·점수는 엔진이 계산하고,", "모델에는 도구 반환값 사용을 지시합니다."]),
+        ("G2  근거 문자열 동반",
+         ["모든 엔진이 rationale을 반환하고,", "프롬프트가 그 근거 사용을 지시합니다."]),
+        ("G3  판정 경로 재현성",
+         ["어느 제공자를 쓰더라도 핵심 판정은", "같은 결정론적 엔진이 계산합니다."]),
     ]
     gw = (CONTENT_W - 2 * 0.30) / 3
     for i, (t, lines) in enumerate(guards):
@@ -1232,8 +1220,8 @@ def slide_15_audit_provenance(prs):
                     for j, l in enumerate(lines)])
 
     txbox(slide, CONTENT_X, 3.36, CONTENT_W, 0.30,
-          [("화면은 이 계보를 등급과 함께 보이고, 등급이 낮은 이유를 원인 유형별로 나눠 적습니다 — "
-            "「검증 안 됨 N건, 대응 주체는 수집 배치」처럼.", 10.5, False, GRAY)])
+          [("API 응답은 계보와 상세 등급을 보존하고, 사용자 화면은 정책 출처와 확인할 사항을 안내합니다.",
+            10.5, False, GRAY)])
 
     # --- 감사 · 관측 -----------------------------------------------------
     panes = [
@@ -1259,11 +1247,11 @@ def slide_15_audit_provenance(prs):
 
     rect(slide, CONTENT_X, 5.48, CONTENT_W, 0.72, fill=DARK, line=None, radius=0.08,
          align=PP_ALIGN.LEFT, insets=(0.30, 0.08, 0.26, 0.08),
-         items=[("값을 지어내지 않습니다. 빈 칸은 실패가 아닙니다.", 13, True, YELLOW),
+         items=[("확인되지 않은 값을 0으로 바꾸지 않습니다.", 13, True, YELLOW),
                 ("출처를 못 찾은 항목은 못 찾았다고 적고, 준거가 없는 선택은 우리 선택이라고 적습니다.",
                  10.5, False, WHITE, 4)])
     txbox(slide, CONTENT_X, 6.34, CONTENT_W, 0.30,
-          [("이 원칙이 화면·API 응답·기술설명서에 같은 문장으로 나타나는지를 자동 검사가 대조합니다.",
+          [("자동 검사는 이 원칙이 API 응답과 기술설명서에 같은 기준으로 기록되는지 대조합니다.",
             10.5, False, GRAY)])
     return slide
 
@@ -1346,7 +1334,7 @@ def slide_17_screens_stack(prs):
         ("② 결과 대시보드", ["시나리오별 부담 막대 (인라인 SVG)", "시나리오 비교 카드 · 적합도",
                           "정책 매칭 리스트 · 리스크 스코어"],
          [(0.55, 0.22), (0.26, 0.16), (0.26, 0.16), (0.55, 0.14)]),
-        ("③ AI 상담 채팅", ["자연어 후속 질문", "엔진 결과 기반 답변", "호출된 도구 표시"],
+        ("③ 진단 결과 질문", ["자연어 후속 질문", "엔진 결과 기반 답변", "실패 시 저장된 안내"],
          [(0.55, 0.12), (0.38, 0.12), (0.55, 0.12), (0.55, 0.16)]),
     ]
     for i, (title, caps, rows) in enumerate(screens):

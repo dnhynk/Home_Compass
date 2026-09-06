@@ -209,7 +209,12 @@ def check_deck() -> Result:
         ).hexdigest()
         expected = {
             "builder": DECK_BUILDER.name,
-            "builderSha256": hashlib.sha256(DECK_BUILDER.read_bytes()).hexdigest(),
+            "builderSha256": hashlib.sha256(
+                DECK_BUILDER.read_text(encoding="utf-8")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .encode("utf-8")
+            ).hexdigest(),
             "deck": DECK.name,
             "deckSha256": hashlib.sha256(DECK.read_bytes()).hexdigest(),
             "deckTextSha256": text_digest,

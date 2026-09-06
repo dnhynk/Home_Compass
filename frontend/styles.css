@@ -341,6 +341,9 @@ strong { font-weight: 650; }
   font-size: 15px; font-weight: 600; letter-spacing: -.015em;
   font-variant-numeric: tabular-nums;
 }
+.input-wrap input::placeholder {
+  color: var(--ink-4); font-weight: 500; opacity: 1;
+}
 .input-wrap.money input { text-align: right; padding-right: 6px; }
 .input-wrap select {
   appearance: none; -webkit-appearance: none;

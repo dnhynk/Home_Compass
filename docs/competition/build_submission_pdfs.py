@@ -49,7 +49,7 @@ CRITICAL = colors.HexColor("#963737")
 
 def humanize_markup(text: str) -> str:
     replacements = {
-        "<b>Home_Compass</b> - 청년": "<b>Home_Compass</b>. 청년",
+        "<b>Home Compass</b> - 청년": "<b>Home Compass</b>. 청년",
         "핵심 제안: 더 많은 금융상품을 나열하지 않고, 사용자가 지금 감당할 수 있는 주거비와 실행 가능한 다음 행동을 숫자와 근거로 먼저 좁힙니다.":
             "제안 범위: 사용자의 소득, 자산, 부채를 기준으로 감당 가능한 주거비와 계약 전 확인할 행동을 수치와 근거로 정리합니다.",
         "<b>문제 1 - 비교 기준의 파편화:</b>": "<b>문제 1 · 비교 기준의 파편화:</b>",
@@ -285,8 +285,8 @@ class CompetitionDoc(BaseDocTemplate):
         super().__init__(
             str(filename), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
             topMargin=16 * mm, bottomMargin=15 * mm,
-            title=doc_label, author="Home_Compass", subject="2026 금융 AI Challenge",
-            creator="Home_Compass submission builder", invariant=1,
+            title=doc_label, author="Home Compass", subject="2026 금융 AI Challenge",
+            creator="Home Compass submission builder", invariant=1,
         )
         self.doc_label = doc_label
         frame = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id="body")
@@ -299,7 +299,7 @@ class CompetitionDoc(BaseDocTemplate):
         canvas.line(18 * mm, 11.5 * mm, 192 * mm, 11.5 * mm)
         canvas.setFont(source.FONT, 7.1)
         canvas.setFillColor(MUTED)
-        canvas.drawString(18 * mm, 7.7 * mm, f"Home_Compass  {self.doc_label}")
+        canvas.drawString(18 * mm, 7.7 * mm, f"Home Compass  {self.doc_label}")
         canvas.drawRightString(192 * mm, 7.7 * mm, str(doc.page))
         canvas.restoreState()
 

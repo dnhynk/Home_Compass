@@ -158,6 +158,8 @@ def main():
             page.fill("#monthlyNetIncome", "300")
             page.fill("#liquidAssets", "4000")
             page.fill("#existingDebt", "30")
+            page.eval_on_selector("#isHomeless", "el => el.checked = true")
+            page.eval_on_selector("#isSMEEmployee", "el => el.checked = true")
             page.click('#preferredType button[data-value="any"]')
             page.click("#btnAnalyze")
             page.wait_for_selector("#dashboard:not([hidden])", timeout=15000)

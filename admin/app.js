@@ -1129,10 +1129,10 @@
 
   function connect() {
     return request('GET', '/api/health').then(function (payload) {
-      $('connDot').className = 'conn-dot ok';
-      $('connText').textContent = '연결됨';
+      $('connBadge').setAttribute('data-state', 'live');
+      $('connText').textContent = '서비스 정상';
     }).catch(function () {
-      $('connDot').className = 'conn-dot bad';
+      $('connBadge').setAttribute('data-state', 'error');
       $('connText').textContent = '연결 상태를 확인해 주세요';
     });
   }

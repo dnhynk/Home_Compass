@@ -913,11 +913,8 @@
     if (!badge) return;
     badge.setAttribute('data-state', state);
     $('#connText').textContent = text;
-    /* 좁은 폭에서 배지는 점만 남는다. 문구는 `#connText` 를 시각적으로만 숨겨
-       (styles.css 의 ≤810px 규칙) **내용으로** 살려 둔다.
-       ★ 여기 있던 `aria-label` 은 지웠다 — ARIA 는 role 없는 <span>(generic)에
-         이름을 붙이는 것을 금지하고, 실제로 axe 가 serious 로 잡았다. 그 상태에서
-         ≤620px 는 텍스트가 display:none 이라 상태가 **색 점 하나로만** 전달됐다. */
+    /* 정상 상태는 CSS가 숨기고, 사용자의 대응이 필요한 예외만 상단에 표시한다.
+       문구 자체가 상태를 설명하므로 색이나 점에 의존하지 않는다. */
     badge.setAttribute('title', text);
   }
 
@@ -947,14 +944,14 @@
          reported "템플릿 응답". Anything other than "offline" is a live provider. */
       var provider = h && h.llm ? String(h.llm) : 'offline';
       STATE.llmMode = provider !== 'offline' ? 'live' : 'offline';
-      if (STATE.llmMode === 'live') setConnection('live', '연결됨');
-      else setConnection('offline', '기본 안내 이용 가능');
+      if (STATE.llmMode === 'live') setConnection('live', '서비스 정상');
+      else setConnection('offline', '저장된 안내 사용 중');
       setChatModeChip(STATE.llmMode);
       renderLocalPathBanner();
       return true;
     }).catch(function () {
       var st = localStatus();
-      if (st.ready) setConnection('local', '연결 끊김 · 저장된 자료 사용');
+      if (st.ready) setConnection('local', '연결 끊김 · 저장된 자료 사용 중');
       else setConnection('disabled', '연결 확인 필요');
       setChatModeChip('offline');
       renderLocalPathBanner();
@@ -1121,7 +1118,7 @@
       .then(function (res) {
         if (!res || !res.affordability) throw new Error('malformed');
         if (STATE.connection === 'local' || STATE.connection === 'disabled') {
-          setConnection('offline', '연결됨');
+          setConnection('live', '서비스 정상');
         }
         STATE.lastSource = 'backend';
         renderLocalPathBanner();
@@ -1174,8 +1171,8 @@
     if (!chip) return;
     chip.hidden = mode === 'live';
     chip.className = 'chip chip-sm chip-neutral';
-    chip.textContent = mode === 'live' ? '' : '기본 안내';
-    chip.title = mode === 'live' ? '' : 'AI 상담에 연결되지 않아 진단 결과에 대한 기본 안내를 제공합니다.';
+    chip.textContent = mode === 'live' ? '' : '저장된 안내';
+    chip.title = mode === 'live' ? '' : 'AI 답변을 사용할 수 없어 진단 결과에 대한 저장된 안내를 제공합니다.';
   }
 
   function chatTextHTML(text) {
@@ -1186,7 +1183,7 @@
     var log = $('#chatLog');
     var li = document.createElement('li');
     li.className = 'msg ' + (role === 'user' ? 'msg-user' : 'msg-bot');
-    li.innerHTML = '<span class="msg-avatar">' + (role === 'user' ? 'ME' : 'AI') + '</span>' +
+    li.innerHTML = '<span class="msg-avatar">' + (role === 'user' ? '나' : 'Home Compass') + '</span>' +
       '<div><div class="msg-bubble">' + (role === 'user' ? esc(text) : chatTextHTML(text)) + '</div></div>';
     log.appendChild(li);
     log.scrollTop = log.scrollHeight;
@@ -1198,8 +1195,8 @@
     var li = document.createElement('li');
     li.className = 'msg msg-bot';
     li.id = 'typingRow';
-    li.innerHTML = '<span class="msg-avatar">AI</span><div class="msg-bubble">' +
-      '<span class="typing"><i></i><i></i><i></i></span></div>';
+    li.innerHTML = '<span class="msg-avatar">Home Compass</span><div class="msg-bubble">' +
+      '<span class="typing">답변을 정리하고 있습니다</span></div>';
     log.appendChild(li);
     log.scrollTop = log.scrollHeight;
     return li;
@@ -1326,7 +1323,7 @@
     t.innerHTML = html;
     t.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.hidden = true; }, 5200);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2800);
   }
 
   function syncMoneyEcho() {

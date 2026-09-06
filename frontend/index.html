@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Home_Compass · 나에게 맞는 주거비 찾기</title>
-<meta name="description" content="소득·자산·지역을 입력하면 감당 가능한 주거비 상한을 계산하고, 전세·월세 총비용을 비교하며, 이용 가능한 청년 주거 정책까지 연결하는 의사결정 에이전트.">
+<title>Home Compass · 나에게 맞는 주거비 찾기</title>
+<meta name="application-name" content="Home_Compass">
+<meta name="description" content="소득·자산·지역을 입력하면 감당 가능한 주거비 상한을 계산하고, 전세·월세 총비용과 이용 가능한 청년 주거 정책을 함께 확인하는 도구.">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231C1A17'/%3E%3Cpath d='M16 6 20 16 16 26 12 16Z' fill='%23FFB800'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
@@ -26,14 +27,13 @@
         </svg>
       </span>
       <span class="brand-text">
-        <strong>Home_Compass</strong>
+        <strong>Home Compass</strong>
         <em>청년 주거 금융</em>
       </span>
     </a>
 
     <div class="topbar-actions">
       <span class="conn" id="connBadge" title="서비스 연결 상태">
-        <span class="conn-dot" id="connDot"></span>
         <span id="connText">연결 확인 중</span>
       </span>
       <!-- 직원 로그인. 판정 화면을 역할별로 포크하지 않는다 (SPEC 6.1 · D-9) —
@@ -55,7 +55,7 @@
       <div class="panel-head">
         <p class="eyebrow">주거비 진단</p>
         <h1 class="panel-title">내 상황 입력</h1>
-        <p class="panel-sub">이름·연락처 없이 진단할 수 있습니다. 진단과 AI 상담을 위해 입력값을 서버로 전송합니다.</p>
+        <p class="panel-sub">이름·연락처 없이 진단할 수 있습니다. 입력값은 진단과 질문 답변을 위해 서버에 전송됩니다.</p>
       </div>
 
       <div class="fieldset">
@@ -199,8 +199,8 @@
     <!-- 0. 진단 전 온보딩 -->
     <div id="onboarding">
       <div class="hero">
-        <p class="hero-eyebrow">나에게 맞는 주거비 찾기</p>
-        <h2 class="hero-title">“내가 지금 <em>얼마짜리 집</em>에<br>살아도 되는가?”</h2>
+        <p class="hero-eyebrow">주거비 기준 계산</p>
+        <h2 class="hero-title">지금 소득으로<br><em>감당할 수 있는 집은?</em></h2>
         <p class="hero-body">
           소득과 자산에 맞는 <strong>주거비 예산</strong>을 알아보세요.
           전세와 월세에 드는 비용부터 지원 제도, 보증금 주의사항까지 함께 살펴볼 수 있습니다.
@@ -209,19 +209,19 @@
 
       <div class="engine-grid">
         <article class="engine-card">
-          <h3>내게 맞는 주거비</h3>
+          <h3>월 주거비 예산</h3>
           <p>생활비와 대출 상환액을 고려해 매달 집에 쓸 수 있는 예산을 알아보세요.</p>
         </article>
         <article class="engine-card">
-          <h3>이용 가능한 지원 제도</h3>
+          <h3>지원 제도 조건</h3>
           <p>내 조건에 맞는 주거 지원 제도와 신청 전에 확인할 조건을 살펴보세요.</p>
         </article>
         <article class="engine-card">
-          <h3>전월세 총비용 비교</h3>
+          <h3>5년 총비용 비교</h3>
           <p>월세, 관리비, 대출이자를 함께 비교해 어떤 선택이 내게 유리한지 알아보세요.</p>
         </article>
         <article class="engine-card">
-          <h3>보증금 주의사항</h3>
+          <h3>계약 전 위험 확인</h3>
           <p>보증금 비율과 반환보증 가입 가능 여부 등 계약 전에 살펴볼 점을 확인하세요.</p>
         </article>
       </div>
@@ -360,19 +360,19 @@
 
       <!-- 2-7 요약 -->
       <section class="card card-summary" id="cardSummary">
-        <span class="summary-mark" aria-hidden="true">“</span>
+        <span class="summary-mark" aria-hidden="true">진단 요약</span>
         <p id="summaryText"></p>
         <p class="summary-meta" id="summaryMeta"></p>
       </section>
     </div>
 
-    <!-- 3. AI 상담 -->
+    <!-- 3. 진단 결과 질문 -->
     <section class="card card-chat" id="cardChat">
       <header class="card-head">
         <div>
-          <p class="eyebrow">AI 상담</p>
-          <h2 class="card-title">주거 고민을 물어보세요</h2>
-          <p class="card-sub">예산, 전월세 비교, 지원 제도 중 궁금한 점이 있나요?</p>
+          <p class="eyebrow">결과 질문</p>
+          <h2 class="card-title">진단 결과에 질문하기</h2>
+          <p class="card-sub">예산과 지원 제도를 입력한 조건에 맞춰 설명합니다. 답변은 AI가 생성할 수 있으므로 계약 전 원문을 확인하세요.</p>
         </div>
         <span class="chip chip-sm" id="chatModeChip" hidden></span>
       </header>
@@ -389,11 +389,7 @@
       <form class="chat-input" id="chatForm">
         <label class="sr-only" for="chatText">상담 질문 입력</label>
         <input type="text" id="chatText" placeholder="예) 보증금 4천만원으로 마포구에서 가능한 선택지는?" autocomplete="off">
-        <button type="submit" class="btn btn-primary btn-send" id="btnSend" aria-label="전송">
-          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-            <path d="M3 10 17 3.5 12.5 17 10 11.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <button type="submit" class="btn btn-primary btn-send" id="btnSend">묻기</button>
       </form>
     </section>
   </section>
@@ -408,7 +404,7 @@
     </p>
     <!-- 현재 참가 형태는 개인 참가다. 이전 프로젝트의 팀 표기 기록은 engineering 문서에 남긴다. -->
     <p class="foot-meta">
-      <strong>Home_Compass</strong> · 나에게 맞는 주거비 찾기
+      <strong>Home Compass</strong> · 나에게 맞는 주거비 찾기
     </p>
   </div>
 </footer>

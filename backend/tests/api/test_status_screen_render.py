@@ -428,5 +428,6 @@ def test_a_failed_status_request_is_not_drawn_as_an_empty_screen():
     """★ 비어 있는 지표 화면은 [문제 없음] 으로 읽힌다 (SPEC 6.2 침묵 폴백 금지)."""
     screen = run_screen(dict(BASE_RESPONSES))       # `/api/admin/status` 만 없다
     assert screen["metrics"] == "", "지표를 못 읽었는데 카드가 그려졌다"
-    assert "지표를 불러오지 못했습니다" in screen["summary"]
-    assert "0 이라는 뜻이 아닙니다" in screen["foot"]
+    assert "처리 현황을 불러오지 못했습니다" in screen["summary"]
+    assert "연결 상태를 확인하고 새로고침" in screen["foot"]
+    assert "/api/" not in screen["summary"]

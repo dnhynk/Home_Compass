@@ -668,7 +668,7 @@
       // 비어 있는 지표 화면은 [문제 없음] 으로 읽힌다.
       $('statusPanel').hidden = false;
       clear($('metricGrid'));
-      $('statusSummary').textContent = '처리 현황을 불러오지 못했습니다. ' + error.message;
+      $('statusSummary').textContent = '처리 현황을 불러오지 못했습니다.';
       $('statusFoot').textContent = '연결 상태를 확인하고 새로고침해 주세요.';
     });
   }

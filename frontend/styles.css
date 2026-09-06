@@ -173,10 +173,6 @@ strong { font-weight: 650; }
 @media (max-width: 470px) {
   .brand-mark { display: none; }
   .brand-text strong { font-size: 13px; letter-spacing: -.03em; }
-  /* `.btn-ghost` 축소는 여기 있었지만 **한 번도 적용된 적이 없다** — 기반 규칙
-     `.btn-ghost`(아래 BUTTONS 절)가 특이도는 같고 순서가 뒤라 이겼다. 측정:
-     375px 에서 #btnSample 이 padding 13px / font-size 12.5px, 즉 기반값 그대로였다.
-     실제로 듣도록 정의 뒤로 옮겼다. */
 }
 
 /* ── buttons ───────────────────────────────────────────── */
@@ -1106,16 +1102,8 @@ strong { font-weight: 650; }
    세션 · 로컬 경로 배너 · 데이터 등급 · 내부 정보 (6단계)
    ============================================================ */
 
-/* ── 직원 로그인 (SPEC 6.1 · D-9) ────────────────────────── */
+/* ── 로그인 (SPEC 6.1 · D-9) ────────────────────────────── */
 .session { display: flex; align-items: center; gap: 6px; }
-.session-form { display: flex; align-items: center; gap: 5px; }
-.session-form input {
-  height: 30px; width: 116px; padding: 0 9px;
-  font: inherit; font-size: 12px;
-  background: var(--surface); color: var(--ink-1);
-  border: 1px solid var(--line); border-radius: var(--r-sm);
-}
-.session-form input:focus-visible { outline: 2px solid var(--accent-yellow-deep); outline-offset: 1px; }
 .session-who { font-size: 12px; font-weight: 650; color: var(--ink-1); }
 .session-role {
   margin-left: 6px; padding-left: 7px; border-left: 1px solid var(--line-strong);
@@ -1123,30 +1111,67 @@ strong { font-weight: 650; }
   font-size: 10.5px; font-weight: 700;
 }
 .btn-xs { height: 30px; padding: 0 11px; font-size: 12px; }
-/* ≤620px 전용 토글. 그 위에서는 칸이 바에 그대로 있으므로 열 것이 없다. */
-.session-toggle { display: none; }
 
-@media (max-width: 860px) {
-  .session-form input { width: 88px; }
+.login-modal {
+  position: fixed; inset: 0; z-index: 220;
+  display: grid; place-items: center;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: rgba(27,25,21,.46);
+  animation: login-backdrop-in 160ms ease-out both;
 }
-/* 상단바 접힘 2단(≤810px)에서도 621~653px 대역은 브랜드가 4px 모자랐다.
-   여기서 더 줄일 수 있는 것은 로그인 칸뿐이다 — 자리표시자만 짧아지고
-   입력은 그대로 된다. */
-@media (max-width: 810px) {
-  .session-form input { width: 76px; }
+.login-modal[hidden] { display: none; }
+.login-panel {
+  position: relative; width: min(100%, 400px); padding: 24px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: 0 28px 70px -22px rgba(27,25,21,.58);
+  animation: login-panel-in 180ms var(--ease-out) both;
 }
-/* 620px 아래로는 76px 칸 둘을 더 줄일 수 없고, 그대로 두면 부족분을
-   `.brand`(min-width:0) 가 먹어 제품 이름이 지워진다. 그렇다고 칸을 `display: none`
-   으로 지우면 **휴대폰에서 상담원이 로그인할 수 없다** — 상담원 확장(F7)은
-   이 상단바가 유일한 입구다. 그래서 **자리만 비우고 칸은 남긴다** — 폼을
-   상단바 아래 디스클로저로 내리고, 바에는 같은 라벨의 토글 하나만 세운다.
-   토글은 지우기 전 제출 버튼과 같은 클래스·같은 라벨이므로 이 대역의 상단바
-   폭 계산은 변하지 않는다 (측정: 320px·390px 가로 스크롤 0 유지).
-   패널은 `.topbar`(position: sticky) 에 맞물려 바 아래로 떨어진다. 폭을 `100%`
-   기준으로 잡는 것은 `100vw` 가 세로 스크롤바를 포함해 오버랩하기 때문이다. */
+.login-modal[data-closing="true"] { animation: login-backdrop-out 140ms ease-in both; }
+.login-modal[data-closing="true"] .login-panel { animation: login-panel-out 140ms ease-in both; }
+.login-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.login-title { margin: 0; font-size: 21px; line-height: 1.3; font-weight: 750; color: var(--ink-1); }
+.login-sub { margin: 5px 0 18px; font-size: 13px; color: var(--ink-3); }
+.login-close {
+  display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px;
+  margin: -5px -5px 0 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--ink-3); font: inherit; font-size: 24px; line-height: 1;
+}
+.login-close:hover { background: var(--surface-2); color: var(--ink-1); }
+.login-close:focus-visible { outline: 2px solid var(--accent-yellow-deep); outline-offset: 2px; }
+.login-label {
+  display: block; margin: 13px 0 6px;
+  font-size: 12px; font-weight: 700; color: var(--ink-2);
+}
+.login-input {
+  width: 100%; height: 44px; padding: 0 12px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink-1); font: inherit; font-size: 16px;
+}
+.login-input:focus { border-color: var(--accent-yellow-deep); outline: 2px solid rgba(198,139,0,.18); }
+.login-note { min-height: 20px; margin: 9px 0 3px; font-size: 12.5px; color: var(--critical-ink); }
+.login-note:empty { visibility: hidden; }
+.login-submit { width: 100%; height: 44px; }
+body.login-open { overflow: hidden; }
+
+@keyframes login-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes login-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes login-panel-in {
+  from { opacity: 0; transform: translateY(10px) scale(.965); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes login-panel-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(7px) scale(.97); }
+}
+
 @media (max-width: 620px) {
-  /* 로그인 뒤에는 사용자·역할·로그아웃까지 추가된다. 한 줄에 억지로 밀어 넣으면
-     제품명이 말줄임표로 사라지므로, 인증된 상태만 작업 표시줄을 둘째 줄로 내린다. */
+  .login-modal {
+    place-items: end center;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .login-panel { width: 100%; max-height: 92dvh; overflow-y: auto; padding: 22px 20px 20px; }
   html:has(.session-who) { --topbar-h: 100px; }
   .topbar-inner:has(.session-who) {
     flex-wrap: wrap;
@@ -1159,16 +1184,6 @@ strong { font-weight: 650; }
     margin-left: 0;
     justify-content: flex-end;
   }
-  .session-toggle { display: inline-flex; }
-  .session-form {
-    position: absolute; top: calc(100% - 6px); right: clamp(16px, 3vw, 34px); z-index: 70;
-    flex-direction: column; align-items: stretch; gap: 8px;
-    width: min(256px, calc(100% - 32px)); padding: 12px;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--r-md); box-shadow: 0 18px 40px -16px rgba(27,25,21,.45);
-  }
-  .session-form[data-open="false"] { display: none; }
-  .session-form input { width: auto; height: 34px; }
 }
 
 /* ── 로컬 판정 경로 상태 배너 (SPEC 6.2 오프라인 정의 #3 · D-11) ──

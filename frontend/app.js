@@ -608,9 +608,8 @@
      ★ 신고는 **제안이지 변경이 아니다.** 이 화면에는 규칙을 바꾸는 경로가 없다. */
 
   var REPORT_PRIVACY_NOTICE =
-    '고객 개인정보를 적지 마세요. 이름·연락처·생년월일·계좌 같은 개인정보는 ' +
-    '신고 사유에 쓰지 않습니다. 신고는 제도·시세 데이터의 오류를 알리는 것이며, ' +
-    '이 칸의 내용은 감사기록에 그대로 남아 지울 수 없습니다.';
+    '이름·연락처·생년월일·계좌번호 같은 개인정보는 입력하지 마세요. ' +
+    '작성한 내용은 담당자가 확인하며 기록으로 보관됩니다.';
 
   /* 신고 대상이 **아닌** 키. 나머지는 전부 신고할 수 있는 항목이다.
      · policy — `id` 는 대상 그 자체이고, `disclaimer` 는 엔진이 붙이는 고정 문구다.
@@ -647,7 +646,7 @@
     if (!canReport()) return '';
     return '<button type="button" class="btn btn-ghost btn-xs report-btn" ' +
       'data-report-kind="' + esc(kind) + '" data-report-id="' + esc(id) + '">' +
-      '이상 신고<span class="sr-only"> — ' + esc(label) + '</span></button>';
+      '정보 수정 요청<span class="sr-only"> — ' + esc(label) + '</span></button>';
   }
 
   function reportTargetItem(kind, id) {
@@ -661,7 +660,7 @@
 
   function openReportDialog(kind, id) {
     var item = reportTargetItem(kind, id);
-    if (!item) { toast('신고 대상을 화면에서 찾지 못했습니다.'); return; }
+    if (!item) { toast('항목 정보를 찾지 못했습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.'); return; }
 
     STATE.report = { kind: kind, id: id };
     $('#reportTarget').textContent = (kind === 'policy' ? '제도 · ' : '시세 · ') +
@@ -715,7 +714,7 @@
     if (!reason) {
       /* 오류 문구가 어느 칸의 것인지 묶고, 초점을 그 칸으로 보낸다.
          전에는 문구만 뜨고 초점이 제출 버튼에 남았다. */
-      $('#reportNote').textContent = '사유를 적어야 신고할 수 있습니다.';
+      $('#reportNote').textContent = '어떤 점이 다른지 적어 주세요.';
       $('#reportReason').setAttribute('aria-invalid', 'true');
       $('#reportReason').focus();
       return;
@@ -736,15 +735,10 @@
       })
     }).then(function (filed) {
       closeReportDialog();
-      /* 신고가 **무엇이 되는지** 그대로 적는다. 「접수됐습니다」로 끝내면 상담원은
-         이것이 고쳐진 것으로 읽는다 — 신고는 제안이지 변경이 아니다. */
-      toast('신고를 올렸습니다. 규칙관리자의 대기 큐에 쌓였고, <b>규칙은 바뀌지 않습니다</b>' +
-        (filed && filed.mergedDraftIds && filed.mergedDraftIds.length
-          ? ' · 같은 제도의 검토 대기 초안 ' + filed.mergedDraftIds.length + '건과 함께 보입니다.'
-          : '.'));
+      toast('수정 요청을 보냈습니다. 담당자가 확인하기 전까지 현재 정보가 유지됩니다.');
     }).catch(function (err) {
       /* 침묵 폴백 금지 (SPEC 6.2 #3). 실패를 삼키면 상담원은 올렸다고 믿는다. */
-      $('#reportNote').textContent = '신고하지 못했습니다: ' + ((err && err.message) || '알 수 없는 오류');
+      $('#reportNote').textContent = '요청을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.';
     });
   }
 

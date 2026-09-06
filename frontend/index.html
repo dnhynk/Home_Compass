@@ -443,13 +443,13 @@
 <div class="report-modal" id="reportModal" role="dialog" aria-modal="true"
      aria-labelledby="reportTitle" hidden>
   <form class="report-panel" id="reportForm" novalidate>
-    <h2 class="report-title" id="reportTitle">이상 신고</h2>
+    <h2 class="report-title" id="reportTitle">정보 수정 요청</h2>
     <p class="report-target" id="reportTarget">—</p>
 
-    <label class="report-label" for="reportField">어느 항목이 잘못됐습니까</label>
+    <label class="report-label" for="reportField">확인이 필요한 항목</label>
     <select id="reportField" class="report-select"></select>
 
-    <label class="report-label" for="reportReason">무엇이 어떻게 다릅니까</label>
+    <label class="report-label" for="reportReason">어떤 점이 다른가요?</label>
     <textarea id="reportReason" class="report-reason" rows="4" maxlength="2000"
               aria-describedby="reportNote"
               placeholder="예) 이 제도는 2026-07 공고로 종료됐다고 기관에서 안내받았습니다."></textarea>
@@ -458,7 +458,7 @@
 
     <div class="report-actions">
       <button type="button" class="btn btn-ghost btn-xs" id="reportCancel">취소</button>
-      <button type="submit" class="btn btn-primary btn-xs" id="reportSubmit">신고 올리기</button>
+      <button type="submit" class="btn btn-primary btn-xs" id="reportSubmit">수정 요청 보내기</button>
     </div>
     <p class="report-note" id="reportNote" role="status"></p>
   </form>

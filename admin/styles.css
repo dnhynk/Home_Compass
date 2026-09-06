@@ -411,7 +411,13 @@ tbody tr:last-child td { border-bottom: 0; }
 .fields tbody tr.active { background: var(--accent-yellow-wash); }
 .fields tbody tr.is-changed td:first-child { box-shadow: inset 3px 0 0 var(--accent-yellow-deep); }
 .fields tbody tr.is-inherited { color: var(--ink-3); background: var(--plane); }
-.f-label { font-weight: 650; color: var(--ink-1); }
+.fields th:first-child,
+.fields td:first-child {
+  width: 1%;
+  min-width: 116px;
+  white-space: nowrap;
+}
+.f-label { font-weight: 650; color: var(--ink-1); white-space: nowrap; word-break: keep-all; }
 .f-path { display: block; font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
 /* ★ 값 칸은 `break-word` 다. `break-all` 은 띄어쓰기가 있어도 글자 단위로 끊어서
    「이 정책의 판정」 칸이 `ineligible` 을 `ineligi` / `ble` 로 갈랐다 (브라우저 실측).

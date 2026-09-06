@@ -1103,10 +1103,13 @@ strong { font-weight: 650; }
    ============================================================ */
 
 /* ── 로그인 (SPEC 6.1 · D-9) ────────────────────────────── */
-.session { display: flex; align-items: center; gap: 6px; }
-.session-who { font-size: 12px; font-weight: 650; color: var(--ink-1); }
+.session { display: flex; align-items: center; gap: 14px; }
+.session-who {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 12px; font-weight: 650; color: var(--ink-1);
+}
 .session-role {
-  margin-left: 6px; padding-left: 7px; border-left: 1px solid var(--line-strong);
+  margin-left: 0; padding-left: 12px; border-left: 1px solid var(--line-strong);
   border-radius: 0; background: transparent; color: var(--accent-yellow-ink);
   font-size: 10.5px; font-weight: 700;
 }

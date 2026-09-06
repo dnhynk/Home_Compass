@@ -35,6 +35,12 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _text_source_sha256(path: Path) -> str:
+    """Hash UTF-8 source with platform line endings normalized to LF."""
+    normalized = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 def deck_text(path: str | os.PathLike[str] = DECK) -> list[str]:
     """Return all non-empty slide text in stable slide/shape order."""
     presentation = Presentation(str(path))
@@ -79,7 +85,7 @@ def _manifest_payload() -> dict[str, object]:
     return {
         "schema": 1,
         "builder": JS_BUILDER.name,
-        "builderSha256": _sha256(JS_BUILDER),
+        "builderSha256": _text_source_sha256(JS_BUILDER),
         "deck": DECK.name,
         "deckSha256": _sha256(DECK),
         "deckTextSha256": _text_sha256(DECK),

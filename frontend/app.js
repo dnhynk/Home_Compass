@@ -253,6 +253,13 @@
       });
     }
 
+    var visibleRefs = refs.filter(function (r) { return r.at > 0 && r.at <= domain; });
+    var refLines = visibleRefs.map(function (r) {
+      var x = toPct(r.at).toFixed(3) + '%';
+      return '<line class="schwabe-ref-line schwabe-ref-line-' + r.kind + '" x1="' + x + '" x2="' + x +
+        '" y1="1" y2="17"></line>';
+    }).join('');
+
     var rows = scenarios.map(function (s) {
       var v = s.schwabeIndexPct;
       var meta = VERDICT_META[s.verdict] || VERDICT_META.stretch;
@@ -266,6 +273,7 @@
           '<rect x="0" y="4" width="' + toPct(v).toFixed(3) + '%" height="10" rx="5" fill="' + color + '"' +
           tipAttr(s.label, [['슈바베지수', pct(v)], ['월 환산 주거비', fmtKR(s.monthlyEquivalentCostKRW)],
                             ['월 실수령액', fmtKR(netIncome)], ['판정', meta.label]]) + '></rect>' +
+          refLines +
           '</svg>';
       return '<li class="schwabe-row">' +
         '<span class="schwabe-name">' + esc(s.label) + '</span>' +
@@ -273,14 +281,16 @@
         '<span class="schwabe-val">' + esc(pctOrDash(v)) + '</span></li>';
     }).join('');
 
-    var marks = refs.filter(function (r) { return r.at > 0 && r.at <= domain; }).map(function (r) {
-      return '<span class="schwabe-mark schwabe-mark-' + r.kind + '" style="left:' + toPct(r.at).toFixed(3) + '%">' +
-        '<i></i><b>' + esc(r.label) + ' ' + esc(pct(r.at)) + '</b></span>';
+    var referenceLegend = visibleRefs.map(function (r) {
+      return '<li class="schwabe-ref schwabe-ref-' + r.kind + '"><i></i><span>' + esc(r.label) +
+        ' <b>' + esc(pct(r.at)) + '</b></span></li>';
     }).join('');
 
     return '<ul class="schwabe-rows">' + rows + '</ul>' +
-      '<div class="schwabe-axis"><span style="left:0%">0%</span>' + marks +
-      '<span class="schwabe-axis-end" style="left:100%">' + esc(pct(domain, 0)) + '</span></div>' +
+      '<div class="schwabe-scale"><div class="schwabe-axis"><span>0%</span>' +
+      '<span>' + esc(pct(domain, 0)) + '</span></div></div>' +
+      (referenceLegend ? '<div class="schwabe-reference-row"><ul class="schwabe-references" aria-label="비교 기준">' +
+        referenceLegend + '</ul></div>' : '') +
       '<p class="schwabe-note">막대는 예상 주거비가 월 실수령액에서 차지하는 비중입니다. 권장액·상한과 비교해 보세요.</p>';
   }
 
@@ -288,26 +298,57 @@
    * 가로 스택 막대. 퍼센트 좌표로 그려 컨테이너 폭이 변해도 라운드 코너가
    * 찌그러지지 않는다. 세그먼트 사이에는 표면색 간격을 둔다.
    * opts.max 를 주면 그 값을 100% 기준으로 삼아 여러 막대를 서로 비교할 수 있다.
+   * 아주 작은 양수 항목은 값과 툴팁은 그대로 두고 최소 표시 폭을 준다. 그만큼 큰
+   * 항목에서 폭을 나눠 받아 전체 막대 길이와 시나리오 간 총액 비교는 유지한다.
    */
   function stackedBarSVG(segments, opts) {
     opts = opts || {};
     var H = opts.height || 40;
     var R = Math.min(5, H / 2);
     var GAP = H > 16 ? 0.9 : 0.6;   /* percent */
+    var MIN_SEGMENT = 3.2;           /* percent; 작은 항목도 색을 식별할 수 있게 한다 */
     var total = segments.reduce(function (a, b) { return a + Math.max(0, b.value); }, 0) || 1;
     var base = opts.max && opts.max > 0 ? opts.max : total;
     var live = segments.filter(function (s) { return s.value > 0; });
+
+    var extent = Math.min(100, total / base * 100);
+    var gapTotal = Math.min(GAP * Math.max(0, live.length - 1), extent);
+    var gap = live.length > 1 ? gapTotal / (live.length - 1) : 0;
+    var available = Math.max(0, extent - gapTotal);
+    var floor = live.length ? Math.min(MIN_SEGMENT, available / live.length) : 0;
+    var widths = new Array(live.length);
+    var remaining = available;
+    var remainingValue = total;
+    var open = live.map(function (_, i) { return i; });
+
+    /* 바닥 폭보다 작은 항목을 먼저 고정하고, 남은 폭은 실제 금액 비율로 나눈다. */
+    while (open.length) {
+      var undersized = open.filter(function (i) {
+        return remainingValue > 0 && live[i].value / remainingValue * remaining < floor;
+      });
+      if (!undersized.length) {
+        open.forEach(function (i) {
+          widths[i] = remainingValue > 0 ? live[i].value / remainingValue * remaining : 0;
+        });
+        break;
+      }
+      undersized.forEach(function (i) {
+        widths[i] = floor;
+        remaining -= floor;
+        remainingValue -= live[i].value;
+      });
+      open = open.filter(function (i) { return undersized.indexOf(i) === -1; });
+    }
 
     var s = '<svg class="viz" width="100%" height="' + H + '" style="height:' + H + 'px" ' +
       'role="img" aria-label="' + esc(opts.aria || '구성비 막대') + '">';
     var x = 0;
     live.forEach(function (seg, i) {
-      var raw = (seg.value / base) * 100;
-      var w = Math.max(0.7, raw - (i < live.length - 1 ? GAP : 0));
+      var w = widths[i] || 0;
       s += '<rect class="seg" x="' + x.toFixed(3) + '%" y="0" width="' + w.toFixed(3) + '%" height="' + H +
         '" rx="' + R + '" fill="' + seg.color + '"' +
         tipAttr(seg.label, [['금액', fmtWon(seg.value)], ['비중', pct(seg.value / total * 100)]]) + '></rect>';
-      x += raw;
+      x += w + (i < live.length - 1 ? gap : 0);
     });
     s += '</svg>';
     return s;

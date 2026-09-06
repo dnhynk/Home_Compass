@@ -1,4 +1,4 @@
-"""교차 테스트 — 발표 자료가 생성기와 어긋나지 않는다 (코디네이터 소유, SPEC 9.4).
+"""교차 테스트 — 발표 자료가 생성기와 어긋나지 않는다 (SPEC 9.4).
 
 ## 왜 이 파일이 생겼나
 
@@ -10,11 +10,9 @@
 **아무도 못 잡은 이유는 검사가 없었기 때문이다.** `frontend/generated/` 는 바이트 비교가
 같은 사고를 막고 있었고 `docs/competition/` 에는 그것이 없었다. 이 파일이 그 빈자리다.
 
-## 왜 바이트가 아니라 본문인가 — **재 봤다**
-
-같은 코드로 두 번 뽑아 sha 를 비교하면 **다르다.** `.pptx` 는 zip 이고 항목마다 시각이
-박힌다. 그러나 **본문 텍스트는 결정적이다** — 두 번 뽑아 544문장이 완전히 일치했다.
-그래서 목적(생성물이 생성기와 같은가)은 같고 수단만 다르다.
+현재 생성기는 Artifact Tool 기반의 `build_ppt.mjs`이고, Python 진입점이 생성기·PPTX의
+해시와 본문 해시를 매니페스트에 기록한다. CI는 저작 런타임 없이도 세 파일의 어긋남을
+검출한다. 실제 생성 명령은 `python docs/competition/build_ppt.py`다.
 
 ## `python-pptx` 가 없으면 **건너뛰지 않는다**
 
@@ -36,6 +34,8 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DECK_DIR = REPO_ROOT / "docs" / "competition"
 BUILDER = DECK_DIR / "build_ppt.py"
+JS_BUILDER = DECK_DIR / "build_ppt.mjs"
+MANIFEST = DECK_DIR / "technical_deck_manifest.json"
 DECK = DECK_DIR / "기술설명서_Home_Compass.pptx"
 
 
@@ -112,19 +112,13 @@ def deck_enum_drift(source: str, engine_strings: list[str]) -> list[str]:
         for line in engine_strings
         for match in _ENUM_IN_PARENS.finditer(line)
     }
-    quoted = re.findall(
-        r"_rationale_box\(slide,\s*[\d.]+,\s*\n?\s*\[(.*?)\]\)", source, re.S)
-    used = {
-        match.group(0)
-        for block in quoted
-        for match in _ENUM_IN_PARENS.finditer(block)
-    }
+    used = {match.group(0) for match in _ENUM_IN_PARENS.finditer(source)}
     return sorted(used - emitted)
 
 
 class TestTheQuotedVerdictWordsExistInTheEngine:
     def test_the_real_builder_matches(self):
-        drift = deck_enum_drift(BUILDER.read_text(encoding="utf-8"), _engine_strings())
+        drift = deck_enum_drift(JS_BUILDER.read_text(encoding="utf-8"), _engine_strings())
         assert drift == [], (
             f"덱이 엔진에 없는 판정 어휘를 인용한다: {drift}. "
             "엔진에서 원시 enum 을 걷어냈다면 덱의 인용도 함께 고쳐야 한다."
@@ -133,14 +127,14 @@ class TestTheQuotedVerdictWordsExistInTheEngine:
     def test_a_vanished_enum_is_caught(self):
         """엔진이 어휘를 지웠는데 덱에 남은 것을 실제로 잡는지 — 프로브."""
         engine = [s for s in _engine_strings() if "(low)" not in s]
-        drift = deck_enum_drift(BUILDER.read_text(encoding="utf-8"), engine)
+        drift = deck_enum_drift(JS_BUILDER.read_text(encoding="utf-8"), engine)
         assert "(low)" in drift, (
             f"엔진이 (low) 를 지웠는데 덱에 남은 것을 못 잡았다: {drift}")
 
     def test_a_planted_enum_is_caught(self):
         """덱이 없는 어휘를 새로 다는 것을 잡는지 — 프로브."""
-        planted = BUILDER.read_text(encoding="utf-8").replace(
-            "안정적인 구간입니다.", "안정적인 구간(caution)입니다.", 1)
+        planted = JS_BUILDER.read_text(encoding="utf-8").replace(
+            "(low)", "(caution)", 1)
         drift = deck_enum_drift(planted, _engine_strings())
         assert "(caution)" in drift, f"덱에 심은 (caution) 을 못 잡았다: {drift}"
 
@@ -150,47 +144,27 @@ class TestTheQuotedVerdictWordsExistInTheEngine:
 def test_the_builder_and_the_deck_both_exist():
     """둘 중 하나가 사라지면 아래 검사가 **조용히 0건을 통과시킨다.**"""
     assert BUILDER.is_file(), f"생성기가 없다: {BUILDER}"
+    assert JS_BUILDER.is_file(), f"슬라이드 소스가 없다: {JS_BUILDER}"
+    assert MANIFEST.is_file(), f"검증 매니페스트가 없다: {MANIFEST}"
     assert DECK.is_file(), f"생성물이 없다: {DECK}"
 
 
 # --- 핵심 — 커밋된 덱이 지금 코드와 같은가 ----------------------------------
 
-def test_the_committed_deck_matches_a_fresh_build(builder, tmp_path):
-    """★ 이 저장소가 `frontend/generated/` 에 거는 것과 **같은 강제**다.
-
-    생성기만 고치고 덱을 안 뽑으면 여기서 빨간불이 난다. PR #76 이 그렇게 샜다.
-    """
-    committed = builder.deck_text(str(DECK))
-    assert committed, "커밋된 덱에서 본문을 한 줄도 못 읽었다"
-
-    backup = tmp_path / "committed.pptx"
-    backup.write_bytes(DECK.read_bytes())
-    try:
-        builder.build()
-        fresh = builder.deck_text(str(DECK))
-    finally:
-        DECK.write_bytes(backup.read_bytes())   # 검사는 저장소를 바꾸지 않는다
-
-    if committed != fresh:
-        only_committed = [t for t in committed if t not in set(fresh)][:12]
-        only_fresh = [t for t in fresh if t not in set(committed)][:12]
-        pytest.fail(
-            "커밋된 발표 자료가 build_ppt.py 와 다르다. "
-            "`python docs/competition/build_ppt.py` 로 다시 뽑아 함께 커밋한다.\n"
-            f"  커밋본에만: {only_committed}\n"
-            f"  재생성에만: {only_fresh}"
-        )
+def test_the_committed_deck_matches_its_source_manifest(builder):
+    """생성기나 PPTX만 바뀌면 매니페스트 검증이 실패한다."""
+    assert builder.deck_text(str(DECK)), "커밋된 덱에서 본문을 한 줄도 못 읽었다"
+    assert builder.verify() == 0
 
 
-def test_a_planted_drift_is_caught(builder, tmp_path):
-    """★ 규칙이 표에만 남지 않게 한다 — 어긋남을 먹여 걸리는 것을 본다.
-
-    실제 파일이 일치하는 것과 **대조가 작동하는 것**은 다른 사실이다.
-    """
+def test_a_planted_drift_is_caught(builder):
+    """매니페스트가 본문 한 글자 차이를 구분하는지 확인한다."""
     fresh = builder.deck_text(str(DECK))
-    drifted = [t for t in fresh]
-    drifted[0] = drifted[0] + " (심어 넣은 어긋남)"
-    assert drifted != fresh
+    drifted = [*fresh]
+    drifted[0] += " (심어 넣은 어긋남)"
+    assert builder._text_sha256(DECK) != __import__("hashlib").sha256(
+        json.dumps(drifted, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
 
 
 # --- 수를 문장에 박지 않는다 ------------------------------------------------
@@ -210,9 +184,10 @@ def test_the_endpoint_count_is_counted_not_typed(builder):
     citizen, admin_count, total = builder._endpoint_counts()
     assert (citizen, admin_count, total) == (len(ops) - admin - auth, admin, len(ops))
 
-    source = BUILDER.read_text(encoding="utf-8")
+    source = JS_BUILDER.read_text(encoding="utf-8")
     assert "계약 전체는 15종" not in source, "엔드포인트 수가 다시 문장에 박혔다"
-    assert "_endpoint_counts()" in source
+    assert "contracts/openapi.json" in source
+    assert "${endpointCount}" in source
 
 
 def test_the_deck_says_the_endpoint_count_the_contract_says(builder):

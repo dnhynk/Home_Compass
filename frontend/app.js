@@ -1469,6 +1469,15 @@
     window.print();
   }
 
+  function updateFormScrollCue() {
+    var scroller = $('#profileFields');
+    var cue = $('#formScrollCue');
+    if (!scroller || !cue) return;
+    if (scroller.scrollTop > 12) cue.setAttribute('data-dismissed', 'true');
+    var scrollable = scroller.scrollHeight > scroller.clientHeight + 2;
+    cue.hidden = !scrollable || cue.getAttribute('data-dismissed') === 'true';
+  }
+
   function wire() {
     $('#profileForm').addEventListener('submit', analyze);
     $('#btnSample').addEventListener('click', fillSample);
@@ -1545,6 +1554,9 @@
       btn.addEventListener('click', function () { sendChat(btn.textContent.trim()); });
     });
 
+    $('#profileFields').addEventListener('scroll', updateFormScrollCue, { passive: true });
+    window.addEventListener('resize', updateFormScrollCue, { passive: true });
+
     window.addEventListener('scroll', hideTip, { passive: true });
   }
 
@@ -1557,7 +1569,8 @@
       '안녕하세요. 주거비 예산이나 전월세 선택 중 궁금한 점을 알려주세요.');
     checkHealth();
     loadSession();
-    loadRegions();
+    loadRegions().then(updateFormScrollCue);
+    requestAnimationFrame(updateFormScrollCue);
   }
 
   /* ══════════════════════════════════════════════════════════

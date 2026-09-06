@@ -1042,7 +1042,7 @@
   function readProfile() {
     var seg = $('#preferredType [aria-checked="true"]');
     return {
-      age: num($('#age').value, 28),
+      age: num($('#age').value),
       annualIncomeKRW: num($('#annualIncome').value) * 10000,
       monthlyNetIncomeKRW: num($('#monthlyNetIncome').value) * 10000,
       liquidAssetsKRW: num($('#liquidAssets').value) * 10000,
@@ -1088,9 +1088,32 @@
 
   function analyze(e) {
     if (e) e.preventDefault();
-    var profile = readProfile();
-    clearFieldError('monthlyNetIncome');
+    var requiredInputs = [
+      ['age', '나이를 입력해 주세요.'],
+      ['annualIncome', '연소득을 입력해 주세요. 없으면 0을 입력해 주세요.'],
+      ['monthlyNetIncome', '월 실수령액을 입력해 주세요.'],
+      ['liquidAssets', '보유 현금성 자산을 입력해 주세요. 없으면 0을 입력해 주세요.'],
+      ['existingDebt', '기존 대출 월 상환액을 입력해 주세요. 없으면 0을 입력해 주세요.']
+    ];
+    requiredInputs.forEach(function (item) { clearFieldError(item[0]); });
     clearFieldError('regionCode');
+    for (var i = 0; i < requiredInputs.length; i += 1) {
+      var item = requiredInputs[i];
+      var input = document.getElementById(item[0]);
+      if (input && input.value.trim() === '') {
+        setFieldError(item[0], item[1]);
+        toast(item[1]);
+        input.focus();
+        return;
+      }
+    }
+    var profile = readProfile();
+    if (profile.age < 19 || profile.age > 70) {
+      setFieldError('age', '나이는 만 19세부터 70세까지 입력해 주세요.');
+      toast('나이는 만 <b>19세부터 70세까지</b> 입력해 주세요.');
+      $('#age').focus();
+      return;
+    }
     if (profile.monthlyNetIncomeKRW <= 0) {
       setFieldError('monthlyNetIncome', '월 실수령액을 0보다 크게 입력해 주세요.');
       toast('월 실수령액을 <b>0보다 크게</b> 입력해 주세요.');

@@ -41,6 +41,13 @@ def main() -> int:
         page.wait_for_timeout(500)
         page.screenshot(path=out / "home_compass_onboarding.png")
 
+        page.fill("#age", "28")
+        page.fill("#annualIncome", "4200")
+        page.fill("#monthlyNetIncome", "300")
+        page.fill("#liquidAssets", "4000")
+        page.fill("#existingDebt", "30")
+        page.eval_on_selector("#isHomeless", "el => el.checked = true")
+        page.eval_on_selector("#isSMEEmployee", "el => el.checked = true")
         page.click("#btnAnalyze")
         page.wait_for_selector("#dashboard:not([hidden])", timeout=15_000)
         page.locator("#toast").wait_for(state="hidden", timeout=7_000)

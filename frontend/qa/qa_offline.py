@@ -130,6 +130,13 @@ def run_viewport(browser, vp, w, h, results):
           "options=%s" % regions)
 
     if ready:
+        page.fill("#age", "28")
+        page.fill("#annualIncome", "4200")
+        page.fill("#monthlyNetIncome", "300")
+        page.fill("#liquidAssets", "4000")
+        page.fill("#existingDebt", "30")
+        page.eval_on_selector("#isHomeless", "el => el.checked = true")
+        page.eval_on_selector("#isSMEEmployee", "el => el.checked = true")
         page.click("#btnAnalyze")
         page.wait_for_selector("#dashboard:not([hidden])", timeout=15000)
         page.wait_for_timeout(900)

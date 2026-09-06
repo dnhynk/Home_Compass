@@ -63,7 +63,7 @@
           <div class="field">
             <label for="age">만 나이</label>
             <div class="input-wrap">
-              <input type="number" id="age" name="age" value="28" min="19" max="70" step="1" inputmode="numeric">
+              <input type="number" id="age" name="age" placeholder="예: 28" min="19" max="70" step="1" inputmode="numeric" required>
               <span class="unit">세</span>
             </div>
           </div>
@@ -100,7 +100,7 @@
         <div class="field">
           <label for="annualIncome">연소득 <span class="lbl-note">세전</span></label>
           <div class="input-wrap money">
-            <input type="number" id="annualIncome" name="annualIncome" value="4200" min="0" step="100" inputmode="numeric">
+            <input type="number" id="annualIncome" name="annualIncome" placeholder="예: 4200" min="0" step="100" inputmode="numeric" required>
             <span class="unit">만원</span>
           </div>
           <p class="field-help money-echo" data-echo-for="annualIncome"></p>
@@ -109,7 +109,7 @@
         <div class="field">
           <label for="monthlyNetIncome">월 실수령액</label>
           <div class="input-wrap money">
-            <input type="number" id="monthlyNetIncome" name="monthlyNetIncome" value="300" min="0" step="10" inputmode="numeric">
+            <input type="number" id="monthlyNetIncome" name="monthlyNetIncome" placeholder="예: 300" min="0" step="10" inputmode="numeric" required>
             <span class="unit">만원</span>
           </div>
           <p class="field-help money-echo" data-echo-for="monthlyNetIncome"></p>
@@ -118,7 +118,7 @@
         <div class="field">
           <label for="liquidAssets">보유 현금성 자산 <span class="lbl-note">보증금 가용</span></label>
           <div class="input-wrap money">
-            <input type="number" id="liquidAssets" name="liquidAssets" value="4000" min="0" step="100" inputmode="numeric">
+            <input type="number" id="liquidAssets" name="liquidAssets" placeholder="예: 4000" min="0" step="100" inputmode="numeric" required>
             <span class="unit">만원</span>
           </div>
           <p class="field-help money-echo" data-echo-for="liquidAssets"></p>
@@ -127,7 +127,7 @@
         <div class="field">
           <label for="existingDebt">기존 대출 월 상환액</label>
           <div class="input-wrap money">
-            <input type="number" id="existingDebt" name="existingDebt" value="30" min="0" step="5" inputmode="numeric">
+            <input type="number" id="existingDebt" name="existingDebt" placeholder="예: 30" min="0" step="5" inputmode="numeric" required>
             <span class="unit">만원</span>
           </div>
           <p class="field-help money-echo" data-echo-for="existingDebt"></p>
@@ -153,7 +153,7 @@
                 <span class="switch-title">무주택 세대주</span>
                 <span class="switch-desc">대부분의 청년 정책 필수 요건</span>
               </span>
-              <input type="checkbox" id="isHomeless" checked>
+              <input type="checkbox" id="isHomeless">
               <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
             </label>
           </li>
@@ -163,7 +163,7 @@
                 <span class="switch-title">중소·중견기업 재직</span>
                 <span class="switch-desc">중기청 전세대출 대상 여부</span>
               </span>
-              <input type="checkbox" id="isSMEEmployee" checked>
+              <input type="checkbox" id="isSMEEmployee">
               <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
             </label>
           </li>

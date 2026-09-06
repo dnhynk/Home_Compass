@@ -313,8 +313,8 @@ class CompetitionDoc(BaseDocTemplate):
         super().__init__(
             str(filename), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
             topMargin=18 * mm, bottomMargin=16 * mm,
-            title=doc_label, author="Home_Compass", subject="2026 금융 AI Challenge",
-            creator="Home_Compass submission builder", invariant=1,
+            title=doc_label, author="Home Compass", subject="2026 금융 AI Challenge",
+            creator="Home Compass submission builder", invariant=1,
         )
         self.doc_label = doc_label
         frame = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id="body")
@@ -327,7 +327,7 @@ class CompetitionDoc(BaseDocTemplate):
         canvas.line(18 * mm, 12 * mm, 192 * mm, 12 * mm)
         canvas.setFont(FONT, 7.3)
         canvas.setFillColor(INK_3)
-        canvas.drawString(18 * mm, 8 * mm, f"Home_Compass | {self.doc_label}")
+        canvas.drawString(18 * mm, 8 * mm, f"Home Compass | {self.doc_label}")
         canvas.drawRightString(192 * mm, 8 * mm, f"- {doc.page} -")
         canvas.restoreState()
 
@@ -335,7 +335,7 @@ class CompetitionDoc(BaseDocTemplate):
 def planning_story(profile: dict[str, object], evidence_dir: Path):
     story = identity_header("1", "2026 금융 AI Challenge 기획서", profile)
     story += section_block("1", "서비스 명칭*", [
-        "<b>Home_Compass</b> - 청년 임차 가구가 자신의 소득과 자산으로 감당 가능한 집의 범위를 먼저 판정하고, 전세·월세 비용과 정책 자격을 같은 근거 위에서 비교하는 주거 금융 의사결정 서비스",
+        "<b>Home Compass</b> - 청년 임차 가구가 자신의 소득과 자산으로 감당 가능한 집의 범위를 먼저 판정하고, 전세·월세 비용과 정책 자격을 같은 근거 위에서 비교하는 주거 금융 의사결정 서비스",
     ])
     story += section_block("2", "아이디어 기획 핵심내용(요약)*", [
         "사용자가 나이·가구원·희망지역·소득·자산·부채·주거조건을 입력하면 4개의 결정론적 엔진이 월 주거비 상한, 전월세 5년 총비용, 정책 적격성, 보증금 위험을 한 번에 계산합니다.",
@@ -383,7 +383,7 @@ def planning_story(profile: dict[str, object], evidence_dir: Path):
     story += section_block("7", "금융 AI 신뢰 설계 - LLM 초안·사람 승인·엔진 집행", [
         callout("한 문장 원칙: LLM이 규칙 초안을 쓰고, 사람이 승인하고, 엔진이 집행합니다. 승인되지 않은 규칙은 판정에 반영되지 않습니다."),
         Spacer(1, 2 * mm),
-        "<b>왜 이것이 금융 AI의 핵심인가:</b> 정책 공고문은 비정형이고 계속 바뀌어 생성형 AI의 해석 능력이 필요하지만, 한 번의 오해가 금액과 자격 결과를 여러 사용자에게 전파해서는 안 됩니다. Home_Compass는 AI 오류를 곧바로 판정 오류로 만들지 않고 검토·반려할 수 있는 초안으로 격리합니다.",
+        "<b>왜 이것이 금융 AI의 핵심인가:</b> 정책 공고문은 비정형이고 계속 바뀌어 생성형 AI의 해석 능력이 필요하지만, 한 번의 오해가 금액과 자격 결과를 여러 사용자에게 전파해서는 안 됩니다. Home Compass는 AI 오류를 곧바로 판정 오류로 만들지 않고 검토·반려할 수 있는 초안으로 격리합니다.",
         "<b>실질적인 사람 통제:</b> 규칙관리자는 초안의 각 필드를 원문 인용 구간과 대조하고, 기존 사례의 판정 변화까지 본 뒤 승인합니다. 승인된 버전만 엔진이 읽으며 승인·반려 이력은 감사 가능하게 남습니다.",
         "<b>런타임에서도 같은 경계:</b> 상담 LLM 답변은 엔진이 계산한 값과 근거를 고객 언어로 설명하는 용도이며 핵심 판정을 갱신하지 않습니다. LLM 키가 없거나 호출이 실패해도 핵심 판정은 동일하게 동작합니다.",
         "<b>심사 적격성 경계:</b> 시민 입력은 식별자와 연결해 저장하지 않고, 확인되지 않은 참고값은 신청·계약 전 재확인이 필요하다고 안내합니다. 서비스는 금융상품 승인·판매·투자자문이 아니라 근거 있는 사전 의사결정을 돕습니다.",

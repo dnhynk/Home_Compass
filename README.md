@@ -45,7 +45,6 @@ A housing-finance decision aid for young Korean renters: deterministic engines c
 [![CI](https://github.com/dnhynk/Home_Compass/actions/workflows/ci.yml/badge.svg)](https://github.com/dnhynk/Home_Compass/actions/workflows/ci.yml)
 
 - 2026 금융 AI Challenge 예선 제출용 MVP입니다. 예선 기간에는 개인 PC와 Tailscale Funnel로 공개 운영했으며, 공개 데모 URL은 이 저장소에 싣지 않습니다.
-- 2026-09-06 기준 `main`의 CI에서 `backend/tests/api/test_report_screens.py`의 3건이 실패합니다. 신고 화면 문구를 바꾼 뒤 해당 테스트의 기대 문구가 갱신되지 않은 상태입니다. 최신 상태는 위 배지로 확인하세요.
 - 기본 데이터는 서울 등 10개 지역 시세와 8개 정책입니다. 정책 수치는 시연용 예시이며, 지역 시세 일부 필드는 출처가 특정되지 않은 미검증(`unverified`) 값으로 표시됩니다.
 - 정책 검토 큐에는 LLM 추출 결과로 만든 규칙 초안이 시드됩니다. 새 공고의 상시 자동 수집·재추출은 연결되어 있지 않습니다.
 - 세션 저장소가 프로세스 메모리에 있어 단일 인스턴스·단일 worker로만 운영할 수 있습니다.

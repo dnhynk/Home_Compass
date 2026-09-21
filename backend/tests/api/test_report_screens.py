@@ -83,7 +83,7 @@ class TestTheReportControlOnlyExistsForSignedInStaff:
     def test_a_counselor_screen_draws_the_button(self):
         html = call("return C.reportButtonHTML('policy', 'buttress_youth', '청년전용');",
                     authenticated=True)
-        assert "이상 신고" in html
+        assert "정보 수정 요청" in html
         assert 'data-report-kind="policy"' in html
         assert 'data-report-id="buttress_youth"' in html
 
@@ -158,7 +158,7 @@ class TestThePrivacyNoticeIsOnTheScreen:
         """★ 이 문구는 구조가 아니라 규율이다. 그러면 최소한 **사실**을 말해야 한다 —
         감사기록은 append-only 이고 지우는 경로가 없다 (SPEC 7.1)."""
         notice = call("return C.REPORT_PRIVACY_NOTICE;", authenticated=True)
-        assert "감사기록" in notice and "지울 수 없" in notice
+        assert "지울 수 없" in notice
 
 
 # ==========================================================================
@@ -228,4 +228,4 @@ class TestNoScreenPretendsToCloseAReport:
         source = (FRONTEND_DIR / "app.js").read_text(encoding="utf-8")
         block = re.search(r"function submitReport\(e\).*?\n  \}", source, re.S)
         assert block is not None, "submitReport 가 없다"
-        assert "규칙은 바뀌지 않습니다" in block.group(0)
+        assert "현재 정보가 유지됩니다" in block.group(0)

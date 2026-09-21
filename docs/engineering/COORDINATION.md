@@ -190,6 +190,11 @@ Delivery 를 돌려줘도 워커를 죽이지 않는다. 하트비트와 터미�
 >    if not any(p.startswith(q) or q.startswith(p) for w in c.WORKER_PATHS.values() for q in w)]"
 > ```
 
+### README 서술 규칙
+
+- 전체 테스트 수는 구현과 함께 변하므로 README에 고정하지 않는다.
+- 실행 결과가 없는 상태에서 README에 완료나 정상 동작을 주장하지 않는다.
+
 ## 계약 변경 절차 (SPEC 8.2)
 
 워커는 `contracts/` 를 고치지 못한다. 필요하면 `ask` 로 요청한다.

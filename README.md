@@ -1,18 +1,54 @@
 # Home_Compass
 
+A housing-finance decision aid for young Korean renters: deterministic engines compute affordability, 5-year costs, policy eligibility and deposit risk, while an LLM only explains the results.
+
 청년 임차 가구가 보증금·월세·대출 조건을 함께 비교하고, 상담사와 정책 운영자가 같은 근거를 검토할 수 있도록 만든 주거 금융 의사결정 서비스입니다.
 
 2026 금융 AI Challenge 개인 참가 프로젝트로 개발하고 있습니다. 특정 금융기관의 상품을 추천하거나 심사를 대신하지 않으며, 입력값과 공개 정책·시장 데이터에 기반한 의사결정 보조 정보를 제공합니다.
 
-## 제공 기능
+## 왜 만들었나
 
-- 시민용 분석: 월 부담액, 초기 필요자금, 비상자금, DSR과 스트레스 금리를 반영한 시나리오 비교
-- 정책 탐색: 사용자 조건과 정책 규칙을 대조하고 근거·제외 사유를 함께 표시
-- AI 상담: OpenAI 또는 Anthropic 연동, 키가 없을 때는 규칙 기반 오프라인 응답
-- 상담원 확장: 판정 근거·내부 필드 확인, 요약본 출력과 데이터 이상 신고
-- 정책 운영 워크플로: 정책 원문 수집, 초안 검증, 승인, 배치 처리와 감사 이력
+- **비교 기준이 흩어져 있다.** 월세, 전세대출 이자, 관리비, 보증금의 기회비용이 서로 다른 화면과 단위로 제시되어, 월 납입액만 보면 보증금 부담과 장기 총비용이 가려집니다.
+- **정책 조건이 복잡하고 자주 바뀐다.** 나이·소득·자산·무주택·지역 조건이 정책마다 다르고 공고문은 비정형 문서라, 검색만으로는 "왜 제외되는가"와 "무엇을 더 확인해야 하는가"에 답하기 어렵습니다.
+- **금융 판단을 LLM에 맡기면 흔들린다.** 언어모델이 금액 계산과 자격 판정까지 하면 같은 입력에도 결과가 달라지고, 잘못 추출된 규칙은 모든 사용자에게 퍼집니다.
 
-핵심 계산과 판정은 결정론적 엔진이 담당합니다. LLM은 설명과 대화에만 사용되며 계산 결과나 정책 적격 판정을 임의로 바꾸지 않습니다.
+## 핵심 기능
+
+- 시민용 분석: 생활비·기존 부채 상환액·비상자금 버퍼를 뺀 월 주거비 상한과 권장액, 전세·반전세·월세 시나리오의 5년 총비용(TCO)·현재가치(NPV)·월 환산비용 비교
+- 정책 탐색: 사용자 조건과 정책 규칙을 대조하고 조건별 근거·제외 사유를 함께 표시
+- 보증금 위험 점검: 전세가율, 대출 비중, 보증금 규모, 지역 시장 상황을 반영한 위험 신호
+- AI 상담: OpenAI 또는 Anthropic 연동, 키가 없거나 호출이 실패하면 규칙 기반 오프라인 응답
+- 상담원 확장: 판정 근거·내부 필드 확인, 요약본 출력과 정보 수정 요청(데이터 이상 신고)
+- 정책 운영 워크플로: 정책 원문 수집, 규칙 초안 검증, 판정 영향도 확인, 승인·반려, 일괄 승인과 감사 이력
+
+## 설계 포인트
+
+- **판정 경로에 LLM이 없습니다.** 금액과 적격 판정은 `backend/src/home_compass/engines/`의 네 결정론적 엔진(지불능력·정책 적격·총비용·보증금 위험)이 계산합니다. 엔진 패키지가 `llm`을 import하지 않는다는 의존 방향은 아키텍처 테스트가 강제합니다.
+- **LLM은 도구를 호출해 설명만 합니다.** 상담 에이전트는 엔진을 도구(tool calling)로 호출해 받은 숫자만 인용하도록 지시되며, 직접 계산한 숫자를 쓰지 않습니다. 설명 문장이 엔진 값을 잘못 옮길 가능성은 남아 있으며, 판정 결과 자체는 바뀌지 않습니다.
+- **AI가 만든 규칙은 사람 승인 전까지 효력이 없습니다.** 정책 원문에서 LLM이 추출한 규칙 초안은 스키마·원문 인용 검증을 거쳐 검토 큐에 쌓이고, 규칙 관리자가 원문 근거와 기존 사례의 판정 변화를 확인해 승인해야 활성 규칙이 됩니다.
+- **모든 사실에 출처를 붙입니다.** 분석 응답에는 데이터의 출처·관측 시각·검증 상태(provenance)와 데이터 등급이 함께 실립니다. 검증되지 않은 값은 거부하지 않고 등급을 붙여 드러냅니다.
+- **모델 상수의 근거를 계약으로 관리합니다.** 엔진이 쓰는 상수는 `contracts/model_constants.json`에 값·단위·출처 분류와 함께 등재되고, 규범적으로 고른 값은 감도분석 대상이 됩니다.
+- **백엔드 없이도 같은 숫자를 냅니다.** `frontend/local_engine.js`는 엔진의 JS 이식이며, 상수·정책·지역 데이터는 생성물(`frontend/generated/`)에서 가져옵니다. 같은 입력에 같은 결과가 나오는지 테스트로 대조합니다.
+
+## 기술 스택
+
+- 백엔드: Python 3.11+, FastAPI, Uvicorn, Pydantic
+- 저장소: SQLite (기본값), JSON Schema 2020-12 계약 검증(`jsonschema`)
+- 인증: Argon2id 비밀번호 해시(`argon2-cffi`), 세션 쿠키와 CSRF 방어, 상담원·규칙 관리자 역할 구분
+- LLM: OpenAI·Anthropic SDK (선택), 키가 없으면 오프라인 템플릿
+- 프론트엔드: Vanilla JS·HTML·CSS (시민 화면, 규칙 관리자 화면)
+- 외부 데이터: 국토교통부 실거래가 OpenAPI
+- 테스트·배포: pytest, GitHub Actions, Docker, Render Blueprint(`render.yaml`)
+
+## 현재 상태
+
+[![CI](https://github.com/dnhynk/Home_Compass/actions/workflows/ci.yml/badge.svg)](https://github.com/dnhynk/Home_Compass/actions/workflows/ci.yml)
+
+- 2026 금융 AI Challenge 예선 제출용 MVP입니다. 예선 기간에는 개인 PC와 Tailscale Funnel로 공개 운영했으며, 공개 데모 URL은 이 저장소에 싣지 않습니다.
+- 2026-09-06 기준 `main`의 CI에서 `backend/tests/api/test_report_screens.py`의 3건이 실패합니다. 신고 화면 문구를 바꾼 뒤 해당 테스트의 기대 문구가 갱신되지 않은 상태입니다. 최신 상태는 위 배지로 확인하세요.
+- 기본 데이터는 서울 등 10개 지역 시세와 8개 정책입니다. 정책 수치는 시연용 예시이며, 지역 시세 일부 필드는 출처가 특정되지 않은 미검증(`unverified`) 값으로 표시됩니다.
+- 정책 검토 큐에는 LLM 추출 결과로 만든 규칙 초안이 시드됩니다. 새 공고의 상시 자동 수집·재추출은 연결되어 있지 않습니다.
+- 세션 저장소가 프로세스 메모리에 있어 단일 인스턴스·단일 worker로만 운영할 수 있습니다.
 
 ## 구조
 
@@ -53,7 +89,7 @@ python -m uvicorn home_compass.main:app --host 127.0.0.1 --port 8000 --workers 1
 - API 문서: http://127.0.0.1:8000/docs
 - 상태 확인: http://127.0.0.1:8000/api/health
 
-처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `HOME_COMPASS_SEED_COUNSELOR_PASSWORD`와 `HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 않습니다.
+처음 시드할 때 상담사와 정책 운영자 비밀번호를 지정하려면 서버 기동 전에 `HOME_COMPASS_SEED_COUNSELOR_PASSWORD`와 `HOME_COMPASS_SEED_RULE_MANAGER_PASSWORD`를 셸 또는 비밀 저장소에서 주입합니다. 실제 값이나 대입문은 저장소 파일에 기록하지 마세요.
 
 개발 환경에서 두 값을 생략하면 임시 비밀번호가 표준 오류에 한 번 출력됩니다. 공개 배포는
 `HOME_COMPASS_ENV=production`일 때 두 비밀번호(각 16자 이상)와 Secure 쿠키 설정이 없으면
@@ -89,13 +125,16 @@ Copy-Item .env.example .env
 
 ## 공개 배포
 
+예선 제출 서비스는 개인 PC에서 서버를 루프백에만 바인딩하고 Tailscale Funnel로 HTTPS 주소를
+연결해 운영했습니다. 절차는 [`docs/competition/PC_HOSTING.md`](docs/competition/PC_HOSTING.md)에 있습니다.
+
 저장소 루트의 `Dockerfile`은 저장소 시드, 운영 설정 검증, 단일 worker 기동을 한 경로로
-묶습니다. `render.yaml`은 서울과 가까운 Singapore 리전, 영구 디스크, HTTPS Secure 쿠키,
-헬스체크를 포함한 Render Blueprint입니다. 두 운영 계정 비밀번호는 Blueprint 생성 화면에서
-비밀값으로 입력하며 저장소에는 남지 않습니다.
+묶습니다. `render.yaml`은 Singapore 리전, 영구 디스크, HTTPS Secure 쿠키, 헬스체크를
+포함한 Render Blueprint로, 선택 가능한 유료 대안입니다. 두 운영 계정 비밀번호는 Blueprint
+생성 화면에서 비밀값으로 입력하며 저장소에는 남지 않습니다.
 
 로컬에서 컨테이너만 스모크하려면 HTTPS 프록시가 없으므로 개발 모드로 실행합니다.
-공개 Render 배포는 `render.yaml`이 운영 모드와 Secure 쿠키를 강제합니다.
+Render 배포는 `render.yaml`이 운영 모드와 Secure 쿠키를 강제합니다.
 
 ```powershell
 docker build -t home-compass .
@@ -106,7 +145,7 @@ docker run --rm -p 8000:8000 `
 ```
 
 실제 제출 순서와 외부 URL 검증 방법은
-[`docs/competition/SUBMISSION_RUNBOOK.md`](docs/competition/SUBMISSION_RUNBOOK.md)에 고정합니다.
+[`docs/competition/SUBMISSION_RUNBOOK.md`](docs/competition/SUBMISSION_RUNBOOK.md)에 있습니다.
 
 ## 데이터 파이프라인
 
@@ -141,7 +180,16 @@ python scripts\gen_contracts.py --check
 python scripts\check_dev_bat.py
 ```
 
-첫 명령은 전체 자동 테스트이고, 두 번째 명령은 생성 계약의 바이트 일치를 확인합니다. 마지막 명령은 Windows에서 `dev.bat`이 실제 서버까지 기동하는 수동 스모크입니다. 전체 테스트 수는 구현과 함께 변하므로 README에 고정하지 않습니다. 실행 결과가 없는 상태에서 완료나 정상 동작을 주장하지 않습니다.
+첫 명령은 전체 자동 테스트이고, 두 번째 명령은 생성 계약의 바이트 일치를 확인합니다. 마지막 명령은 Windows에서 `dev.bat`이 실제 서버까지 기동하는 수동 스모크입니다.
+
+## 상세 문서
+
+- [기술 스펙](docs/engineering/SPEC.md): 범위 결정, AI 활용 경계, 데이터 계보, 검증 기준
+- [시장 데이터 도출](docs/engineering/market/DERIVATION.md), [수집 원천](docs/engineering/collection/SOURCES.md)
+- [실사 기록](docs/engineering/diligence/FINDINGS.md): 모델 상수와 정책 조건의 출처 조사
+- [계약 디렉터리](contracts/README.md), [저장소 문서](backend/src/home_compass/store/README.md)
+- [제출 런북](docs/competition/SUBMISSION_RUNBOOK.md), [PC 배포 운영](docs/competition/PC_HOSTING.md), [제출 전 최종 감사](docs/competition/FINAL_AUDIT_2026-09-05.md)
+- 개발 운영 기록: [코디네이터 운영 절차](docs/engineering/COORDINATION.md), [인계 문서](docs/engineering/HANDOFF.md), [리허설](docs/engineering/REHEARSAL.md)
 
 ## 고지
 
